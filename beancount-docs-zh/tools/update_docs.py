@@ -99,7 +99,13 @@ def changed_docs(old: str, new: str) -> list[str]:
     if old == new:
         return []
     out = git("diff", "--name-only", old, new, "--", "docs")
-    return [line for line in out.splitlines() if line.endswith(".md")]
+    names = []
+    for line in out.splitlines():
+        if not line.endswith(".md"):
+            continue
+        # manifest 里的 source 不带 "docs/" 前缀
+        names.append(line[len("docs/"):] if line.startswith("docs/") else line)
+    return names
 
 
 def doc_slug_for_source(source_name: str, rows: list[dict]) -> str | None:
@@ -155,6 +161,61 @@ def write_report(state: dict, changed_rows: list[dict]) -> None:
     REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+KNOWLEDGE_MAP = {
+    "01-language.md": [
+        "index.md",
+        "beancount_language_syntax.md",
+        "beancount_options_reference.md",
+        "beancount_cheat_sheet.md",
+        "beancount_query_language.md",
+    ],
+    "02-accounting.md": [
+        "the_double_entry_counting_method.md",
+        "command_line_accounting_in_context.md",
+        "command_line_accounting_cookbook.md",
+        "balance_assertions_in_beancount.md",
+        "precision_tolerances.md",
+        "rounding_precision_in_beancount.md",
+        "settlement_dates_in_beancount.md",
+        "tutorial_example.md",
+    ],
+    "03-investment.md": [
+        "how_inventories_work.md",
+        "trading_with_beancount.md",
+        "calculating_portolio_returns.md",
+        "fetching_prices_in_beancount.md",
+        "stock_vesting_in_beancount.md",
+        "exporting_your_portfolio.md",
+    ],
+    "04-automation-architecture.md": [
+        "beancount_scripting_plugins.md",
+        "beancount_design_doc.md",
+        "importing_external_data.md",
+        "beangulp_design_doc_for_new_repo.md",
+        "ledgerhub_design_doc.md",
+        "beancount_v3.md",
+        "beancount_v3_dependencies.md",
+        "a_proposal_for_an_improvement_on_inventory_booking.md",
+    ],
+    "05-domain-and-context.md": [
+        "getting_started_with_beancount.md",
+        "installing_beancount.md",
+        "installing_beancount_v3.md",
+        "running_beancount_and_generating_reports.md",
+        "fund_accounting_with_beancount.md",
+        "health_care_expenses.md",
+        "how_we_share_expenses.md",
+        "sharing_expenses_with_beancount.md",
+        "tracking_medical_claims.md",
+        "a_comparison_of_beancount_and_ledger_hledger.md",
+        "external_contributions.md",
+        "beancount_history_and_credits.md",
+    ],
+}
+
+NOTE_OF_SOURCE = {src: note for note, srcs in KNOWLEDGE_MAP.items() for src in srcs}
+
+
 def cmd_status() -> None:
     ensure_source()
     state = seed_state()
@@ -184,6 +245,19 @@ def cmd_check() -> None:
         print("  -", name)
     if not changed:
         print("no upstream document changes.")
+        return
+    if not (ROOT / "knowledge").exists():
+        print("CHANGED_DOCS=%d" % len(changed))
+        return
+    touched = {}
+    for name in changed:
+        touched.setdefault(NOTE_OF_SOURCE.get(name, "（未收录进知识库）"), []).append(name)
+    print("受影响的学习笔记：")
+    for note in sorted(touched):
+        print(f"  {note}: {len(touched[note])} 篇")
+        for name in touched[note]:
+            print(f"     - {name}")
+    print("CHANGED_DOCS=%d" % len(changed))
 
 
 def cmd_pull() -> None:
