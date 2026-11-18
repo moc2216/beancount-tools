@@ -87,7 +87,7 @@ def main() -> int:
             problems.append(f"单文件仍有 {len(external)} 张外链图片")
         if 'id="q"' not in html:
             problems.append("单文件缺少搜索框")
-        pagers = html.count('class="pager"')
+        pagers = len(re.findall(r'class="pager[\s"]', html))
         if pagers != len(slugs):
             problems.append(f"单文件翻页数 {pagers}，应为 {len(slugs)}")
 
@@ -119,7 +119,7 @@ def main() -> int:
     next_of: dict[str, str | None] = {}
     for slug in slugs:
         html = (SITE / f"{slug}.html").read_text(encoding="utf-8")
-        if 'class="pager"' not in html:
+        if not re.search(r'class="pager[\s"]', html):
             problems.append(f"{slug}.html: 缺少文末翻页")
             continue
         m_prev = re.search(r'class="pager-card pager-prev" href="([^"]+)"', html)

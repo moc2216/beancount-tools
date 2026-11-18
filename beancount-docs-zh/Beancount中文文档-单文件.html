@@ -412,45 +412,53 @@ hr {
 
 /* 文末翻页 */
 .pager {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 10px;
-  align-items: stretch;
-  margin: 46px 0 4px;
-  padding-top: 22px;
+  margin: 48px 0 2px;
+  padding-top: 24px;
   border-top: 1px solid var(--line);
+}
+.pager-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
 }
 .pager-card {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 12px 14px;
+  gap: 4px;
+  padding: 15px 17px;
+  min-height: 84px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: #fff;
   text-decoration: none;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
 }
-.pager-card:hover { border-color: var(--accent); background: #f6fbf9; }
-.pager-next { text-align: right; align-items: flex-end; }
-.pager-label { font-size: 11.5px; color: var(--muted); letter-spacing: .02em; }
-.pager-title { font-size: 14.5px; line-height: 1.4; color: var(--ink); font-weight: 600; }
-.pager-kicker { font-size: 11px; color: var(--muted); }
+.pager-card:hover { border-color: var(--accent); background: #f7fcf9; transform: translateY(-1px); }
+.pager-prev { align-items: flex-start; }
+.pager-next { align-items: flex-end; text-align: right; }
+.pager-label { font-size: 11.5px; color: var(--muted); letter-spacing: .03em; }
+.pager-title { font-size: 15px; line-height: 1.45; color: var(--ink); font-weight: 600; }
+.pager-kicker { margin-top: auto; font-size: 11px; color: var(--muted); }
+.pager-card.is-empty { display: none; }
+.pager-single .pager-cards { grid-template-columns: minmax(0, 1fr); }
+.pager-single .pager-card { max-width: none; }
+.pager-foot { margin-top: 16px; text-align: center; }
 .pager-home {
-  align-self: center;
-  padding: 6px 12px;
+  display: inline-block;
   font-size: 12.5px;
   color: var(--muted);
+  text-decoration: none;
+  padding: 6px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  text-decoration: none;
-  white-space: nowrap;
+  background: #fff;
 }
-.pager-home:hover { color: var(--accent); border-color: var(--accent); }
-.pager-card.is-empty { border: 1px dashed transparent; background: none; }
+.pager-home:hover { color: var(--accent); background: #f1f7f4; }
 @media (max-width: 620px) {
-  .pager { grid-template-columns: minmax(0, 1fr); }
-  .pager-home { order: 3; justify-self: center; }
+  .pager-cards { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .pager-next { text-align: left; align-items: flex-start; }
+  .pager-card { min-height: 0; padding: 13px 15px; }
   .pager-card.is-empty { display: none; }
 }
 
@@ -717,7 +725,7 @@ hr {
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><span class="pager-card is-empty"></span><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-getting-started-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Getting Started with Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></nav></section><section class="doc-section" id="doc-getting-started-with-beancount"><div class="article-meta">
+        <nav class="pager pager-single" aria-label="翻页"><div class="pager-cards"><span class="pager-card is-empty" aria-hidden="true"></span><a class="pager-card pager-next" href="#doc-getting-started-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Getting Started with Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-getting-started-with-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/getting_started_with_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -940,7 +948,7 @@ option "operating_currency" "CAD"
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-user-manual" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount User&#x27;s Manual</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-installing-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Installing Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></nav></section><section class="doc-section" id="doc-installing-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-user-manual" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount User&#x27;s Manual</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-card pager-next" href="#doc-installing-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Installing Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-installing-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/installing_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -1319,7 +1327,7 @@ uv tool install beanquery
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-getting-started-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Getting Started with Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-installing-beancount-v3" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Installing Beancount (C++ version)</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></nav></section><section class="doc-section" id="doc-how-inventories-work"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-getting-started-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Getting Started with Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-card pager-next" href="#doc-installing-beancount-v3" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Installing Beancount (C++ version)</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-how-inventories-work"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/how_inventories_work/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -1746,7 +1754,7 @@ uv tool install beanquery
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-tutorial-example" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Example &amp; Tutorial</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-trading-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Trading with Beancount</strong><span class="pager-kicker">投资账本</span></a></nav></section><section class="doc-section" id="doc-installing-beancount-v3"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-tutorial-example" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Example &amp; Tutorial</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-trading-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Trading with Beancount</strong><span class="pager-kicker">投资账本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-installing-beancount-v3"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/installing_beancount_v3/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -1880,7 +1888,7 @@ C:\_code\t\beancount&gt;
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-installing-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Installing Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-running-beancount-and-generating-reports" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Running Beancount &amp; Generating Reports</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></nav></section><section class="doc-section" id="doc-running-beancount-and-generating-reports"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-installing-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Installing Beancount</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-card pager-next" href="#doc-running-beancount-and-generating-reports" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Running Beancount &amp; Generating Reports</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-running-beancount-and-generating-reports"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/running_beancount_and_generating_reports/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -2302,7 +2310,7 @@ Liabilities:US:Chase:Slate  -2,891.85       USD            USD                  
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-installing-beancount-v3" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Installing Beancount (C++ version)</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-language-syntax" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Language Syntax</strong><span class="pager-kicker">语言 / 查询</span></a></nav></section><section class="doc-section" id="doc-beancount-language-syntax"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-installing-beancount-v3" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Installing Beancount (C++ version)</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-card pager-next" href="#doc-beancount-language-syntax" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Language Syntax</strong><span class="pager-kicker">语言 / 查询</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-language-syntax"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_language_syntax/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -3298,7 +3306,7 @@ poptag #berlin-trip-2014
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-running-beancount-and-generating-reports" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Running Beancount &amp; Generating Reports</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-options-reference" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Options Reference</strong><span class="pager-kicker">语言 / 查询</span></a></nav></section><section class="doc-section" id="doc-beancount-options-reference"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-running-beancount-and-generating-reports" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Running Beancount &amp; Generating Reports</strong><span class="pager-kicker">入门 / 安装 / 运行</span></a><a class="pager-card pager-next" href="#doc-beancount-options-reference" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Options Reference</strong><span class="pager-kicker">语言 / 查询</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-options-reference"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_options_reference/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -3461,7 +3469,7 @@ option &quot;name_expenses&quot; &quot;Expenses&quot;
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-language-syntax" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Language Syntax</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-cheat-sheet" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Syntax Cheat Sheet</strong><span class="pager-kicker">语言 / 查询</span></a></nav></section><section class="doc-section" id="doc-beancount-cheat-sheet"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-language-syntax" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Language Syntax</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-card pager-next" href="#doc-beancount-cheat-sheet" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Syntax Cheat Sheet</strong><span class="pager-kicker">语言 / 查询</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-cheat-sheet"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_cheat_sheet/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -3491,7 +3499,7 @@ YYYY-MM-DD event "address" "123 May Street"</p><h2 id="beancount-cheat-sheet-opt
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-options-reference" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Options Reference</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-query-language" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Query Language</strong><span class="pager-kicker">语言 / 查询</span></a></nav></section><section class="doc-section" id="doc-beancount-query-language"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-options-reference" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Options Reference</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-card pager-next" href="#doc-beancount-query-language" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Query Language</strong><span class="pager-kicker">语言 / 查询</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-query-language"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_query_language/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -4022,7 +4030,7 @@ Expenses:Food:Restaurant 4310.60 USD 2012-12-30 5053.61 USD 2013-12-29 4209.06 U
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-cheat-sheet" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Syntax Cheat Sheet</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-the-double-entry-counting-method" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">The Double-Entry Counting Method</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-the-double-entry-counting-method"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-cheat-sheet" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Syntax Cheat Sheet</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-card pager-next" href="#doc-the-double-entry-counting-method" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">The Double-Entry Counting Method</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-the-double-entry-counting-method"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/the_double_entry_counting_method/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -4402,7 +4410,7 @@ Assets:AccountsReceivable
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-query-language" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Query Language</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-command-line-accounting-in-context" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Command-line Accounting in Context</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-command-line-accounting-in-context"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-query-language" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Query Language</strong><span class="pager-kicker">语言 / 查询</span></a><a class="pager-card pager-next" href="#doc-command-line-accounting-in-context" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Command-line Accounting in Context</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-command-line-accounting-in-context"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/command_line_accounting_in_context/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -4771,7 +4779,7 @@ entries, errors, options = beancount.loader.load_file('myfile.ledger')</p>
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-the-double-entry-counting-method" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">The Double-Entry Counting Method</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-command-line-accounting-cookbook" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Command-line Accounting Cookbook</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-trading-with-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-the-double-entry-counting-method" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">The Double-Entry Counting Method</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-command-line-accounting-cookbook" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Command-line Accounting Cookbook</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-trading-with-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/trading_with_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -5123,7 +5131,7 @@ Expenses:Financial:Commissions        39.80 USD
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-how-inventories-work" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">How Inventories Work</strong><span class="pager-kicker">投资账本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-calculating-portfolio-returns" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Calculating Portfolio Returns</strong><span class="pager-kicker">投资账本</span></a></nav></section><section class="doc-section" id="doc-calculating-portfolio-returns"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-how-inventories-work" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">How Inventories Work</strong><span class="pager-kicker">投资账本</span></a><a class="pager-card pager-next" href="#doc-calculating-portfolio-returns" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Calculating Portfolio Returns</strong><span class="pager-kicker">投资账本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-calculating-portfolio-returns"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/calculating_portolio_returns/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -5602,7 +5610,7 @@ ASSET_OTHERASSET           : Exchange of stock/symbol
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-trading-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Trading with Beancount</strong><span class="pager-kicker">投资账本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-fetching-prices-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Prices in Beancount</strong><span class="pager-kicker">投资账本</span></a></nav></section><section class="doc-section" id="doc-command-line-accounting-cookbook"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-trading-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Trading with Beancount</strong><span class="pager-kicker">投资账本</span></a><a class="pager-card pager-next" href="#doc-fetching-prices-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Prices in Beancount</strong><span class="pager-kicker">投资账本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-command-line-accounting-cookbook"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/command_line_accounting_cookbook/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -6050,7 +6058,7 @@ Expenses:Loft4530:Taxes:School
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-command-line-accounting-in-context" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Command-line Accounting in Context</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-balance-assertions-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Balance Assertions in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-balance-assertions-in-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-command-line-accounting-in-context" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Command-line Accounting in Context</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-balance-assertions-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Balance Assertions in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-balance-assertions-in-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/balance_assertions_in_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -6238,7 +6246,7 @@ Expenses:Loft4530:Taxes:School
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-command-line-accounting-cookbook" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Command-line Accounting Cookbook</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-precision-tolerances" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Precision &amp; Tolerances</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-fetching-prices-in-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-command-line-accounting-cookbook" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Command-line Accounting Cookbook</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-precision-tolerances" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Precision &amp; Tolerances</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-fetching-prices-in-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/fetching_prices_in_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -6373,7 +6381,7 @@ Expenses:Loft4530:Taxes:School
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-calculating-portfolio-returns" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Calculating Portfolio Returns</strong><span class="pager-kicker">投资账本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-stock-vesting-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Stock Vesting in Beancount</strong><span class="pager-kicker">投资账本</span></a></nav></section><section class="doc-section" id="doc-precision-tolerances"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-calculating-portfolio-returns" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Calculating Portfolio Returns</strong><span class="pager-kicker">投资账本</span></a><a class="pager-card pager-next" href="#doc-stock-vesting-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Stock Vesting in Beancount</strong><span class="pager-kicker">投资账本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-precision-tolerances"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/precision_tolerances/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -6694,7 +6702,7 @@ option &quot;display_precision&quot; &quot;AUD:0.01&quot;
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-balance-assertions-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Balance Assertions in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-rounding-precision-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Proposal: Rounding &amp; Precision in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-rounding-precision-in-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-balance-assertions-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Balance Assertions in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-rounding-precision-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Proposal: Rounding &amp; Precision in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-rounding-precision-in-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/rounding_precision_in_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -6831,7 +6839,7 @@ option &quot;display_precision&quot; &quot;AUD:0.01&quot;
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-precision-tolerances" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Precision &amp; Tolerances</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-settlement-dates-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Settlement Dates &amp; Transfer Accounts in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-settlement-dates-in-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-precision-tolerances" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Precision &amp; Tolerances</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-settlement-dates-in-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Settlement Dates &amp; Transfer Accounts in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-settlement-dates-in-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/settlement_dates_in_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -6988,7 +6996,7 @@ option &quot;display_precision&quot; &quot;AUD:0.01&quot;
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-rounding-precision-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Proposal: Rounding &amp; Precision in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-tutorial-example" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Example &amp; Tutorial</strong><span class="pager-kicker">会计方法 / 校验</span></a></nav></section><section class="doc-section" id="doc-stock-vesting-in-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-rounding-precision-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Proposal: Rounding &amp; Precision in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-tutorial-example" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Example &amp; Tutorial</strong><span class="pager-kicker">会计方法 / 校验</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-stock-vesting-in-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/stock_vesting_in_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -7218,7 +7226,7 @@ Assets:US:Hooli:Unvested:C123456   93363.1500 USD.UNVEST
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-fetching-prices-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Prices in Beancount</strong><span class="pager-kicker">投资账本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-importing-external-data" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Importing External Data in Beancount</strong><span class="pager-kicker">导入 / 插件</span></a></nav></section><section class="doc-section" id="doc-tutorial-example"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-fetching-prices-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Prices in Beancount</strong><span class="pager-kicker">投资账本</span></a><a class="pager-card pager-next" href="#doc-importing-external-data" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Importing External Data in Beancount</strong><span class="pager-kicker">导入 / 插件</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-tutorial-example"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/tutorial_example/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -7493,7 +7501,7 @@ Assets:US:Hooli:Unvested:C123456   93363.1500 USD.UNVEST
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-settlement-dates-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Settlement Dates &amp; Transfer Accounts in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-how-inventories-work" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">How Inventories Work</strong><span class="pager-kicker">投资账本</span></a></nav></section><section class="doc-section" id="doc-importing-external-data"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-settlement-dates-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Settlement Dates &amp; Transfer Accounts in Beancount</strong><span class="pager-kicker">会计方法 / 校验</span></a><a class="pager-card pager-next" href="#doc-how-inventories-work" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">How Inventories Work</strong><span class="pager-kicker">投资账本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-importing-external-data"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/importing_external_data/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -8019,7 +8027,7 @@ def test():
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-stock-vesting-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Stock Vesting in Beancount</strong><span class="pager-kicker">投资账本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-scripting-plugins" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Scripting &amp; Plugins</strong><span class="pager-kicker">导入 / 插件</span></a></nav></section><section class="doc-section" id="doc-beancount-scripting-plugins"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-stock-vesting-in-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Stock Vesting in Beancount</strong><span class="pager-kicker">投资账本</span></a><a class="pager-card pager-next" href="#doc-beancount-scripting-plugins" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Scripting &amp; Plugins</strong><span class="pager-kicker">导入 / 插件</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-scripting-plugins"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_scripting_plugins/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -8221,7 +8229,7 @@ plugin "wash_sales"
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-importing-external-data" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Importing External Data in Beancount</strong><span class="pager-kicker">导入 / 插件</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-design-doc" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Design Doc</strong><span class="pager-kicker">架构 / 版本</span></a></nav></section><section class="doc-section" id="doc-beancount-design-doc"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-importing-external-data" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Importing External Data in Beancount</strong><span class="pager-kicker">导入 / 插件</span></a><a class="pager-card pager-next" href="#doc-beancount-design-doc" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Design Doc</strong><span class="pager-kicker">架构 / 版本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-design-doc"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_design_doc/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -8927,7 +8935,7 @@ realization.dump_balances(real_root, file=sys.stdout)
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-scripting-plugins" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Scripting &amp; Plugins</strong><span class="pager-kicker">导入 / 插件</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-v3" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Vnext: Goals &amp; Design</strong><span class="pager-kicker">架构 / 版本</span></a></nav></section><section class="doc-section" id="doc-beancount-v3"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-scripting-plugins" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Scripting &amp; Plugins</strong><span class="pager-kicker">导入 / 插件</span></a><a class="pager-card pager-next" href="#doc-beancount-v3" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount Vnext: Goals &amp; Design</strong><span class="pager-kicker">架构 / 版本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-v3"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_v3/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -9765,7 +9773,7 @@ Assets:US:Ameritrade:Futures:Contracts -1 NQH21 {271815.00 USD}</p>
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-design-doc" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Design Doc</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-v3-dependencies" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount C++ version: Dependencies</strong><span class="pager-kicker">架构 / 版本</span></a></nav></section><section class="doc-section" id="doc-beancount-v3-dependencies"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-design-doc" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Design Doc</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-card pager-next" href="#doc-beancount-v3-dependencies" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount C++ version: Dependencies</strong><span class="pager-kicker">架构 / 版本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-v3-dependencies"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_v3_dependencies/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -9852,7 +9860,7 @@ Assets:US:Ameritrade:Futures:Contracts -1 NQH21 {271815.00 USD}</p>
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-v3" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Vnext: Goals &amp; Design</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beangulp-design-doc-for-new-repo" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beangulp Design Doc for New Repo</strong><span class="pager-kicker">架构 / 版本</span></a></nav></section><section class="doc-section" id="doc-beangulp-design-doc-for-new-repo"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-v3" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount Vnext: Goals &amp; Design</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-card pager-next" href="#doc-beangulp-design-doc-for-new-repo" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beangulp Design Doc for New Repo</strong><span class="pager-kicker">架构 / 版本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beangulp-design-doc-for-new-repo"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beangulp_design_doc_for_new_repo/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -9972,7 +9980,7 @@ soandso_bank.py generate ~/Downloads/transactions.csv
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beancount-v3-dependencies" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount C++ version: Dependencies</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-ledgerhub-design-doc" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Design Doc for Ledgerhub</strong><span class="pager-kicker">架构 / 版本</span></a></nav></section><section class="doc-section" id="doc-ledgerhub-design-doc"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beancount-v3-dependencies" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beancount C++ version: Dependencies</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-card pager-next" href="#doc-ledgerhub-design-doc" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Design Doc for Ledgerhub</strong><span class="pager-kicker">架构 / 版本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-ledgerhub-design-doc"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/ledgerhub_design_doc/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -10225,7 +10233,7 @@ raise NotImplementedError</p>
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-beangulp-design-doc-for-new-repo" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beangulp Design Doc for New Repo</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-a-proposal-for-an-improvement-on-inventory-booking" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Inventory Booking</strong><span class="pager-kicker">架构 / 版本</span></a></nav></section><section class="doc-section" id="doc-a-proposal-for-an-improvement-on-inventory-booking"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-beangulp-design-doc-for-new-repo" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Beangulp Design Doc for New Repo</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-card pager-next" href="#doc-a-proposal-for-an-improvement-on-inventory-booking" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Inventory Booking</strong><span class="pager-kicker">架构 / 版本</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-a-proposal-for-an-improvement-on-inventory-booking"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/a_proposal_for_an_improvement_on_inventory_booking/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -11138,7 +11146,7 @@ raise NotImplementedError</p>
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-ledgerhub-design-doc" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Design Doc for Ledgerhub</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-a-comparison-of-beancount-and-ledger-hledger" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">A Comparison of Beancount and Ledger</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a></nav></section><section class="doc-section" id="doc-a-comparison-of-beancount-and-ledger-hledger"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-ledgerhub-design-doc" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Design Doc for Ledgerhub</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-card pager-next" href="#doc-a-comparison-of-beancount-and-ledger-hledger" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">A Comparison of Beancount and Ledger</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-a-comparison-of-beancount-and-ledger-hledger"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/a_comparison_of_beancount_and_ledger_hledger/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -11341,7 +11349,7 @@ raise NotImplementedError</p>
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-a-proposal-for-an-improvement-on-inventory-booking" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Inventory Booking</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-exporting-your-portfolio" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Exporting Your Portfolio</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a></nav></section><section class="doc-section" id="doc-exporting-your-portfolio"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-a-proposal-for-an-improvement-on-inventory-booking" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Inventory Booking</strong><span class="pager-kicker">架构 / 版本</span></a><a class="pager-card pager-next" href="#doc-exporting-your-portfolio" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Exporting Your Portfolio</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-exporting-your-portfolio"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/exporting_your_portfolio/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -11497,7 +11505,7 @@ raise NotImplementedError</p>
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-a-comparison-of-beancount-and-ledger-hledger" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">A Comparison of Beancount and Ledger</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-external-contributions" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">External Contributions to Beancount</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a></nav></section><section class="doc-section" id="doc-external-contributions"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-a-comparison-of-beancount-and-ledger-hledger" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">A Comparison of Beancount and Ledger</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a><a class="pager-card pager-next" href="#doc-external-contributions" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">External Contributions to Beancount</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-external-contributions"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/external_contributions/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -11704,7 +11712,7 @@ raise NotImplementedError</p>
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-exporting-your-portfolio" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Exporting Your Portfolio</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-fund-accounting-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Fund Accounting with Beancount</strong><span class="pager-kicker">专题建模</span></a></nav></section><section class="doc-section" id="doc-fund-accounting-with-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-exporting-your-portfolio" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Exporting Your Portfolio</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a><a class="pager-card pager-next" href="#doc-fund-accounting-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Fund Accounting with Beancount</strong><span class="pager-kicker">专题建模</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-fund-accounting-with-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/fund_accounting_with_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -12082,7 +12090,7 @@ Endowment:Expenses:BuildingImprovement:...
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-external-contributions" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">External Contributions to Beancount</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-health-care-expenses" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Health Care Expenses</strong><span class="pager-kicker">专题建模</span></a></nav></section><section class="doc-section" id="doc-health-care-expenses"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-external-contributions" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">External Contributions to Beancount</strong><span class="pager-kicker">对比 / 导出 / 社区</span></a><a class="pager-card pager-next" href="#doc-health-care-expenses" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Health Care Expenses</strong><span class="pager-kicker">专题建模</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-health-care-expenses"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/health_care_expenses/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -12317,7 +12325,7 @@ Endowment:Expenses:BuildingImprovement:...
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-fund-accounting-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Fund Accounting with Beancount</strong><span class="pager-kicker">专题建模</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-how-we-share-expenses" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">How We Share Expenses</strong><span class="pager-kicker">专题建模</span></a></nav></section><section class="doc-section" id="doc-how-we-share-expenses"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-fund-accounting-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Fund Accounting with Beancount</strong><span class="pager-kicker">专题建模</span></a><a class="pager-card pager-next" href="#doc-how-we-share-expenses" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">How We Share Expenses</strong><span class="pager-kicker">专题建模</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-how-we-share-expenses"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/how_we_share_expenses/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -12510,7 +12518,7 @@ Mom OWES Dad:       0.00
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-health-care-expenses" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Health Care Expenses</strong><span class="pager-kicker">专题建模</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-sharing-expenses-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Sharing Expenses in Beancount</strong><span class="pager-kicker">专题建模</span></a></nav></section><section class="doc-section" id="doc-sharing-expenses-with-beancount"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-health-care-expenses" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Health Care Expenses</strong><span class="pager-kicker">专题建模</span></a><a class="pager-card pager-next" href="#doc-sharing-expenses-with-beancount" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Sharing Expenses in Beancount</strong><span class="pager-kicker">专题建模</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-sharing-expenses-with-beancount"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/sharing_expenses_with_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -13037,7 +13045,7 @@ poptag #trip-mexico-cozumel-2015
 </li>
 </ol>
 </div>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-how-we-share-expenses" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">How We Share Expenses</strong><span class="pager-kicker">专题建模</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-tracking-medical-claims" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Tracking Out-of-Network Medical Claims in Beancount</strong><span class="pager-kicker">专题建模</span></a></nav></section><section class="doc-section" id="doc-tracking-medical-claims"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-how-we-share-expenses" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">How We Share Expenses</strong><span class="pager-kicker">专题建模</span></a><a class="pager-card pager-next" href="#doc-tracking-medical-claims" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Tracking Out-of-Network Medical Claims in Beancount</strong><span class="pager-kicker">专题建模</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-tracking-medical-claims"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/tracking_medical_claims/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -13137,7 +13145,7 @@ Net Income: (-312.00 USD)
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-sharing-expenses-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Sharing Expenses in Beancount</strong><span class="pager-kicker">专题建模</span></a><a class="pager-home" href="#home">目录</a><a class="pager-card pager-next" href="#doc-beancount-history-and-credits" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount History and Credits</strong><span class="pager-kicker">历史</span></a></nav></section><section class="doc-section" id="doc-beancount-history-and-credits"><div class="article-meta">
+        <nav class="pager" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-sharing-expenses-with-beancount" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Sharing Expenses in Beancount</strong><span class="pager-kicker">专题建模</span></a><a class="pager-card pager-next" href="#doc-beancount-history-and-credits" data-dir="next"><span class="pager-label">下一篇 →</span><strong class="pager-title">Beancount History and Credits</strong><span class="pager-kicker">历史</span></a></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="doc-beancount-history-and-credits"><div class="article-meta">
           <span class="badge">译文</span>
           <span>原文作者：Martin Blais</span>
           <a href="https://beancount.github.io/docs/beancount_history_and_credits/" target="_blank" rel="noreferrer">查看原文 ↗</a>
@@ -13191,7 +13199,7 @@ Net Income: (-312.00 USD)
 <blockquote>
 <p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="#notice">NOTICE.md</a>。</p>
 </blockquote>
-        <nav class="pager" aria-label="翻页"><a class="pager-card pager-prev" href="#doc-tracking-medical-claims" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Tracking Out-of-Network Medical Claims in Beancount</strong><span class="pager-kicker">专题建模</span></a><a class="pager-home" href="#home">目录</a><span class="pager-card is-empty"></span></nav></section><section class="doc-section" id="notice"><div class="article-meta">
+        <nav class="pager pager-single" aria-label="翻页"><div class="pager-cards"><a class="pager-card pager-prev" href="#doc-tracking-medical-claims" data-dir="prev"><span class="pager-label">← 上一篇</span><strong class="pager-title">Tracking Out-of-Network Medical Claims in Beancount</strong><span class="pager-kicker">专题建模</span></a><span class="pager-card is-empty" aria-hidden="true"></span></div><div class="pager-foot"><a class="pager-home" href="#home">返回目录</a></div></nav></section><section class="doc-section" id="notice"><div class="article-meta">
           <span class="badge">版权与许可</span>
           <a href="#home">← 返回索引</a>
         </div>

@@ -273,7 +273,7 @@ def build_pager(row: dict, order: list[dict]) -> str:
 
     def card(target: dict | None, direction: str) -> str:
         if not target:
-            return '<span class="pager-card is-empty"></span>'
+            return '<span class="pager-card is-empty" aria-hidden="true"></span>'
         group = find_group(target["slug"])
         kicker = html.escape(group[1]) if group else ""
         label = "← 上一篇" if direction == "prev" else "下一篇 →"
@@ -285,11 +285,14 @@ def build_pager(row: dict, order: list[dict]) -> str:
             f'<span class="pager-kicker">{kicker}</span></a>'
         )
 
+    solo = " pager-single" if (prev is None) != (nxt is None) else ""
     return (
-        '<nav class="pager" aria-label="翻页">'
+        f'<nav class="pager{solo}" aria-label="翻页">'
+        + '<div class="pager-cards">'
         + card(prev, "prev")
-        + '<a class="pager-home" href="index.html">目录</a>'
         + card(nxt, "next")
+        + "</div>"
+        + '<div class="pager-foot"><a class="pager-home" href="index.html">返回目录</a></div>'
         + "</nav>"
     )
 
