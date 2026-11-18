@@ -9,7 +9,7 @@ from pathlib import Path
 
 import markdown
 
-from build_all_site import ICON
+from build_all_site import BASE_URL, ICON
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
@@ -54,6 +54,7 @@ def build_notice() -> None:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>版权与许可 · Beancount 中文文档</title>
   <meta name="description" content="Beancount 中文文档的版权、许可与免责说明：原文 MIT License，中文为非官方翻译。">
+  <link rel="canonical" href="{BASE_URL}/notice.html">
   <link rel="icon" href="{ICON}">
   <link rel="stylesheet" href="assets/style.css">
 </head>

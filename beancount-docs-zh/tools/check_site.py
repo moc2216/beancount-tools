@@ -65,6 +65,8 @@ def main() -> int:
             problems.append(f"{page.name}: 缺少 meta description")
         if 'rel="icon"' not in html:
             problems.append(f"{page.name}: 缺少 favicon")
+        if not re.search(r'<link rel="canonical" href="https://[^"]+"', html):
+            problems.append(f"{page.name}: 缺少 canonical 链接")
         for src in re.findall(r'<img[^>]+src="([^"]+)"', html):
             if src.startswith(("http://", "https://", "data:")):
                 continue
@@ -85,6 +87,29 @@ def main() -> int:
             problems.append(f"单文件仍有 {len(external)} 张外链图片")
         if 'id="q"' not in html:
             problems.append("单文件缺少搜索框")
+
+    sitemap = SITE / "sitemap.xml"
+    if not sitemap.exists():
+        problems.append("缺少 site/sitemap.xml")
+    else:
+        locs = re.findall(r"<loc>([^<]+)</loc>", sitemap.read_text(encoding="utf-8"))
+        if len(locs) != len(slugs) + 2:
+            problems.append(f"sitemap 条目 {len(locs)}，应为 {len(slugs) + 2}")
+        bad = [u for u in locs if not u.startswith("https://")]
+        if bad:
+            problems.append(f"sitemap 含非绝对地址：{bad[:3]}")
+
+    robots = SITE / "robots.txt"
+    if not robots.exists():
+        problems.append("缺少 site/robots.txt")
+    elif "Sitemap: https://" not in robots.read_text(encoding="utf-8"):
+        problems.append("robots.txt 未指向 sitemap")
+
+    not_found = SITE / "404.html"
+    if not not_found.exists():
+        problems.append("缺少 site/404.html")
+    elif "<h1>" not in not_found.read_text(encoding="utf-8"):
+        problems.append("404.html 缺少标题")
 
     if problems:
         print(f"检查未通过，共 {len(problems)} 项：")

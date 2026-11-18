@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import shutil
+import sys
 from pathlib import Path
 
 import markdown
@@ -17,6 +19,11 @@ SITE = ROOT / "site"
 SRC = ROOT / "source" / "docs"
 MANIFEST = ROOT / "translation-manifest.json"
 STATE = ROOT / "translation-state.json"
+
+# 发布地址；本地构建与 CI 必须一致，否则 sitemap 和 canonical 会漂移。
+BASE_URL = os.environ.get(
+    "DOCS_BASE_URL", "https://moc2216.github.io/beancount-tools"
+).rstrip("/")
 
 GROUPS = [
     ("入门 / 安装 / 运行", [
@@ -68,6 +75,7 @@ PAGE = """<!doctype html>
   <meta property="og:title" content="{title} · Beancount 中文文档">
   <meta property="og:description" content="{desc}">
   <meta property="og:type" content="article">
+  <link rel="canonical" href="{base}/{slug}.html">
   <link rel="icon" href="{icon}">
   <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -109,6 +117,7 @@ INDEX = """<!doctype html>
   <meta property="og:title" content="Beancount 中文文档">
   <meta property="og:description" content="{desc}">
   <meta property="og:type" content="website">
+  <link rel="canonical" href="{base}/">
   <link rel="icon" href="{icon}">
   <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -242,6 +251,77 @@ def find_group(slug: str):
     return None
 
 
+NOT_FOUND = """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>页面不存在 · Beancount 中文文档</title>
+  <meta name="description" content="这个地址没有对应的页面。返回目录继续阅读 Beancount 中文文档。">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="{icon}">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">404</div>
+    </div>
+  </header>
+  <div class="layout">
+    <main>
+      <article>
+        <h1>没有这个页面</h1>
+        <p>地址可能已经变化，或者链接里的锚点失效。下面几个入口可以继续找：</p>
+        <ul>
+          <li><a href="index.html">返回目录</a> — 39 篇文档按主题分类</li>
+          <li><a href="beancount-language-syntax.html">语言语法</a> — 最常见入口</li>
+          <li><a href="beancount-options-reference.html">option 配置参考</a> — 查配置项</li>
+          <li><a href="precision-tolerances.html">precision 与 tolerance</a> — 查余额校验行为</li>
+        </ul>
+        <p>如果你要找的是可离线保存的版本，仓库里有一份单文件 HTML：<a href="{repo_single}" rel="noreferrer">在 GitHub 打开</a>。</p>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+</body>
+</html>
+"""
+
+
+def write_publish_files(rows: list[dict]) -> None:
+    """生成 sitemap.xml、robots.txt、404.html（依赖 BASE_URL）。"""
+    repo_single = (
+        "https://github.com/moc2216/beancount-tools/blob/main/"
+        "beancount-docs-zh/Beancount中文文档-单文件.html"
+    )
+    urls = [f"{BASE_URL}/"] + [
+        f"{BASE_URL}/{row['slug']}.html" for row in rows if row.get("status") == "done"
+    ]
+    urls.append(f"{BASE_URL}/notice.html")
+
+    items = "\n".join(f"  <url><loc>{html.escape(u)}</loc></url>" for u in urls)
+    sitemap = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{items}\n</urlset>\n"
+    )
+    (SITE / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+
+    robots = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "\n"
+        f"Sitemap: {BASE_URL}/sitemap.xml\n"
+    )
+    (SITE / "robots.txt").write_text(robots, encoding="utf-8")
+
+    not_found = NOT_FOUND.format(icon=ICON, repo_single=repo_single)
+    (SITE / "404.html").write_text(not_found, encoding="utf-8")
+    print(f"wrote sitemap.xml ({len(urls)} urls), robots.txt, 404.html")
+
+
 def build_sidebar(row: dict, by_slug: dict[str, dict], toc: str) -> str:
     current = find_group(row["slug"])
     parts = ['<p class="sidebar-label">目录</p>', '<nav class="tree">']
@@ -277,6 +357,11 @@ def build_sidebar(row: dict, by_slug: dict[str, dict], toc: str) -> str:
 
 
 def main() -> None:
+    global BASE_URL
+    argv = sys.argv[1:]
+    if "--base-url" in argv:
+        BASE_URL = argv[argv.index("--base-url") + 1].rstrip("/")
+
     SITE.mkdir(parents=True, exist_ok=True)
     rows = load_manifest()
     state = load_state()
@@ -306,6 +391,8 @@ def main() -> None:
         page = PAGE.format(
             title=html.escape(row["title"]),
             subtitle=html.escape(row["slug"]),
+            slug=html.escape(row["slug"]),
+            base=BASE_URL,
             source=html.escape(row["source_url"]),
             parent=parent,
             sidebar=sidebar,
@@ -336,12 +423,14 @@ def main() -> None:
     index = INDEX.format(
         nav="\n".join(nav),
         sections="\n".join(sections),
+        base=BASE_URL,
         count=len(rows),
         desc="Beancount 官方文档正文的非官方中文译文，共 %d 篇，含语言语法、查询、精度与 tolerance、投资账本、导入插件等主题。" % len(rows),
         icon=ICON,
     )
     (SITE / "index.html").write_text(index, encoding="utf-8")
     print("built site/index.html")
+    write_publish_files(done)
 
 
 if __name__ == "__main__":

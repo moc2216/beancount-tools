@@ -1,0 +1,68 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "beancount-docs-zh/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: beancount-docs-zh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: beancount-docs-zh/requirements.txt
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 语料体检
+        run: python tools/qa_corpus.py --strict
+
+      - name: 构建站点
+        run: python tools/update_docs.py build
+
+      - name: 产物自洽检查
+        run: python tools/check_site.py
+
+      - name: 生成文件应与提交一致
+        run: |
+          if ! git diff --exit-code -- site zh Beancount中文文档-单文件.html translation-manifest.json; then
+            echo "::error::构建产物与提交内容不一致，请在本地运行 python tools/update_docs.py build 后提交。"
+            exit 1
+          fi
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: beancount-docs-zh/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
