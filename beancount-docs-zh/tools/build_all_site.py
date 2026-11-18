@@ -98,6 +98,7 @@ PAGE = """<!doctype html>
         </div>
         {stale_notice}
         {body}
+        {pager}
       </article>
     </main>
   </div>
@@ -251,6 +252,48 @@ def find_group(slug: str):
     return None
 
 
+def reading_order(by_slug: dict[str, dict]) -> list[dict]:
+    """按侧栏分组顺序展开成一条阅读顺序，跨分类连续。"""
+    order = []
+    for _, slugs in GROUPS:
+        for slug in slugs:
+            row = by_slug.get(slug)
+            if row and row.get("status") == "done":
+                order.append(row)
+    return order
+
+
+def build_pager(row: dict, order: list[dict]) -> str:
+    slugs = [r["slug"] for r in order]
+    if row["slug"] not in slugs:
+        return ""
+    i = slugs.index(row["slug"])
+    prev = order[i - 1] if i > 0 else None
+    nxt = order[i + 1] if i + 1 < len(order) else None
+
+    def card(target: dict | None, direction: str) -> str:
+        if not target:
+            return '<span class="pager-card is-empty"></span>'
+        group = find_group(target["slug"])
+        kicker = html.escape(group[1]) if group else ""
+        label = "← 上一篇" if direction == "prev" else "下一篇 →"
+        return (
+            f'<a class="pager-card pager-{direction}" href="{target["slug"]}.html"'
+            f' data-dir="{direction}">'
+            f'<span class="pager-label">{label}</span>'
+            f'<strong class="pager-title">{html.escape(target["title"])}</strong>'
+            f'<span class="pager-kicker">{kicker}</span></a>'
+        )
+
+    return (
+        '<nav class="pager" aria-label="翻页">'
+        + card(prev, "prev")
+        + '<a class="pager-home" href="index.html">目录</a>'
+        + card(nxt, "next")
+        + "</nav>"
+    )
+
+
 NOT_FOUND = """<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -368,6 +411,7 @@ def main() -> None:
     by_slug = {r["slug"]: r for r in rows}
     mapping = slug_map(rows)
     done = [r for r in rows if r.get("status") == "done"]
+    order = reading_order(by_slug)
     print("done docs", len(done))
 
     for row in done:
@@ -398,6 +442,7 @@ def main() -> None:
             sidebar=sidebar,
             stale_notice=stale_notice,
             body=body,
+            pager=build_pager(row, order),
             desc=describe(body),
             icon=ICON,
         )

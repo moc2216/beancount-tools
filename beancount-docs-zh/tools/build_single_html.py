@@ -337,6 +337,21 @@ def main() -> None:
       input.select();
     }}
   }});
+
+  // 左右方向键在当前章节内翻页
+  document.addEventListener('keydown', function (e) {{
+    if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+    var tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var dir = e.key === 'ArrowLeft' ? 'prev' : 'next';
+    var card = document.querySelector(
+      '.doc-section:not([hidden]) .pager-card.pager-' + dir
+    );
+    if (!card) return;
+    e.preventDefault();
+    location.hash = card.getAttribute('href');
+  }});
 }})();
 </script>
 </body>

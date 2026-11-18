@@ -87,6 +87,9 @@ def main() -> int:
             problems.append(f"单文件仍有 {len(external)} 张外链图片")
         if 'id="q"' not in html:
             problems.append("单文件缺少搜索框")
+        pagers = html.count('class="pager"')
+        if pagers != len(slugs):
+            problems.append(f"单文件翻页数 {pagers}，应为 {len(slugs)}")
 
     sitemap = SITE / "sitemap.xml"
     if not sitemap.exists():
@@ -110,6 +113,35 @@ def main() -> int:
         problems.append("缺少 site/404.html")
     elif "<h1>" not in not_found.read_text(encoding="utf-8"):
         problems.append("404.html 缺少标题")
+
+    # 翻页链路：从第一篇按“下一篇”走到底，应恰好覆盖每篇一次
+    prev_of: dict[str, str | None] = {}
+    next_of: dict[str, str | None] = {}
+    for slug in slugs:
+        html = (SITE / f"{slug}.html").read_text(encoding="utf-8")
+        if 'class="pager"' not in html:
+            problems.append(f"{slug}.html: 缺少文末翻页")
+            continue
+        m_prev = re.search(r'class="pager-card pager-prev" href="([^"]+)"', html)
+        m_next = re.search(r'class="pager-card pager-next" href="([^"]+)"', html)
+        prev_of[slug] = m_prev.group(1) if m_prev else None
+        next_of[slug] = m_next.group(1) if m_next else None
+
+    starts = [s for s in slugs if prev_of.get(s) is None]
+    if len(starts) != 1:
+        problems.append(f"翻页起点应有 1 个，实际 {len(starts)} 个")
+    else:
+        seen: list[str] = []
+        cur: str | None = starts[0] + ".html"
+        while cur and cur.endswith(".html"):
+            slug = cur[:-5]
+            if slug in seen:
+                problems.append(f"翻页出现循环：{slug}")
+                break
+            seen.append(slug)
+            cur = next_of.get(slug)
+        if len(seen) != len(slugs) or set(seen) != set(slugs):
+            problems.append(f"翻页链路覆盖 {len(seen)} 篇，应为 {len(slugs)} 篇")
 
     if problems:
         print(f"检查未通过，共 {len(problems)} 项：")

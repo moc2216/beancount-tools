@@ -32,3 +32,20 @@
     sessionStorage.setItem('beancount-prev', location.pathname + location.search);
   } catch (e) {}
 })();
+
+// 左右方向键翻页（输入框内不触发）
+(function () {
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+    var t = e.target;
+    if (!t) return;
+    var tag = (t.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || t.isContentEditable) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var dir = e.key === 'ArrowLeft' ? 'prev' : 'next';
+    var link = document.querySelector('.pager-card.pager-' + dir);
+    if (!link || !link.getAttribute('href')) return;
+    e.preventDefault();
+    location.href = link.getAttribute('href');
+  });
+})();
