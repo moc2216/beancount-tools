@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracking Out-of-Network Medical Claims in Beancount · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais - 更新于：2023 年 11 月">
+  <meta property="og:title" content="Tracking Out-of-Network Medical Claims in Beancount · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais - 更新于：2023 年 11 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">tracking-medical-claims</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 专题建模 <span class="count">5</span></div><ul>
+<li><a href="fund-accounting-with-beancount.html">Fund Accounting with Beancount</a></li>
+<li><a href="health-care-expenses.html">Health Care Expenses</a></li>
+<li><a href="how-we-share-expenses.html">How We Share Expenses</a></li>
+<li><a href="sharing-expenses-with-beancount.html">Sharing Expenses in Beancount</a></li>
+<li class="active"><a href="tracking-medical-claims.html">Tracking Out-of-Network Medical Claims in Beancount</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul></ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-08" data-parent="index.html#group-08">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/tracking_medical_claims/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/tracking_medical_claims/</p>
+</blockquote>
+<h1 id="beancount">在 Beancount 中追踪网络外医疗理赔<a id="title"></a></h1>
+<p><a href="mailto:blais@furius.ca">Martin Blais</a> - 更新于：2023 年 11 月</p>
+<p>让我们通过一个例子来说明如何处理涉及保险和 HSA（健康储蓄账户）理赔的医疗支出。这里以心理治疗为例，该治疗属于网络外服务，先由个人垫付，随后获得报销。</p>
+<p>当接受一次治疗时，将其记录为应收账款和应付账款：</p>
+<pre><code>   2023-09-06 * "Dr. Freud" "Session" #freud-2023-09
+     Assets:AccountsReceivable:Psychotherapy     260.00 USD
+     Liabilities:AccountsPayable:Psychotherapy  -260.00 USD
+
+   2023-09-11 * "Dr. Freud" "Session" #freud-2023-09
+     Assets:AccountsReceivable:Psychotherapy     260.00 USD
+     Liabilities:AccountsPayable:Psychotherapy  -260.00 USD
+</code></pre>
+<p>随后，进行部分付款以清除应付账款：</p>
+<pre><code>   2023-09-12 * "ZELLE SENT" #freud-2023-09
+     Assets:US:BofA:Checking                     -520.00 USD
+     Liabilities:AccountsPayable:Psychotherapy    520.00 USD
+</code></pre>
+<p>整个月份的情况类似：</p>
+<pre><code>   2023-09-20 * "Dr. Freud" "Session" #freud-2023-09
+     Assets:AccountsReceivable:Psychotherapy     260.00 USD
+     Liabilities:AccountsPayable:Psychotherapy  -260.00 USD
+
+   2023-09-23 * "ZELLE SENT" #freud-2023-09
+     Assets:US:BofA:Checking                     -260.00 USD
+     Liabilities:AccountsPayable:Psychotherapy  260.00 USD
+
+
+   2023-09-27 * "Dr. Freud" "Session" #freud-2023-09
+     Assets:AccountsReceivable:Psychotherapy     260.00 USD
+     Liabilities:AccountsPayable:Psychotherapy  -260.00 USD
+
+   2023-09-28 * "ZELLE SENT" #freud-2023-09
+     Assets:US:BofA:Checking                     -260.00 USD
+     Liabilities:AccountsPayable:Psychotherapy  260.00 USD
+</code></pre>
+<p>月底，治疗师会生成一份理赔单。我们将理赔单提交给保险公司，清除应收账款，并将剩余部分转移至待开具的保险公司支票：</p>
+<pre><code>   2023-09-28 * "Claim for September filed with insurance" #freud-2023-09
+     Assets:AccountsReceivable:Psychotherapy  -1040.00 USD
+     Expenses:Mental:Psychotherapy              312.00 USD
+     Assets:AccountsReceivable:Anthem           728.00 USD
+</code></pre>
+<p>最终，保险公司会出具 EOB（福利说明单）以确认覆盖金额（在本例中为 70%，这一比例在条款中已明确），随后收到支票并存入银行：</p>
+<pre><code>   2023-10-24 * "ATM CHECK DEPOSIT" #freud-2023-09
+     Assets:US:BofA:Checking             728.00 USD
+     Assets:AccountsReceivable:Anthem   -728.00 USD
+</code></pre>
+<p>此时，我们已知剩余部分中可由 HSA 支付的金额，因此向 HSA 公司提交理赔申请，再次将其记录为应收账款和应付账款：</p>
+<pre><code>   2023-10-25 * "HealthEquity" "Filed for reimbursement" #freud-2023-09
+     Liabilities:AccountsPayable:HealthEquity  -312.00 USD
+     Assets:AccountsReceivable:HealthEquity     312.00 USD
+</code></pre>
+<p>HSA 公司直接将该款项存入我们的支票账户：</p>
+<pre><code>   2023-11-01 * "BofA bank (Claim ID:1234567-890); EFT to bank" #freud-2023-09
+     Assets:US:HealthEquity:Cash               -312.00 USD
+     Liabilities:AccountsPayable:HealthEquity   312.00 USD
+</code></pre>
+<p>在银行端，当我们导入这笔 transaction 时，将其与应收账款进行对冲：</p>
+<pre><code>   2023-11-01 * "HEALTHEQUITY INC" #freud-2023-09
+     Assets:US:BofA:Checking                    312.00 USD
+     Assets:AccountsReceivable:HealthEquity    -312.00 USD
+</code></pre>
+<p>最终结果是，HSA 被用于覆盖未由保险报销的费用部分。</p>
+<pre><code>|-- Assets                       
+|   |-- AccountsReceivable       
+|   |   |-- Anthem                
+|   |   |-- HealthEquity         
+|   |   `-- Psychotherapy        
+|   `-- US                       
+|       |-- HealthEquity         
+|       |   `-- Cash                  -312.00               USD
+|       `-- BofA                   
+|           `-- Checking         
+|-- Expenses                     
+|   `-- Mental                   
+|       `-- Psychotherapy              312.00               USD
+`-- Liabilities                  
+    `-- AccountsPayable          
+        |-- HealthEquity         
+        `-- Psychotherapy
+
+Net Income: (-312.00 USD)
+</code></pre>
+<p>上述方法存在一些缺陷：</p>
+<ul>
+<li>保险覆盖的金额是预先已知的；但在许多情况下，在保险公司出具 EOB 之前，该金额是未知的（毕竟 EOB 的作用就是“福利说明”）。这需要对上述方法进行修改。</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

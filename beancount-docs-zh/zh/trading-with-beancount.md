@@ -1,0 +1,423 @@
+> 非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+> 原文：https://beancount.github.io/docs/trading_with_beancount/
+
+# 用 Beancount 进行交易
+
+> **面向 intermediate → advanced 读者**  
+> 原文：Martin Blais，2014 年 7 月  
+> 来源：[Trading with Beancount](http://furius.ca/beancount/doc/trading)  
+> 翻译原则：中文为主；`transaction`、`posting`、`directive`、`account`、`balance assertion`、`tolerance`、`precision`、`interpolation`、`cost`、`price`、`lot`、`booking`、`pad` 等术语保留英文。代码块、option 名、account 名、货币代码、链接均保持原样。
+
+> **版本提示**：本文写于 2014 年 7 月，多处把"改进 inventory booking 的 proposal"当作未来工作，尤其 `{*}` 平均成本记账与 lot 选择机制。此后这些已基本实现：`{*}` 平均成本语法可用；lot 选择与平均成本可通过 `option "booking_method"`（`STRICT` / `FIFO` / `LIFO` / `AVERAGE` / `NONE`）配置。阅读"Booking Methods""Dated lots""Average Cost Booking"三节时，请以当前版本为准。
+
+## 译者导读
+
+本文是理解 Beancount 投资记账的"根"章节——后面关于 portfolio returns 计算（见《计算 Portfolio Returns》）的一切，都建立在本文定义的 P/L、lot、cost 与 market value 之上。对高级用户，最值得带走的是以下几点：
+
+1. **P/L 不是"卖出价减买入价"，而是"收到的现金减去所卖出 lot 的成本"**。你甚至不需要在 transaction 里写卖出价——Beancount 完全靠"现金与 cost 之差"自动算出 capital gain。理解这一点，才能明白为什么 `Income:...:PnL` 那条 posting 可以留空自动补全。
+2. **同一只股票会被拆成多个 lots**，每个 lot 带自己的成本（可能还有日期）。卖出一部分时，选哪个 lot 直接决定当期盈亏与税务（长短期、先进先出等）。
+3. **inventory 是核心心智模型**：每个 account 是一个"袋子"，里面每件物品都贴着成本标签。这一模型贯穿 Beancount 的 cost 语义。
+4. **拆股、成本基础调整、以股分红**在语法上都没有特殊魔法，都是"清空再重建 / 直接入库"这类普通 postings；难点不在记账，而在保持 lot 的日期连续性与税务信息。
+5. **佣金如何分摊到每股成本**，是精确税务申报的关键；本文给出把佣金折进 book value 的具体算法，这是大多数人忽略的细节。
+
+---
+
+*本文讲解如何在 Beancount 中记录交易与投资：P/L、trade lots、booking 方法、佣金、拆股、成本基础调整、分红与平均成本记账。*
+
+> [引言](#introduction)
+>
+> [什么是盈亏](#what-is-profit-and-loss)
+>
+> [已实现与未实现盈亏](#realized-and-unrealized-pl)
+>
+> [交易批次](#trade-lots)
+>
+> [记账方法](#booking-methods)
+>
+> [带日期的批次](#dated-lots)
+>
+> [报告未实现盈亏](#reporting-unrealized-pl)
+>
+> [佣金](#commissions)
+>
+> [拆股](#stock-splits)
+>
+> [成本基础调整](#cost-basis-adjustment-and-return-of-capital)
+>
+> [分红](#dividends)
+>
+> [平均成本记账](#average-cost-booking)
+>
+> [未来主题](#future-topics)
+
+## 引言<a id="introduction"></a>
+
+本文是《[Command-Line Accounting Cookbook](command-line-accounting-cookbook.md)》的配套文档，专门讨论 Beancount 中的交易与投资主题。在阅读本文之前，你最好已经读过[复式记账法简介](the-double-entry-counting-method.md)。
+
+在讨论股票交易之前，需要先讨论"盈亏"（profit and loss，简称 P/L，读作 "P and L"），也叫资本利得或资本损失。对于新手来说，多笔交易叠加起来的 P/L 概念可能难以理解；我甚至见过职业交易员对"不同时间跨度下的 P/L"缺乏足够精细的理解。因此值得花一点时间把这个问题讲清楚——这也是理解如何在复式记账系统里 book 你的交易所必需的。
+
+本文将尽可能穿插详细的示例，说明如何在 Beancount 中 book 这些交易。另外，Beancount 有一个相关的、正在推进的[改进 booking 方法的 proposal](a-proposal-for-an-improvement-on-inventory-booking.md)，你也许也会感兴趣。关于税务递延账户的 basis 讨论不在本文范围，而会在更通用的 cookbook 中处理。
+
+## 什么是盈亏<a id="what-is-profit-and-loss"></a>
+
+假设你在 E\*Trade 折扣券商有一个 account，并买入某家公司的股票，比如 IBM。如果你在 IBM 每股 160$ 时买入 10 股，需要花 1600$。这个金额就是我们所说的"账面价值"（book value），也等价于"成本"（the cost）。它是你为了获得这些股票——也叫"持仓"（the position）——所付出的钱。这就是你在 Beancount 里录入这笔 transaction 的方式：
+
+    2014-02-16 * "Buying some IBM"
+      Assets:US:ETrade:IBM                 10 IBM {160.00 USD}
+      Assets:US:ETrade:Cash          -1600.00 USD
+
+实际中你可能还要向 E\*Trade 支付一些佣金，为了完整起见我们把它也记进去：
+
+    2014-02-16 * "Buying some IBM"
+      Assets:US:ETrade:IBM                 10 IBM {160.00 USD}
+      Assets:US:ETrade:Cash          -1609.95 USD
+      Expenses:Financial:Commissions     9.95 USD
+
+这就是你告诉 Beancount "以成本（at cost）存入一些单位"的方式——在这里，是"每股 160 USD"成本的 IBM 单位。这笔 transaction 是平的，因为它的各条 leg 之和为零：10 x 160 + -1609.95 + 9.95 = 0。另外注意，我们选择用一个专门存放 IBM 股票的 subaccount；这不是严格必需的，但对报表（例如资产负债表）很方便，因为它会让你的每只持仓股票都各自聚合在一行。用单独的 "cash" subaccount 也能强调：那里未投资的资金不产生任何回报。
+
+第二天，市场开盘，IBM 每股涨到 170$。在这个语境下，我们把它称为"价格"（the price）[^1]。你的 position——你的这些股票——的"市场价值"（market value），就是股数 × 市场价格，即 10 股 × 170$/股 = 1700$。
+
+这两个金额之差，就是我们所说的 P/L：
+
+> market value - book value = P/L
+>
+> 10 x 170$ - 10 x 160$ = 1700$ - 1600$ = 100$（盈利）
+
+我们把正数称为"盈利"（profit），负数称为"亏损"（loss）。
+
+## 已实现与未实现盈亏<a id="realized-and-unrealized-pl"></a>
+
+上一节的盈利被称为"未实现盈利"（unrealized profit）。这是因为这些股票实际上还没有卖出——它是一个假设性的盈利：*如果*我能以市场价值卖出这些股票，我*将*拿到这么多钱。我上一节提到的 100$，实际上是一笔"未实现盈亏"（unrealized P/L）。
+
+那么假设你满意这笔未实现盈利，并且觉得 IBM 上涨只是暂时的运气。你决定以 170$/股，向市场卖出这 10 股中的 3 股。这些股票的盈利现在就是"已实现"（realized）的了：
+
+> market value - book value = P/L
+>
+> 3 x 170$ - 3 x 160$ = 3 x (170 - 160) = 30$（盈利）
+
+这 30$ 是一笔"已实现盈亏"（realized P/L）。你 position 中剩余的部分仍然显示未实现盈利，也就是说，在你卖出之前，价格还可能继续波动：
+
+> market value - book value = P/L
+>
+> 7 x 170$ - 7 x 160$ = 70$
+
+这就是你在 Beancount 里 book 这次部分卖出的方式（同样包括佣金）：
+
+    2014-02-17 * "Selling some IBM"
+      Assets:US:ETrade:IBM                 -3 IBM {160.00 USD}
+      Assets:US:ETrade:Cash            500.05 USD
+      Expenses:Financial:Commissions     9.95 USD
+
+你注意到这里有什么不对劲吗？-3 x 160 = -480，-480 + 500.05 + 9.95 = 30……这笔 transaction 并不等于零！问题在于，我们卖出 3 股实际收到了 510$ 现金。因为我们真正的卖出价是 170$：3 x 170 = 510$。这正是我们需要把盈利记账的地方——再增加一条 leg 来吸收这笔盈利，而且方便的是，它能自动为我们计算并跟踪盈利：
+
+    2014-02-17 * "Selling some IBM"
+      Assets:US:ETrade:IBM                 -3 IBM {160.00 USD}
+      Assets:US:ETrade:Cash            500.05 USD
+      Expenses:Financial:Commissions     9.95 USD
+      Income:US:ETrade:PnL
+
+最后一条 leg 会被 Beancount 自动填为 `-30 USD`，因为我们允许有一条不写金额的 posting（记住，在没有借贷之分的复式记账系统里，盈利对 "Income" account 来说是负数）。这就是税务上政府关心的数字。（好吧，并不完全准确：要计算真正的资本利得，还应该进一步剔除佣金；但这里自动计算的是包含佣金的 P/L。没有自动化的办法剔除它；你可以在报表阶段把佣金去掉。）
+
+总结一下，你现在有：
+
+> 一个 7 股、"每股账面价值 160$" 的 position = 1120$（其账面价值）
+>
+> 已实现盈亏 30$
+>
+> 未实现盈亏 70$
+
+到这里，有些人会跳起来说："等等，等一下！我是以 170$/股卖的，不是 160$/股，你这里为什么要写 160$？"答案是：你手里并没有以 170$ 持有的股票可以卖。为了解释这一点，我需要绕个弯子，说明我们如何在 account 里跟踪这些东西……
+
+那么，我们是如何跟踪这些股票的呢？
+
+其实很简单：Beancount 在 account 里存东西时，用的是所谓的 "inventory"。你可以把 "inventory" 想象成一个贴着该 account 名字的袋子。每个 account 有这样一个袋子，用来装该 account 在某个时间点上的东西——也就是该 account 在那个时刻的"余额"（balance）。想象袋子里每件东西都贴着一个标签，写着它们的成本（cost），也就是为获得它们而支付的价格。每当你往袋子里放一件东西，就给这件东西贴一个新标签。为了正常工作，所有东西都必须有标签[^2]。在我们的例子里，袋子里装着 10 件"以 160$/股买入的 IBM 股票"。我们用来把 IBM 放进 account 的语法可能有点误导；我们写的是：
+
+      Assets:US:ETrade:IBM                 10 IBM {160.00 USD}
+
+但实际上，Beancount 对它的理解更接近下面这种语法：
+
+      Assets:US:ETrade:IBM                 10 {IBM 160.00 USD}
+
+但……这样写太烦了，所以我们用了对人类更直观的语法。
+
+所以关键在于，你没法减去 `{IBM at 170.00 USD}` 这样的单位……因为袋子里根本没有。袋子里有的是 `{IBM at 160.00 USD}` 这样的单位。你只能取出这些。
+
+说到这里，你有没有发现：真正帮我们跟踪 P/L 的，其实是卖出股票时换来的现金金额？我们从头到尾都不需要标出卖出价格。正是因为收到的现金金额，与我们卖出的 position 的成本不同，才引发了不平衡，而我们把这份不平衡 book 到资本利得。
+
+嗯……Beancount 维护着一个 price database，那么至少把那个价格记录下来、附在这笔 transaction 上作为文档，不是很好吗？确实如此。Beancount 允许你在那条 posting 上也附带一个 price，但在平账时，它会完全忽略这个 price。它主要是作为文档存在，如果你写脚本也可以用到。而如果你使用 `beancount.plugins.implicit_prices` 插件，它会被用来自动合成一条 `price` entry，充实我们的历史价格数据库，以便在报告 account 内容的 market value 时使用（后面会详细说明）。
+
+所以，卖出那些股票的完整、最终 transaction 应该是：
+
+    2014-02-17 * "Selling some IBM"
+      Assets:US:ETrade:IBM          -3 IBM {160.00 USD} @ 170.00 USD
+      Assets:US:ETrade:Cash          500.05 USD
+      Expenses:Financial:Commissions   9.95 USD
+      Income:US:ETrade:PnL
+
+## 交易批次<a id="trade-lots"></a>
+
+实际中，交易的真实情况会比这稍微复杂一点。你可能会多次买入 IBM，而且每次买入的价格很可能不同。我们再用一个示例交易看看这是怎么运作的。假设你此前的 position 是 7 股、成本 160$。第二天你看到价格又涨了，你改变了对 IBM 的看法，决定"做多"（go long），再买入 5 股。这次你拿到的价格是 180$/股：
+
+    2014-02-18 * "I put my chips on big blue!"
+      Assets:US:ETrade:IBM                 5 IBM {180.00 USD}
+      Assets:US:ETrade:Cash           -909.95 USD
+      Expenses:Financial:Commissions     9.95 USD
+
+那么，现在 `Assets:US:ETrade:IBM` 的袋子里有什么？我们有两类东西：
+
+-   来自第一笔交易的 7 股"以 160 USD/股持有的 IBM"
+
+-   来自这笔交易的 5 股"以 180 USD/股持有的 IBM"
+
+我们把这些称为 "lots"，或 "trade lots"（交易批次）。
+
+事实上，假设一个月后你要卖出这整个 position，在 Beancount 里"合法地"卖出（也就是不报错）的方式，是把两条 leg 都写出来。假设当时价格是 172$/股：
+
+    2014-03-18 * "Selling all my blue chips."
+      Assets:US:ETrade:IBM          -7 IBM {160.00 USD} @ 172.00 USD
+      Assets:US:ETrade:IBM          -5 IBM {180.00 USD}
+      Assets:US:ETrade:Cash         2054.05 USD
+      Expenses:Financial:Commissions   9.95 USD
+      Income:US:ETrade:PnL
+
+现在你 IBM 的最终 position 就是 0 股。
+
+另一种做法是：既然是卖出整个 position，Beancount 应该能对一个未指定的成本，无歧义地匹配所有 lots。这样写是等价的：
+
+    2014-03-18 * "Selling all my blue chips."
+      Assets:US:ETrade:IBM          -12 IBM {} @ 172.00 USD
+      Assets:US:ETrade:Cash         2054.05 USD
+      Expenses:Financial:Commissions   9.95 USD
+      Income:US:ETrade:PnL
+
+注意，如果总股数不能恰好匹配所有 lots，这样写就不行（那样会有歧义……该选哪个 lots 子集并不明显）。
+
+## 记账方法<a id="booking-methods"></a>
+
+但是，如果你只想卖出其中一部分股票呢？比如你需要一点现金给心爱的人买礼物，这次想卖出 4 股。假设现在价格是 175$/股。
+
+现在你需要做个选择。你可以选择卖出更早买入的股票，实现一笔更大的盈利：
+
+    2014-03-18 * "Selling my older blue chips."
+      Assets:US:ETrade:IBM          -4 IBM {160.00 USD} @ 175.00 USD
+      Assets:US:ETrade:Cash          690.05 USD
+      Expenses:Financial:Commissions   9.95 USD
+      Income:US:ETrade:PnL        ;; -60.00 USD (profit)
+
+或者你可以选择卖出最近才买入的那些，实现一笔亏损：
+
+    2014-03-18 * "Selling my most recent blue chips."
+      Assets:US:ETrade:IBM          -4 IBM {180.00 USD} @ 175.00 USD
+      Assets:US:ETrade:Cash          690.05 USD
+      Expenses:Financial:Commissions   9.95 USD
+      Income:US:ETrade:PnL        ;;  20.00 USD (loss)
+
+或者你可以选择混合卖出：只需用两条 leg。
+
+注意，实际中这个选择取决于若干因素：
+
+-   你交易股票所在的司法辖区的税法，可能规定了 book 这些股票的具体方法，你其实没有选择权。例如，税法可能规定必须卖出最早买入的那一批，这种方法叫"先进先出"（first-in-first-out）。
+
+-   如果你有选择权，你所持有的各个 lots 可能因为持有时间不同，而有不同的税务属性。例如在美国，持有超过一年的 position 适用更低的税率（"长期"资本利得税率）。
+
+-   你可能还有其他盈亏想要用来对冲，以尽量减少缴税时的现金流出。这有时被称为"[税务亏损收割](https://www.bogleheads.org/wiki/Tax_loss_harvesting)"（tax loss harvesting）。
+
+还有更多因素……但我不打算在这里展开。我的目标是向你展示如何用复式记账方法 book 这些东西。
+
+> **译者注 · 版本差异**  
+> 本文写于 2014 年，当时 lot 的选择只能靠手写 `{cost}` 来决定。现在 Beancount 支持 `option "booking_method"`（可取 `STRICT` / `FIFO` / `LIFO` / `AVERAGE` / `NONE`），让系统按规则自动选择 lots，而不必逐笔手写成本。手写 `{cost}` 的做法仍然有效，且最能精确表达你的意图。
+
+## 带日期的批次<a id="dated-lots"></a>
+
+我们几乎已经把整套机制讲完了。还有一个相当技术性的细节要补充，它从一个问题开始：如果我以相同的价格买入了多个 lots 的股票，会怎样？
+
+正如上一节所暗示的，你持有某个 position 的时间长度可能会影响你的税务，即便最终的 P/L 相同。那我们如何区分这些 lots 呢？
+
+嗯……我前面为了好理解，把问题稍微简化了一点。当我们把 position 放进 inventory 时，在贴在物品上的标签上，如果你提供了，我们还可以记下该 lot 被买入的日期。通常，开仓 position 的 transaction 日期会自动为你填上，所以不手动输入日期的话，你会自动得到下面这样的等价写法：
+
+    2014-05-20 * "First trade"
+      Assets:US:ETrade:IBM          5 IBM {180.00 USD, 2014-05-20}
+      Assets:US:ETrade:Cash           -909.95 USD
+      Expenses:Financial:Commissions     9.95 USD
+
+    2014-05-21 * "Second trade"
+      Assets:US:ETrade:IBM          3 IBM {180.00 USD, 2014-05-21}
+      Assets:US:ETrade:Cash           -549.95 USD
+      Expenses:Financial:Commissions     9.95 USD
+
+现在当你卖出时，你可以明确指定要减少哪个 lot 的 position：
+
+    2014-08-04 * "Selling off first trade"
+      Assets:US:ETrade:IBM         -5 IBM {180.00 USD, 2014-05-20}
+      Assets:US:ETrade:Cash            815.05 USD
+      Expenses:Financial:Commissions     9.95 USD
+      Income:US:ETrade:PnL
+
+如果你在 accounts 之间转移 position，并且想保留该 lot 原始的买入日期，你可以使用相同的语法（这个日期*不必*与它所附的 transaction 的日期一致）。
+
+注意，你的券商不太可能在其网站可下载的 CSV 或 OFX 文件里提供这些信息……你多半没法自动录入这笔 transaction 的 lot 细节，如果真遇到，可能得翻出券商提供的 PDF 交易确认单手工录入。不过，以相同价格买入两个 lots 的情况有多常见呢？我交易相对频繁——大约每两周一次——但在 8 年的数据里，一次都没有遇到过。实际上，除非你每天做几千笔交易——而 Beancount 其实也不是为那种活动设计的，至少不是最高效的方式——否则这种情况很少发生。
+
+（*技术细节*：我们正在改进 lot 选择的机制，让你不必自己插入 lot 日期，而且可以通过提供一个名称来消除 lot 选择的歧义。参见即将到来的改动。）
+
+## 报告未实现盈亏<a id="reporting-unrealized-pl"></a>
+
+好，现在我们的 account balance 记录着每个单位的成本，这给了我们这些 position 的账面价值。很好。但市场价值怎么看呢？
+
+position 的市场价值，就是这些金融工具（instrument）的单位数量 × 我们关心的那个时点的市场价格。这个价格是波动的，所以我们需要 price。
+
+Beancount 支持一种叫 `price` entry 的条目，让你告诉它某个 instrument 在某个时间点的价格，例如：
+
+    2014-05-25 price IBM   182.27 USD
+
+为了让 Beancount 保持简单、依赖少，软件不会自动抓取这些价格（你可以用 LedgerHub 做这件事，或者自己写脚本把最新价格插入输入文件……网上有很多抓取价格的库）。它只知道所有这些 price entry 里的市场价格。利用这些 price entry，它在内存中构建了一个随时间变化的历史价格数据库，并可以查询它来获取最新的价格。
+
+## 佣金<a id="commissions"></a>
+
+到目前为止，我们还没有讨论交易佣金。根据适用的税法，与交易相关的成本也许可以从我们前面例子中计算出的原始资本利得里扣除。政府把这些视为费用，通常你都可以扣除这些交易佣金（从政府角度看这完全合理，毕竟那笔钱你并没有落袋）。
+
+在上面的例子里，资本利得和佣金费用被分别跟踪到两个不同的 accounts。例如，你最终可能会得到这样的报表 balance：
+
+    Income:US:ETrade:PnL                -645.02 USD
+    Expenses:Financial:Commissions        39.80 USD
+
+（为了说清楚：这应被解读为 $645.02 的*盈利*和 $39.80 的费用。）你可以把这两个数相减，得到不含成本的 P/L 的*近似值*：645.02 - 39.80 = $605.22。然而，这只是对正确 P/L 值的近似。要理解为什么，我们得看一个在报告期内卖出部分股票的例子。
+
+假设我们有一个 account，每笔交易佣金 $10：2013 年买入 100 股 ITOT，其中 40 股在当年晚些时候卖出，剩余 60 股在第二年卖出。场景如下：
+
+> 2013-09-01 以 $80 买入 100 股 ITOT，**佣金 = 10$**
+>
+> 2013-11-01 以 $82 卖出 40 股 ITOT，佣金 = 10$
+>
+> 2014-02-01 以 $84 卖出 60 股 ITOT，佣金 = 10$
+
+如果你计算 2013 年底已付佣金之和，会得到 $20；用前面说的近似方法，2013 年和 2014 年你会申报：
+
+> 2013：P/L 为 40 x ($82 - $80) - ($10 + $10) = $60
+>
+> 2014：P/L 为 60 x ($84 - $80) - $10 = $230
+
+然而严格来说，这是不正确的。*买入* 100 股所支付的 $10 佣金，必须按卖出的股数比例分摊（pro-rate）。也就是说，第一次卖出 40 股时，只有 4$ 的佣金可以扣除：$10 x (40 股 / 100 股)，于是我们得到：
+
+> 2013：P/L 为 40 x ($82 - $80) - $(4 + 10) = $66
+>
+> 2014：P/L 为 60 x ($84 - $80) - $(6 + 10) = $224
+
+如你所见，每年的申报 P/L 不同，尽管两年 P/L 之和相同（$290）。
+
+有一种便捷的方法，可以自动把买入成本分摊到按卖出股数比例的金额上：把买入交易成本加到整个 position 的账面价值里。在这个例子中，你可以说这 100 股的 position 账面价值是 $8010 而不是 $8000：100 股 x $80/股 + $10，等价地说，就是每股的账面价值为 $80.10。这样计算结果是：
+
+> 2013：P/L 为 40 x ($82 - $80.10) - $10 = $66
+>
+> 2014：P/L 为 60 x ($84 - $80.10) - $10 = $224
+
+你甚至可以更进一步，把*卖出*时的佣金也折进每股卖价里：
+
+> 2013：P/L 为 40 x ($81.75 - $80.10) = $66
+>
+> 2014：P/L 为 60 x ($83.8333 - $80.10) = $224
+
+这看起来可能有点小题大做，但想象一下这些成本高得多的情况——大型商业交易正是如此；细节对税务人员来说就开始重要了。精确记账很重要，我们需要开发一种更精确的方法来做这件事。
+
+<table><tbody><tr class="odd"><td><em><strong>我们目前的输入语法还没有好的办法做到这一点。一个合适的方法正在开发中，[proposal](a-proposal-for-an-improvement-on-inventory-booking.md) 已经摆上桌面。细节另见邮件列表。[2014 年 6 月]</strong></em></td></tr></tbody></table>
+
+## 拆股<a id="stock-splits"></a>
+
+拆股目前的做法是：清空一个 account 的 positions，再以不同的价格重建这些 positions：
+
+    2004-12-21 * "Autodesk stock splits"
+      Assets:US:MSSB:ADSK          -100 ADSK {66.30 USD}
+      Assets:US:MSSB:ADSK           200 ADSK {33.15 USD}
+
+这两条 postings 互相抵消，因此满足了平账规则。如你所见，这不需要任何特殊语法特性。它也能处理更一般的情况，例如 2014 年 4 月谷歌公司在纳斯达克交易所发生的特殊拆分——拆成两类股票（有投票权和无投票权股票，比例分别为 50.08% 和 49.92%）：
+
+    2014-04-07 * "Stock splits into voting and non-voting shares"
+      Assets:US:MSSB:GOOG        -25 GOOG {1212.51   USD} ; Old GOOG
+      Assets:US:MSSB:GOOG         25 GOOG { 605.2850 USD} ; New GOOG
+      Assets:US:MSSB:GOOGL        25 GOOG { 607.2250 USD}
+
+最终，也许应该提供一个 plugin 模块来更方便地创建这类拆股 transaction，因为其中存在一定冗余。我们需要找出最通用的做法。但上面的写法目前是可用的。
+
+这种方法的一个问题是，交易 lots 的*连续性*丢失了：也就是说，经过上面的 transaction，每个 lot 的买入日期都被重置了，于是就无法自动推算交易的持有时长，以及它对税务的影响（即长期 vs. 短期交易）。即使没有这个信息，盈利仍然计算正确，但这始终是个恼人的细节。
+
+处理这个问题的办法之一，是使用 Dated Lots（见本文相应章节）。这样，原始交易日期就能保留在新 lots 上。除了基于价格的资本利得/亏损之外，还提供了准确的时点信息。
+
+另一种解决此问题、并方便地传播 lot 交易日期的方法[已被提出](a-proposal-for-an-improvement-on-inventory-booking.md)，将在 Beancount 中后续实现。
+
+当前实现更重要的一个问题是，拆股前后一个单位 ADSK 的含义是不同的。这种 commodity 单位的价格图表会出现剧烈的断崖式跳变！这是一个更普遍的问题，Beancount 和 Ledger 都还没有解决。[《Commodity Definition Changes》](https://docs.google.com/document/d/1Y_h5sjUTJzdK1riRh-mrVQm9KCzqFlU65KMsMsrQgXk/) 文档对此主题有讨论。
+
+## 成本基础调整与资本返还<a id="cost-basis-adjustment-and-return-of-capital"></a>
+
+成本基础的调整可能发生在管理型基金中，源于基金内部的交易活动。这通常发生在税务庇护账户里：这种调整产生的收益对税务没有影响，而且成本基础按每个 position 中所有股票的平均成本来持有。
+
+如果我们有被调整的各个 lot 的具体价格，就可以用和拆股相同的方式来 book：
+
+    2014-04-07 * "Cost basis adjustment for XSP"
+      Assets:CA:RRSP:XSP           -100 ADSK {21.10 CAD}
+      Assets:CA:RRSP:XSP            100 ADSK {23.40 CAD}
+      Income:CA:RRSP:Gains      -230.00 CAD
+
+> **译者注 · 原文疑误**  
+> 上面这个例子里，account 名用的是 `XSP`，但单位却写成了 `ADSK`，疑似原文档复制粘贴之误。翻译时保留原样；实际使用时请把单位换成正确的 instrument（应为 `XSP`）。
+
+不过，这种情况真的很罕见。更常见的是使用平均成本记账方法的 account，而我们目前还没有办法处理。（已有[一个 proposal](a-proposal-for-an-improvement-on-inventory-booking.md) 在推动这件事，但尚未完成。）
+
+成本基础调整常见于"资本返还"（Return of Capital）事件。例如，当基金向股东返还资本时就会发生，这可能是由业务清盘引起的。从税务角度看，这些是不可征税事件，会影响基金股权的成本基础。股数可能不变，但它们的成本基础需要调整，以便将来卖出时计算可能的盈亏。
+
+## 分红<a id="dividends"></a>
+
+分红并不构成特别的难题。它们只是收入。可以以现金形式收到：
+
+    2014-02-01 * "Cash dividends received from mutual fund RBF1005"
+      Assets:Investments:Cash            171.02 CAD
+      Income:Investments:Dividends
+
+或者以股票本身的形式收到：
+
+    2014-02-01 * "Stock dividends received in shares"
+      Assets:Investments:RBF1005          7.234 RBF1005 {23.64 CAD}
+      Income:Investments:Dividends
+
+对于以股票形式收到的分红，和买入股票一样，你需要提供收到分红时的成本基础（这应该能在你的对账单里查到）。如果该 account 以平均成本持有，这条 posting 在需要执行平均成本记账时，会简单地与其他 legs 合并。
+
+## 平均成本记账<a id="average-cost-booking"></a>
+
+目前，执行平均成本记账的唯一办法很痛苦：你必须用"拆股"一节里的方法，重新估值你的 inventory。但这不切实际。有一个[正在推进的 proposal](a-proposal-for-an-improvement-on-inventory-booking.md)，附带相应的语法，可以完整解决这个问题。
+
+一旦该 proposal 实现，写法会是这样：
+
+    2014-02-01 * "Selling 5 shares at market price 550 USD"
+      Assets:Investments:Stock               -5 GOOG {*}
+      Assets:Investments:Cash           2740.05 USD
+      Expenses:Commissions                 9.95 USD
+      Income:Investments:CapitalGains
+
+任何成本写为 "\*" 的 posting，作用于 inventory 时，会选中该 currency（GOOG）的所有股票，把它们按平均成本合并成一批，然后以这个新的平均成本减少该 position。
+
+> **译者注 · 版本差异**  
+> 这段 `{*}` 平均成本语法在本文写作时还是"未来工作"，现在已实现：`{*}` 表示"按平均成本"，reduce 时会用所有匹配 lots 的平均成本。此外，Beancount 还提供 `option "booking_method"`（可取 `STRICT` / `FIFO` / `LIFO` / `AVERAGE` / `NONE`），可从 account 层面统一控制 lot 与平均成本的选择。
+
+## 未来主题<a id="future-topics"></a>
+
+以下主题我会在以后处理：
+
+-   **Mark-to-Market（逐日盯市）**：处理 Section 1256 类 instruments（即期货和期权）的年末逐日盯市，做法是重新评估成本基础。这类似于在每年年末对所有这类 instruments 应用一次成本基础调整。
+
+-   **Short Sales（卖空）**：这需要很少的改动。我们只需允许以成本持有的单位为负数。目前，当以成本持有的单位变为负数时，我们会发出 warning，以便检测数据录入错误；但很容易扩展 Open directive 的语法，允许在可持有卖空头寸的特定 accounts 上出现这种情况，它们应当就显示为负的股数。除此之外，所有算术都应该自然成立。保证金的利息支付会作为独立的 transactions 出现。另外，当你卖空股票时，你不会收到这些 position 的分红，反而要支付分红。你需要为此设置一个费用 account，例如 `Expenses:StockLoans:Dividends`。
+
+-   **Trading Options（期权交易）**：我目前还不知道该怎么做，但我想象可以像持有股票一样持有它们，不做区分。我预见不到什么困难。
+
+-   **Currency Trading（外汇交易）**：目前，我还没有对我的 FOREX account 里的 positions 记账，只记了它们的 P/L 和利息支付。这会带来一些有意思的问题：
+
+    -   FOREX account 里持有的 positions，并不像股票那样只是单纯的多头或空头：它们其实是同时抵消了两种 commodity。例如，USD/CAD 的多头 position 会增加 USD 的敞口、减少 CAD 的敞口，可以看作同时持有一个 USD 的多头资产和一个 CAD 的空头资产。虽然也可以把这些 positions 当作独立的 instruments 来持有（比如 "USDCAD" 这种单位，忽略其组成部分），但对于大额 position——尤其是长期持有用于对冲的情况——处理好这一点很重要，需要以某种方式让用户能把多个货币 position 的净货币敞口，反映到其余资产和负债之上。
+
+    -   我们还需要处理平掉这些 positions 所产生的收益：它们在换算到 account currency 之后，会产生一笔以该 currency 计价的收益。例如，你持有一个以 USD 计价的 currency account，做多 EUR/JPY，当你平仓时，会获得一笔 EUR 计价的收益，把 P/L 从 EUR 换算成等值的 USD（经由 EUR/USD）后，USD 收益会存入你的 account。这意味着在估算任何 position 的当前 market value 时，会用到两个汇率：当前汇率与买入时汇率的差价，以及基础货币（如 EUR）对 account 货币（如 USD）的汇率。
+
+其中一些需要 Beancount 的新特性，另一些则不需要。欢迎提出想法。
+
+[^1]: 不过，这是一个容易误导人的说法。现实中*并不存在"价格"*——只存在一些市场，在那里你能得到别人愿意用多少换你股票的"暗示"（针对不同的买卖数量、针对有限的数量，我们称其为"一个市场"）。但只有当你真正完成卖出后，你才确切知道自己能以多少成交；在此之前，你只有一个估计。如果你不熟悉交易，这一点应该会让你停下来想一想，并希望能给你一个关于世界如何运作的"啊哈！"时刻——世界上任何东西其实都不存在"价格"。不过，在本文的讨论里，我们先抽象掉这一点，假设你可以立刻在市场上以中间价买卖任意数量的股票，就像 [Google Finance](https://www.google.com/finance?&q=ibm) 或 [Yahoo Finance](http://finance.yahoo.com/q?s=ibm) 或你的券商所报告的那样。把"我们能够以每股 170$ 卖出这些股票"确定下来的过程叫"marking"（估值）——也就是说，在合理的假设下，我们相信确实能以那个价格卖出这些股票（"marking to market"（逐日盯市）这个术语，指的就是我们用市场价格作为我们已知的、关于我们能否实现该交易的最佳指标）。对于只买卖少量、不会扰动市场、且有诚实券商的个人而言，这在实践中大体成立。
+
+[^2]: 顺带一提，把普通货币放进 account，只是"带空标签的物品"这一退化情况。这是一个实现细节，在实践中非常好用。
+
+---
+
+> **版权与许可**：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 [NOTICE.md](../NOTICE.md)。

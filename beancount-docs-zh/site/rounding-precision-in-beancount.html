@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proposal: Rounding &amp; Precision in Beancount · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais，2014 年 10 月">
+  <meta property="og:title" content="Proposal: Rounding &amp; Precision in Beancount · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais，2014 年 10 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">rounding-precision-in-beancount</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 会计方法 / 校验 <span class="count">8</span></div><ul>
+<li><a href="the-double-entry-counting-method.html">The Double-Entry Counting Method</a></li>
+<li><a href="command-line-accounting-in-context.html">Command-line Accounting in Context</a></li>
+<li><a href="command-line-accounting-cookbook.html">Command-line Accounting Cookbook</a></li>
+<li><a href="balance-assertions-in-beancount.html">Balance Assertions in Beancount</a></li>
+<li><a href="precision-tolerances.html">Beancount Precision &amp; Tolerances</a></li>
+<li class="active"><a href="rounding-precision-in-beancount.html">Proposal: Rounding &amp; Precision in Beancount</a></li>
+<li><a href="settlement-dates-in-beancount.html">Settlement Dates &amp; Transfer Accounts in Beancount</a></li>
+<li><a href="tutorial-example.html">Beancount Example &amp; Tutorial</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#_1">动机</a><ul>
+<li><a href="#_2">平衡精度</a></li>
+<li><a href="#_3">自动舍入</a></li>
+<li><a href="#balance-assertion">Balance Assertion 的精度</a></li>
+</ul>
+</li>
+<li><a href="#_4">其他系统</a></li>
+<li><a href="#_5">提案</a><ul>
+<li><a href="#tolerance">自动推断 Tolerance</a></li>
+<li><a href="#cost">对以 Cost 持有的金额的推断</a></li>
+<li><a href="#_6">自动舍入</a></li>
+<li><a href="#balance-assertions">修复 Balance Assertions</a></li>
+<li><a href="#_7">近似断言</a></li>
+</ul>
+</li>
+<li><a href="#_8">累积与报告残差</a></li>
+<li><a href="#_9">实现</a></li>
+<li><a href="#_10">用户评论</a></li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-03" data-parent="index.html#group-03">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/rounding_precision_in_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/rounding_precision_in_beancount/</p>
+</blockquote>
+<h1 id="beancount">提案：Beancount 中的舍入与精度<a id="title"></a></h1>
+<p><a href="http://plus.google.com/+MartinBlais">Martin Blais</a>，2014 年 10 月</p>
+<p><em>本文档描述了 Beancount transaction 中的舍入误差问题及其处理方式。它还包含</em></p>
+<p><em>一项关于在 Beancount 中更好地处理 precision 问题的提案。</em></p>
+<h2 id="_1">动机<a id="motivation"></a></h2>
+<h3 id="_2">平衡精度<a id="balancing-precision"></a></h3>
+<p>Transaction 的平衡无法精确完成。这一点此前已在 <a href="https://groups.google.com/d/msg/ledger-cli/m-TgILbfrwA/YjkmOM3LHXIJ">Ledger 邮件列表上讨论过</a>。在用于平衡 transaction 的金额上，必须允许一定的 tolerance。</p>
+<p>当你考虑到在文本文件中输入数字意味着有限的小数表示时，这种需求就很明显了。例如，如果你要将单位数量与 cost 相乘，假设两者都以 2 位小数记录，结果可能会得到一个具有 4 位小数的数字，然后你需要将该结果与通常仅以 2 位小数输入的现金金额进行比较，就像这个例子一样：</p>
+<pre><code>2014-05-06 * “Buy mutual fund”
+  Assets:Investments:RGXGX       4.27 RGAGX {53.21 USD} 
+  Assets:Investments:Cash     -227.21 USD
+</code></pre>
+<p>如果你计算一下，第一个 posting 的精确 balance 金额是 227.2067 USD，而不是 227.21 USD。然而，管理 investment 账户的经纪商公司会对现金提取应用四舍五入到最接近的 cent，并且四舍五入后的金额才是应该使用的正确金额。这个 transaction 必须平衡；我们需要以某种方式允许一些灵活性。</p>
+<p>发生数学运算的大多数情况都涉及将单位数量和 price 或 cost 转换为相应的现金价值（例如，units x cost = total cost）。我们在表示 transaction 信息时的任务是复制主要发生在机构中的操作。这些操作总是涉及对单位和货币数字的四舍五入（银行确实会应用随机舍入），从这些机构的角度以及从政府的角度来看，要使用的<em>正确</em>数字确实是<em>四舍五入后</em>的数字本身。这不是数学纯度的问题，而是实用性的问题，我们的系统应该做银行所做的事情。因此，我认为我们应该始终将四舍五入后的数字 post 到 account 中。使用有理数在这方面并不是限制，但我们必须小心地在重要的地方存储四舍五入后的数字。</p>
+<h3 id="_3">自动舍入<a id="automatic-rounding"></a></h3>
+<p>另一个相关问题是自动舍入 interpolation 数字的金额。让我们再次采用最初的问题示例：</p>
+<pre><code>2014-05-06 * “Buy mutual fund”
+  Assets:Investments:RGXGX       4.27 RGAGX {53.21 USD} 
+  Assets:Investments:Cash     ;; Interpolated posting = -227.2067 USD
+</code></pre>
+<p>这里，第二个 posting 的金额是从第一个 posting 的 balance 金额 interpolation 出来的。理想情况下，我们应该找到一种方法来指定它应如何舍入到 2 位小数的 precision。</p>
+<p>请注意，这也影响 interpolation 的 price 和 cost：</p>
+<pre><code>2014-05-06 * “Buy mutual fund”
+  Assets:Investments:RGXGX       4.27 RGAGX {USD} 
+  Assets:Investments:Cash     -227.21 USD
+</code></pre>
+<p>这里，cost 旨在从现金腿自动计算：227.21 / 4.27 = 53.2107728337… USD。要推断的正确 cost 也是四舍五入后的金额 53.21 USD。我们希望有一种机制来允许我们推断所需的 precision。</p>
+<p>不幸的是，这种机制不能仅基于 commodity：不同的 account 可能以不同的 precision 跟踪货币。作为一个现实世界的例子，我有一个零售 FOREX 交易账户，其 price 和存款确实使用 4 位小数的 precision。</p>
+<h3 id="balance-assertion">Balance Assertion 的精度<a id="precision-of-balance-assertions"></a></h3>
+<p>Balance assertion 的精度也受此问题影响，像这样的 assertion：</p>
+<pre><code>2014-04-01 balance Assets:Investments:Cash   4526.77 USD
+</code></pre>
+<p>用户并不打算让这个 balance 检查精确地加总到 4526.77000000… USD。然而，如果这个现金 account 之前接收了一个具有更高 precision 的存款，如上一节示例所示，那么我们就有问题了。现在，现金金额包含了一些从 interpolation 中存入的碎屑（0.0067 USD）。如果我们能够为上一节中 posting 的自动舍入找到一个良好的解决方案，这就不会是一个问题。但在此期间，我们必须找到一个解决方案。</p>
+<p>Beancount 目前的方法是一种权宜之计：它使用 <a href="http://github.com/beancount/beancount/tree/master/beancount/ops/balance.py#L23">用户可配置的 tolerance</a> 为 0.0150（在任何单位中）。我们希望更改这一点，使得使用的 tolerance 能够依赖于 commodity、account，甚至正在使用的特定 directive。</p>
+<h2 id="_4">其他系统<a id="other-systems"></a></h2>
+<p>其他命令行会计系统在如何确定该 tolerance 方面存在差异：</p>
+<ul>
+<li>
+<p>Ledger 尝试通过利用最近解析的上下文（按文件顺序）来自动推导用于其 balance assertion 的 precision。所使用的 precision 是针对特定 commodity 最近一次解析的值的 precision。这可能存在问题：它可能导致 <a href="https://groups.google.com/d/msg/ledger-cli/m-TgILbfrwA/cTHg2juqEJgJ">交易之间不必要的副作用，且难以调试</a>。</p>
+</li>
+<li>
+<p>另一方面，HLedger 使用全局 precision 设置。<a href="https://groups.google.com/d/msg/ledger-cli/m-TgILbfrwA/SoGZDNhlDOkJ">整个文件首先被处理，然后从整个输入文件中看到的最精确的数字中推导出 precision。</a></p>
+</li>
+<li>
+<p>目前，Beancount 在其 <a href="http://github.com/beancount/beancount/tree/master/beancount/ops/validation.py">balance checking 算法</a> 中使用一个常量值作为 tolerance（任何单位的 0.005）。这很薄弱，至少应该依赖于 commodity，甚至也应该依赖于使用该 commodity 的特定 account。</p>
+</li>
+</ul>
+<h2 id="_5">提案<a id="proposal"></a></h2>
+<h3 id="tolerance">自动推断 Tolerance<a id="automatically-inferring-tolerance"></a></h3>
+<p>Beancount 应使用一种完全<em>局部</em>于每个 transaction 的方法来推导其 precision，或许可以有一个全局值作为默认值。也就是说，对于每个 transaction，它将检查具有简单金额（无 cost，无 price）的 postings，并推断用于 tolerance 的 precision 应为用户在此 transaction 中输入的最精确金额的一半。例如：</p>
+<pre><code>2014-05-06 * “Buy mutual fund”
+  Assets:Investments:RGXGX       4.278  RGAGX {53.21 USD} 
+  Assets:Investments:Cash     -227.6324 USD
+  Expenses:Commissions           9.95   USD
+</code></pre>
+<p>此处要使用的 precision 的小数位数是第 2 个和第 3 个 posting 的最大值，即 max(4, 2) = 4。第一个 posting 被忽略，因为其金额是数学运算的结果。tolerance 值应为最精确数字的<em>一半</em>，即 0.00005 USD。这应允许用户通过简单地在输入中插入更多位数来使用任意 precision。</p>
+<p>仅使用小数位数来推导 precision……整数应意味着精确匹配。用户可以指定单个尾随小数点来暗示亚美元 precision。例如，以下 transaction 应无法平衡，因为计算出的金额为 999.999455 USD：</p>
+<pre><code>2014-05-06 * “Buy mutual fund”
+  Assets:Investments:RGXGX       23.45 RGAGX {42.6439 USD} 
+  Assets:Investments:Cash        -1000 USD
+</code></pre>
+<p>相反，用户应显式允许使用某些 tolerance：</p>
+<pre><code>2014-05-06 * “Buy mutual fund”
+  Assets:Investments:RGXGX       23.45 RGAGX {42.6439 USD} 
+  Assets:Investments:Cash       -1000. USD
+</code></pre>
+<p>或者更好，使用 1000.00 USD。这有一个缺点，即它阻止用户指定更简单的整数金额。我不确定这是否是个大问题。</p>
+<p>最后，不会应用由 transaction 暗示的任何全局影响。任何 transaction 都不应影响其他 transaction 的平衡上下文。</p>
+<h3 id="cost">对以 Cost 持有的金额的推断<a id="inference-on-amounts-held-at-cost"></a></h3>
+<p>Matthew Harris 提出的一个想法（<a href="https://groups.google.com/d/msg/beancount/5u-xgR-ttjg/sXfU32ItRscJ">此处</a>）是，我们也可以使用单位数量乘以 cost 的最小十进制值作为建立 transaction 平衡 tolerance 的数字。例如，在以下 transaction 中：</p>
+<pre><code>2014-05-06 * “Buy mutual fund”
+  Assets:Investments:RGXGX       23.45 RGAGX {42.6439 USD} 
+  ...
+</code></pre>
+<p>可以推导出的 tolerance 值为</p>
+<p>0.01 RGAGX x 42.6439 USD = <strong>0.426439 USD</strong></p>
+<p>Matthew 最初提出的用例是一个不包含简单金额的 transaction，只是一个两条腿都以 cost 持有的转换：</p>
+<pre><code>  2011-01-25 * "Transfer of Assets, 3467.90 USD"
+    * Assets:RothIRA:Vanguard:VTIVX  250.752 VTIVX {18.35 USD} @ 13.83 USD  
+    * Assets:RothIRA:DodgeCox:DODGX  -30.892 DODGX {148.93 USD} @ 112.26 USD
+</code></pre>
+<p>我实际上尝试过实现这一点，结果得到的 tolerance 要么宽得不可接受，要么小得不可接受。<strong>它在实践中效果不佳，因此我放弃了这个想法。</strong></p>
+<h3 id="_6">自动舍入<a id="automated-rounding"></a></h3>
+<p>对于自动计算的值，例如在 auto-postings 中剩余值被自动推导的情况，我们应该考虑对这些值进行舍入。目前尚未就此开展工作；这些值当前未被舍入。</p>
+<h3 id="balance-assertions">修复 Balance Assertions<a id="fixing-balance-assertions"></a></h3>
+<p>为了修复 balance assertions，我们将通过查看 balance 金额本身使用的小数位数来推导所需的 precision，通过查看最精确的小数位并使用该数字值的一半来计算 tolerance：</p>
+<pre><code>2014-04-01 balance Assets:Investments:Cash   4526.7702 USD
+</code></pre>
+<p>此 balance 检查暗示 precision 为 0.00005 USD。</p>
+<p>如果你使用整数单位，则不允许任何 tolerance。精确的数字应匹配：</p>
+<pre><code>2014-04-01 balance Assets:Investments:Cash   4526 USD
+</code></pre>
+<p>如果你想允许亚美元差异，使用单个逗号：</p>
+<pre><code>2014-04-01 balance Assets:Investments:Cash   4526. USD
+</code></pre>
+<p>此 balance 检查暗示 precision 为 0.50 USD。</p>
+<h3 id="_7">近似断言<a id="approximate-assertions"></a></h3>
+<p>另一个想法，在 <a href="https://github.com/ledger/ledger/pull/329">Ledger 上的此工单</a> 中提出，建议一种显式的近似断言。</p>
+<p>我们可以这样实现（仅是一个想法）：</p>
+<pre><code>2014-04-01 balance Assets:Investments:Cash   4526.00 +/- 0.05 USD
+</code></pre>
+<h2 id="_8">累积与报告残差<a id="accumulating-reporting-residuals"></a></h2>
+<p>为了显式地呈现并监控 Ledger 中发生的舍入误差金额，我们应该<a href="https://groups.google.com/d/msg/ledger-cli/m-TgILbfrwA/YjkmOM3LHXIJ">将其累积到一个 Equity 账户</a>，例如 “Equity:Rounding”。此功能应作为可选项开启。用户应能够指定用于累积误差的 account。每当一笔 transaction 无法精确平衡时，残差（即舍入误差）将作为该 transaction 的一个 posting 插入到该 equity 账户中。</p>
+<p>默认情况下，此累积功能应处于关闭状态。目前尚不清楚额外的 postings 是否会带来干扰（如果不会，也许应该默认开启此功能；实践将为我们提供答案）。</p>
+<h2 id="_9">实现<a id="implementation"></a></h2>
+<p>本提案的实现<a href="precision-tolerances.html">文档在此</a>。</p>
+<h2 id="_10">用户评论<a id="user-comments"></a></h2>
+<p>Johannes H - 2014年10月19日</p>
+<blockquote>
+<p>我原本预期系统会有相反的行为。整数应当意味着最宽松的匹配。</p>
+<p>* 因为如果用户懒得输入小数位（例如，输入 "1000" 而不是 "1000.00"），这可以被视为用户不太在意 precision 的一个指标。因此，我预期系统在对数字的解释上也应当更加宽松。</p>
+<p>* 相反，如果用户愿意付出额外的努力，通过输入额外的数字或额外的小数点来指定数字的精确 precision（例如，输入 "1000.00" 或 "1000." 而不是简单的 "1000"），这可以被视为用户在意该数字 precision 的一个指标。因此，用户在指定 precision 时所付出的努力和严格程度，应当反映在系统更严格的解释上。</p>
+<p>收起</p>
+</blockquote>
+<p>Martin Blais - 2014年10月25日</p>
+<blockquote>
+<p>我们同意你的第二点，但不同意第一点。第二点已由本提案解决。</p>
+<p>如果整数被解释为最宽松的 precision，那么我们如何指定完整的 precision？"xx.000000000"？（这并不美观）还是其他语法，例如 "1000.-"？你希望如何指定？在某些情况下，我们确实需要一种方式来指定完整的 precision。（见下文）。</p>
+<p>那么 "1000" 和 "1000." 之间的区别又是什么？我看到用户输入 "1000." 表示他/她不在乎小数位。"1000" 的含义尚待确定，我们可以让它表示其他含义。我认为它可以是表示完整 precision 的合理位置。</p>
+<p>关键在于，在实践中，没有小数点的整数用于两种情况：</p>
+<p>- 指定整数股数，这必须是精确的。</p>
+<p>- 输入的简洁性。输入 100$ 比输入 100.00$ 更容易。这些整数金额通常用于现金，或用于近似并手动输入的金额，在这些情况下 precision 不是问题（应用完整 precision 不会引起问题）。</p>
+</blockquote>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

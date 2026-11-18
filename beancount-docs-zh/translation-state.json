@@ -1,0 +1,201 @@
+{
+  "source_commit": "0db55f6b29156653d626396f77338d7b135888da",
+  "last_sync": "2026-11-18T13:33:54+00:00",
+  "docs": {
+    "beancount-user-manual": {
+      "source": "index.md",
+      "source_sha256": "7da7758c5336c52bb80bb22ba07f59e24f30fc8343f6858c565c1ce2418f6a44",
+      "status": "current"
+    },
+    "getting-started-with-beancount": {
+      "source": "getting_started_with_beancount.md",
+      "source_sha256": "c55dfa028f9c6bf0e6f02821e5bd661fe90c0eb451f7855ec544947b3f7a9dcc",
+      "status": "current"
+    },
+    "installing-beancount": {
+      "source": "installing_beancount.md",
+      "source_sha256": "4008a69ceef1be47179bfb6d7079a04465e4a4ce9d04a3dbd2d702348d4bc2c0",
+      "status": "current"
+    },
+    "how-inventories-work": {
+      "source": "how_inventories_work.md",
+      "source_sha256": "7f3225743379f2e6dc8e66cd1160e8e05baec279ad269f0e7c61075f61c2ef3e",
+      "status": "current"
+    },
+    "installing-beancount-v3": {
+      "source": "installing_beancount_v3.md",
+      "source_sha256": "73ce86dbe50b716d88039f5aee62c63960c6d28be533c9fdb2071cd5d83e0635",
+      "status": "current"
+    },
+    "running-beancount-and-generating-reports": {
+      "source": "running_beancount_and_generating_reports.md",
+      "source_sha256": "a794c801ba910845b7c2b7761d636982be33b315e05a89452ae547eddbcba298",
+      "status": "current"
+    },
+    "beancount-language-syntax": {
+      "source": "beancount_language_syntax.md",
+      "source_sha256": "8aaae6d8e436d3a88222c8535868ea348c72c0dd8672b8c392020acdd5d47c93",
+      "status": "current"
+    },
+    "beancount-options-reference": {
+      "source": "beancount_options_reference.md",
+      "source_sha256": "082013d05c097e8477264364628bb3cd2c24fadbc88e217e206821c9bee1073e",
+      "status": "current"
+    },
+    "beancount-cheat-sheet": {
+      "source": "beancount_cheat_sheet.md",
+      "source_sha256": "466b9a9c2ddd8b9b2522afee7a4925976bdaca5abef6a1711c48f75828b6220e",
+      "status": "current"
+    },
+    "beancount-query-language": {
+      "source": "beancount_query_language.md",
+      "source_sha256": "8867050de20e04e0595012eafc5c66a503842d3e770e4aa56f4d636c91a46b40",
+      "status": "current"
+    },
+    "the-double-entry-counting-method": {
+      "source": "the_double_entry_counting_method.md",
+      "source_sha256": "c8bdc2c116d7ba1d0558732ce0271b8946d48fc1c2f1ab8ae5f20b4fca504433",
+      "status": "current"
+    },
+    "command-line-accounting-in-context": {
+      "source": "command_line_accounting_in_context.md",
+      "source_sha256": "d4e919394a21199c7c3e05bed8e0a2ea05de50880d7122c10cb7dc7464193669",
+      "status": "current"
+    },
+    "trading-with-beancount": {
+      "source": "trading_with_beancount.md",
+      "source_sha256": "aa73b57bcc08ff825414093b9776edd5172483a1a5244c876fc4fe189fc01730",
+      "status": "current"
+    },
+    "calculating-portfolio-returns": {
+      "source": "calculating_portolio_returns.md",
+      "source_sha256": "34b7b2c3ba64f5e36b8ae8f0a2ee4a7f718e68e21bba92260dc100e0843d2f8a",
+      "status": "current"
+    },
+    "command-line-accounting-cookbook": {
+      "source": "command_line_accounting_cookbook.md",
+      "source_sha256": "cb765d89760f5fbb0ab361ade6dcb0a0943850bd062fe455f860a2b22f3c123f",
+      "status": "current"
+    },
+    "balance-assertions-in-beancount": {
+      "source": "balance_assertions_in_beancount.md",
+      "source_sha256": "1b230642c3486a6ec130bdf538681aeba17d2456ccb6867479b1ed0dfe88a5a2",
+      "status": "current"
+    },
+    "fetching-prices-in-beancount": {
+      "source": "fetching_prices_in_beancount.md",
+      "source_sha256": "47abcaab336831cea8b42c007e90dc3957419052144e42c807a6e425fa69370c",
+      "status": "current"
+    },
+    "precision-tolerances": {
+      "source": "precision_tolerances.md",
+      "source_sha256": "61c3018a3f6b05dc7db48ae7a8893c2d0768b78cb4be22aa8583d7b4a0fd7156",
+      "status": "current"
+    },
+    "rounding-precision-in-beancount": {
+      "source": "rounding_precision_in_beancount.md",
+      "source_sha256": "33e9a4f09c4c2b93736666db5b4554e75d766ce21e6bef222bdbe3428a5b752d",
+      "status": "current"
+    },
+    "settlement-dates-in-beancount": {
+      "source": "settlement_dates_in_beancount.md",
+      "source_sha256": "3e3c0e0a2c319c2f7cfbaa9ef0e4b6e92c488a9c4c9d3f4752af808c4c08401c",
+      "status": "current"
+    },
+    "stock-vesting-in-beancount": {
+      "source": "stock_vesting_in_beancount.md",
+      "source_sha256": "f8b59bdbfaf74aff2ef86820f3d8fd0c52915deef8f1f62b1ad56826fc3fbb5e",
+      "status": "current"
+    },
+    "tutorial-example": {
+      "source": "tutorial_example.md",
+      "source_sha256": "e16f55009cdfe1895d79a44b7a16dc3bc248db69a09426c8ebcf8d1d3102974a",
+      "status": "current"
+    },
+    "importing-external-data": {
+      "source": "importing_external_data.md",
+      "source_sha256": "a9e7843aaca896fff7df85c50892d96def296e3743d5b97d489624e3db2976d0",
+      "status": "current"
+    },
+    "beancount-scripting-plugins": {
+      "source": "beancount_scripting_plugins.md",
+      "source_sha256": "75409ce795a315e7281e1edee9d564f6fd014d03e05d947ea5d6724be8fdd97b",
+      "status": "current"
+    },
+    "beancount-design-doc": {
+      "source": "beancount_design_doc.md",
+      "source_sha256": "ea4e3375824bbe1dc27c808fbc99b97c65af23520a5f5d97da2c053310eb9165",
+      "status": "current"
+    },
+    "beancount-v3": {
+      "source": "beancount_v3.md",
+      "source_sha256": "b8d3f6f6d4a409802baebeecda57d2cca2234bb51b4cbb68c2c1b54792181cc5",
+      "status": "current"
+    },
+    "beancount-v3-dependencies": {
+      "source": "beancount_v3_dependencies.md",
+      "source_sha256": "defe4da643f97aed0c4bc805a7cf0eb7277dad98b7dddca4c68291d2cc6e3704",
+      "status": "current"
+    },
+    "beangulp-design-doc-for-new-repo": {
+      "source": "beangulp_design_doc_for_new_repo.md",
+      "source_sha256": "631f5a1b64918cd4e7060f6846a0e2e57296e88a0f6eb99238577cc0d6f0fd73",
+      "status": "current"
+    },
+    "ledgerhub-design-doc": {
+      "source": "ledgerhub_design_doc.md",
+      "source_sha256": "11bd21828f27ff6210d04111625830e421f46074d0cc8f4d0e834fd90ece5415",
+      "status": "current"
+    },
+    "a-proposal-for-an-improvement-on-inventory-booking": {
+      "source": "a_proposal_for_an_improvement_on_inventory_booking.md",
+      "source_sha256": "3d3a8a0a06e8073c6f50a01e1a1fc3e9be946a52b8a57e8259e1ee58eb56ad03",
+      "status": "current"
+    },
+    "a-comparison-of-beancount-and-ledger-hledger": {
+      "source": "a_comparison_of_beancount_and_ledger_hledger.md",
+      "source_sha256": "9b65f42d2fa5317d0be6be3dce42d1cbd5e027dcd17e484108e49b29188a5526",
+      "status": "current"
+    },
+    "exporting-your-portfolio": {
+      "source": "exporting_your_portfolio.md",
+      "source_sha256": "bf658d4e25e89257f6b3d6bd35343df6ef8277f18960923280d4f8c624bcdc43",
+      "status": "current"
+    },
+    "external-contributions": {
+      "source": "external_contributions.md",
+      "source_sha256": "29dd9315550a70721854fb21875b456d54d0b819ce18f16cb779131a1932c23a",
+      "status": "current"
+    },
+    "fund-accounting-with-beancount": {
+      "source": "fund_accounting_with_beancount.md",
+      "source_sha256": "b771f43a445e5e0680dc116f24738a4972a449e2e9bb774b26b4a2891d2a5cd6",
+      "status": "current"
+    },
+    "health-care-expenses": {
+      "source": "health_care_expenses.md",
+      "source_sha256": "1894f2627b1ffbe08cd429921b8fc2dc6f8f1c933fccddccea67f50a1e4f8efc",
+      "status": "current"
+    },
+    "how-we-share-expenses": {
+      "source": "how_we_share_expenses.md",
+      "source_sha256": "6d1710d0d83b45e2145d0ffddea26a842487cec7072efbc055bc1ccc3198176b",
+      "status": "current"
+    },
+    "sharing-expenses-with-beancount": {
+      "source": "sharing_expenses_with_beancount.md",
+      "source_sha256": "3d1a203e9abd2729f9cbdac53f2198bd55bd8817ff99a8c242c7991851cae599",
+      "status": "current"
+    },
+    "tracking-medical-claims": {
+      "source": "tracking_medical_claims.md",
+      "source_sha256": "69c898bdb8a56e265089b05de54b34b8fe9c48417e78a583e7ba7a6a3914aa9b",
+      "status": "current"
+    },
+    "beancount-history-and-credits": {
+      "source": "beancount_history_and_credits.md",
+      "source_sha256": "8e1fc2f840d4b610e7f12cfac46cb8cf510e9206f3eb53ea85e046b791faa08e",
+      "status": "current"
+    }
+  }
+}

@@ -1,0 +1,386 @@
+[
+  {
+    "source": "index.md",
+    "slug": "beancount-user-manual",
+    "title": "Beancount User's Manual",
+    "source_url": "https://beancount.github.io/docs/index/",
+    "status": "done",
+    "order": 0,
+    "bytes": 12426,
+    "force": false
+  },
+  {
+    "source": "getting_started_with_beancount.md",
+    "slug": "getting-started-with-beancount",
+    "title": "Getting Started with Beancount",
+    "source_url": "https://beancount.github.io/docs/getting_started_with_beancount/",
+    "status": "done",
+    "order": 1,
+    "bytes": 19612,
+    "force": false
+  },
+  {
+    "source": "installing_beancount.md",
+    "slug": "installing-beancount",
+    "title": "Installing Beancount",
+    "source_url": "https://beancount.github.io/docs/installing_beancount/",
+    "status": "done",
+    "order": 2,
+    "bytes": 17414,
+    "force": false
+  },
+  {
+    "source": "how_inventories_work.md",
+    "slug": "how-inventories-work",
+    "title": "How Inventories Work",
+    "source_url": "https://beancount.github.io/docs/how_inventories_work/",
+    "status": "done",
+    "order": 3,
+    "bytes": 31447
+  },
+  {
+    "source": "installing_beancount_v3.md",
+    "slug": "installing-beancount-v3",
+    "title": "Installing Beancount (C++ version)",
+    "source_url": "https://beancount.github.io/docs/installing_beancount_v3/",
+    "status": "done",
+    "order": 3,
+    "bytes": 7329,
+    "force": false
+  },
+  {
+    "source": "running_beancount_and_generating_reports.md",
+    "slug": "running-beancount-and-generating-reports",
+    "title": "Running Beancount & Generating Reports",
+    "source_url": "https://beancount.github.io/docs/running_beancount_and_generating_reports/",
+    "status": "done",
+    "order": 4,
+    "bytes": 26945,
+    "force": true
+  },
+  {
+    "source": "beancount_language_syntax.md",
+    "slug": "beancount-language-syntax",
+    "title": "Beancount Language Syntax",
+    "source_url": "https://beancount.github.io/docs/beancount_language_syntax/",
+    "status": "done",
+    "order": 5,
+    "bytes": 71917,
+    "force": true
+  },
+  {
+    "source": "beancount_options_reference.md",
+    "slug": "beancount-options-reference",
+    "title": "Beancount Options Reference",
+    "source_url": "https://beancount.github.io/docs/beancount_options_reference/",
+    "status": "done",
+    "order": 6,
+    "bytes": 12184,
+    "force": false
+  },
+  {
+    "source": "beancount_cheat_sheet.md",
+    "slug": "beancount-cheat-sheet",
+    "title": "Beancount Syntax Cheat Sheet",
+    "source_url": "https://beancount.github.io/docs/beancount_cheat_sheet/",
+    "status": "done",
+    "order": 7,
+    "bytes": 3801,
+    "force": false
+  },
+  {
+    "source": "beancount_query_language.md",
+    "slug": "beancount-query-language",
+    "title": "Beancount Query Language",
+    "source_url": "https://beancount.github.io/docs/beancount_query_language/",
+    "status": "done",
+    "order": 8,
+    "bytes": 41463,
+    "force": false
+  },
+  {
+    "source": "the_double_entry_counting_method.md",
+    "slug": "the-double-entry-counting-method",
+    "title": "The Double-Entry Counting Method",
+    "source_url": "https://beancount.github.io/docs/the_double_entry_counting_method/",
+    "status": "done",
+    "order": 9,
+    "bytes": 51991,
+    "force": false
+  },
+  {
+    "source": "command_line_accounting_in_context.md",
+    "slug": "command-line-accounting-in-context",
+    "title": "Command-line Accounting in Context",
+    "source_url": "https://beancount.github.io/docs/command_line_accounting_in_context/",
+    "status": "done",
+    "order": 10,
+    "bytes": 55230,
+    "force": false
+  },
+  {
+    "source": "trading_with_beancount.md",
+    "slug": "trading-with-beancount",
+    "title": "Trading with Beancount",
+    "source_url": "https://beancount.github.io/docs/trading_with_beancount/",
+    "status": "done",
+    "order": 10,
+    "bytes": 32653
+  },
+  {
+    "source": "calculating_portolio_returns.md",
+    "slug": "calculating-portfolio-returns",
+    "title": "Calculating Portfolio Returns",
+    "source_url": "https://beancount.github.io/docs/calculating_portolio_returns/",
+    "status": "done",
+    "order": 11,
+    "bytes": 49127
+  },
+  {
+    "source": "command_line_accounting_cookbook.md",
+    "slug": "command-line-accounting-cookbook",
+    "title": "Command-line Accounting Cookbook",
+    "source_url": "https://beancount.github.io/docs/command_line_accounting_cookbook/",
+    "status": "done",
+    "order": 11,
+    "bytes": 44159,
+    "force": false
+  },
+  {
+    "source": "balance_assertions_in_beancount.md",
+    "slug": "balance-assertions-in-beancount",
+    "title": "Balance Assertions in Beancount",
+    "source_url": "https://beancount.github.io/docs/balance_assertions_in_beancount/",
+    "status": "done",
+    "order": 12,
+    "bytes": 14799,
+    "force": false
+  },
+  {
+    "source": "fetching_prices_in_beancount.md",
+    "slug": "fetching-prices-in-beancount",
+    "title": "Prices in Beancount",
+    "source_url": "https://beancount.github.io/docs/fetching_prices_in_beancount/",
+    "status": "done",
+    "order": 12,
+    "bytes": 12435
+  },
+  {
+    "source": "precision_tolerances.md",
+    "slug": "precision-tolerances",
+    "title": "Beancount Precision & Tolerances",
+    "source_url": "https://beancount.github.io/docs/precision_tolerances/",
+    "status": "done",
+    "order": 13,
+    "bytes": 33213
+  },
+  {
+    "source": "rounding_precision_in_beancount.md",
+    "slug": "rounding-precision-in-beancount",
+    "title": "Proposal: Rounding & Precision in Beancount",
+    "source_url": "https://beancount.github.io/docs/rounding_precision_in_beancount/",
+    "status": "done",
+    "order": 13,
+    "bytes": 13882,
+    "force": false
+  },
+  {
+    "source": "settlement_dates_in_beancount.md",
+    "slug": "settlement-dates-in-beancount",
+    "title": "Settlement Dates & Transfer Accounts in Beancount",
+    "source_url": "https://beancount.github.io/docs/settlement_dates_in_beancount/",
+    "status": "done",
+    "order": 14,
+    "bytes": 14640,
+    "force": false
+  },
+  {
+    "source": "stock_vesting_in_beancount.md",
+    "slug": "stock-vesting-in-beancount",
+    "title": "Stock Vesting in Beancount",
+    "source_url": "https://beancount.github.io/docs/stock_vesting_in_beancount/",
+    "status": "done",
+    "order": 14,
+    "bytes": 15782
+  },
+  {
+    "source": "tutorial_example.md",
+    "slug": "tutorial-example",
+    "title": "Beancount Example & Tutorial",
+    "source_url": "https://beancount.github.io/docs/tutorial_example/",
+    "status": "done",
+    "order": 15,
+    "bytes": 14795,
+    "force": false
+  },
+  {
+    "source": "importing_external_data.md",
+    "slug": "importing-external-data",
+    "title": "Importing External Data in Beancount",
+    "source_url": "https://beancount.github.io/docs/importing_external_data/",
+    "status": "done",
+    "order": 16,
+    "bytes": 43327,
+    "force": false
+  },
+  {
+    "source": "beancount_scripting_plugins.md",
+    "slug": "beancount-scripting-plugins",
+    "title": "Beancount Scripting & Plugins",
+    "source_url": "https://beancount.github.io/docs/beancount_scripting_plugins/",
+    "status": "done",
+    "order": 17,
+    "bytes": 12456,
+    "force": false
+  },
+  {
+    "source": "beancount_design_doc.md",
+    "slug": "beancount-design-doc",
+    "title": "Beancount Design Doc",
+    "source_url": "https://beancount.github.io/docs/beancount_design_doc/",
+    "status": "done",
+    "order": 18,
+    "bytes": 78819,
+    "force": false
+  },
+  {
+    "source": "beancount_v3.md",
+    "slug": "beancount-v3",
+    "title": "Beancount Vnext: Goals & Design",
+    "source_url": "https://beancount.github.io/docs/beancount_v3/",
+    "status": "done",
+    "order": 19,
+    "bytes": 81038,
+    "force": false
+  },
+  {
+    "source": "beancount_v3_dependencies.md",
+    "slug": "beancount-v3-dependencies",
+    "title": "Beancount C++ version: Dependencies",
+    "source_url": "https://beancount.github.io/docs/beancount_v3_dependencies/",
+    "status": "done",
+    "order": 20,
+    "bytes": 12065,
+    "force": false
+  },
+  {
+    "source": "beangulp_design_doc_for_new_repo.md",
+    "slug": "beangulp-design-doc-for-new-repo",
+    "title": "Beangulp Design Doc for New Repo",
+    "source_url": "https://beancount.github.io/docs/beangulp_design_doc_for_new_repo/",
+    "status": "done",
+    "order": 21,
+    "bytes": 10663,
+    "force": false
+  },
+  {
+    "source": "ledgerhub_design_doc.md",
+    "slug": "ledgerhub-design-doc",
+    "title": "Design Doc for Ledgerhub",
+    "source_url": "https://beancount.github.io/docs/ledgerhub_design_doc/",
+    "status": "done",
+    "order": 22,
+    "bytes": 25049,
+    "force": false
+  },
+  {
+    "source": "a_proposal_for_an_improvement_on_inventory_booking.md",
+    "slug": "a-proposal-for-an-improvement-on-inventory-booking",
+    "title": "Inventory Booking",
+    "source_url": "https://beancount.github.io/docs/a_proposal_for_an_improvement_on_inventory_booking/",
+    "status": "done",
+    "order": 23,
+    "bytes": 79143,
+    "force": false
+  },
+  {
+    "source": "a_comparison_of_beancount_and_ledger_hledger.md",
+    "slug": "a-comparison-of-beancount-and-ledger-hledger",
+    "title": "A Comparison of Beancount and Ledger",
+    "source_url": "https://beancount.github.io/docs/a_comparison_of_beancount_and_ledger_hledger/",
+    "status": "done",
+    "order": 24,
+    "bytes": 47582,
+    "force": true
+  },
+  {
+    "source": "exporting_your_portfolio.md",
+    "slug": "exporting-your-portfolio",
+    "title": "Exporting Your Portfolio",
+    "source_url": "https://beancount.github.io/docs/exporting_your_portfolio/",
+    "status": "done",
+    "order": 25,
+    "bytes": 18643,
+    "force": false
+  },
+  {
+    "source": "external_contributions.md",
+    "slug": "external-contributions",
+    "title": "External Contributions to Beancount",
+    "source_url": "https://beancount.github.io/docs/external_contributions/",
+    "status": "done",
+    "order": 26,
+    "bytes": 42029,
+    "force": false
+  },
+  {
+    "source": "fund_accounting_with_beancount.md",
+    "slug": "fund-accounting-with-beancount",
+    "title": "Fund Accounting with Beancount",
+    "source_url": "https://beancount.github.io/docs/fund_accounting_with_beancount/",
+    "status": "done",
+    "order": 27,
+    "bytes": 36381,
+    "force": false
+  },
+  {
+    "source": "health_care_expenses.md",
+    "slug": "health-care-expenses",
+    "title": "Health Care Expenses",
+    "source_url": "https://beancount.github.io/docs/health_care_expenses/",
+    "status": "done",
+    "order": 28,
+    "bytes": 20013,
+    "force": false
+  },
+  {
+    "source": "how_we_share_expenses.md",
+    "slug": "how-we-share-expenses",
+    "title": "How We Share Expenses",
+    "source_url": "https://beancount.github.io/docs/how_we_share_expenses/",
+    "status": "done",
+    "order": 29,
+    "bytes": 19234,
+    "force": false
+  },
+  {
+    "source": "sharing_expenses_with_beancount.md",
+    "slug": "sharing-expenses-with-beancount",
+    "title": "Sharing Expenses in Beancount",
+    "source_url": "https://beancount.github.io/docs/sharing_expenses_with_beancount/",
+    "status": "done",
+    "order": 30,
+    "bytes": 37894,
+    "force": true
+  },
+  {
+    "source": "tracking_medical_claims.md",
+    "slug": "tracking-medical-claims",
+    "title": "Tracking Out-of-Network Medical Claims in Beancount",
+    "source_url": "https://beancount.github.io/docs/tracking_medical_claims/",
+    "status": "done",
+    "order": 31,
+    "bytes": 4709,
+    "force": false
+  },
+  {
+    "source": "beancount_history_and_credits.md",
+    "slug": "beancount-history-and-credits",
+    "title": "Beancount History and Credits",
+    "source_url": "https://beancount.github.io/docs/beancount_history_and_credits/",
+    "status": "done",
+    "order": 32,
+    "bytes": 9477,
+    "force": false
+  }
+]

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beancount Scripting &amp; Plugins · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais，2014 年 7 月">
+  <meta property="og:title" content="Beancount Scripting &amp; Plugins · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais，2014 年 7 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">beancount-scripting-plugins</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 导入 / 插件 <span class="count">2</span></div><ul>
+<li><a href="importing-external-data.html">Importing External Data in Beancount</a></li>
+<li class="active"><a href="beancount-scripting-plugins.html">Beancount Scripting &amp; Plugins</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#_1">简介</a></li>
+<li><a href="#load-pipeline">load 流程（pipeline）</a></li>
+<li><a href="#_2">编写插件</a><ul>
+<li><a href="#_3">插件配置</a></li>
+</ul>
+</li>
+<li><a href="#_4">编写脚本</a><ul>
+<li><a href="#_5">从文件加载</a></li>
+<li><a href="#_6">从字符串加载</a></li>
+<li><a href="#_7">打印错误</a></li>
+<li><a href="#entries">打印 Entries 与往返处理</a></li>
+</ul>
+</li>
+<li><a href="#_8">执行插件</a></li>
+<li><a href="#_9">进一步探索</a></li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-05" data-parent="index.html#group-05">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/beancount_scripting_plugins/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/beancount_scripting_plugins/</p>
+</blockquote>
+<h1 id="beancount">Beancount 脚本与插件<a id="title"></a></h1>
+<p><a href="http://plus.google.com/+MartinBlais">Martin Blais</a>，2014 年 7 月</p>
+<p><a href="http://furius.ca/beancount/doc/scripting">http://furius.ca/beancount/doc/scripting</a></p>
+<blockquote>
+<p><a href="#introduction">简介</a></p>
+<p><a href="#load-pipeline">加载管道</a></p>
+<p><a href="#writing-plug-ins">编写插件</a></p>
+<p><a href="#writing-scripts">编写脚本</a></p>
+<p><a href="#loading-from-file">从文件加载</a></p>
+<p><a href="#loading-from-string">从字符串加载</a></p>
+<p><a href="#printing-errors">打印错误</a></p>
+<p><a href="#printing-entries-round-tripping">打印条目与往返转换</a></p>
+<p><a href="#executing-plugins">进一步探索</a></p>
+</blockquote>
+<h2 id="_1">简介<a id="introduction"></a></h2>
+<p>本文档提供了使用账本内容编写脚本的示例和指南。它还介绍了如何编写自己的“插件”，这些插件只是可以配置为以编程方式转换 transaction 或合成 transaction 的 Python 函数。这是扩展 Beancount 功能和编写自定义 report 的两种主要方法。你只需使用 Python 即可完成这些操作。</p>
+<h2 id="load-pipeline">load 流程（pipeline） <a></a></h2>
+<p>你需要了解一些 Beancount 处理其输入文件的方式。在内部，加载输入文件的唯一入口点是 <code>beancount.loader.load_file()</code> 函数，它接受一个输入文件并执行一系列转换步骤，如下图所示：</p>
+<p><img alt="加载流程：输入文件 → parser → 内置 plugin → 用户 plugin → validation → entries；顶部汇总 options_map，底部汇总 errors" src="assets/images/beancount-scripting-plugins/d3e464c1d017210fad49eefaf841df09d0b099a0.png" /></p>
+<p>加载的阶段如下：</p>
+<ol>
+<li>
+<p><strong>Parser（解析器）。</strong> 将输入文件通过解析器处理。此阶段的输出为：</p>
+<ol>
+<li>
+<p>entries：一个元组列表（定义在 beancount.core.data 中），对应于文件中出现的每个 directive，并按日期和行号排序。此外，与其他 directive 出现在同一日期的 Transaction directive 始终保证排在它们之后。这为处理这些条目做好了准备。这个条目列表将在后续各个阶段中被转换和细化。</p>
+</li>
+<li>
+<p>options_map：一个包含输入文件中选项值的 Python dict。详见 beancount.parser.options。一旦创建，此后将不再被修改。</p>
+</li>
+<li>
+<p>errors：如果发生错误，则为一个错误对象列表。在每个阶段，新生成的错误都会被收集起来。</p>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>Process plugins（处理插件）。</strong> 对于每个插件，加载插件模块并调用其函数，传入上一阶段的条目列表和 options_map，并用插件返回的列表替换当前列表。这实际上允许插件过滤条目。<br />
+    要运行的插件列表由一组实现 Beancount 某些内置功能的默认插件模块组成，随后是用户从输入文件中的 “plugin” 选项提供的列表。</p>
+</li>
+<li>
+<p><strong>Validation（验证）。</strong> 将生成的条目通过验证阶段，以确保由插件合成或修改的 directive 符合代码库所依赖的一些不变量。这主要用于生成错误。</p>
+</li>
+</ol>
+<p>由此 pipeline 生成的条目列表属于 <a href="https://github.com/beancount/beancount/tree/master/beancount/core/data.py">beancount.core.data</a> 中定义的各种类型，在典型的输入文件中，大多数条目都是 <em>Transaction</em> 类型。Beancount 自身的过滤和 report 程序直接处理这些条目，你也可以这样做。这些条目是简单的只读对象（Python <a href="https://docs.python.org/3/library/collections.html#collections.namedtuple">namedtuples</a>），没有显式修改其内容的方法。Beancount 内部的所有处理都是以函数式风格进行的，处理被假定为不可变的条目列表<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>。</p>
+<p>要运行的用户插件列表是加载阶段的一部分，因为这允许监控文件变化的程序重新加载文件并重新应用相同的插件列表。这也允许输入文件的作者以这种方式选择性地启用各种可选功能。</p>
+<h2 id="_2">编写插件<a id="writing-plug-ins"></a></h2>
+<p>如上一节所述，加载 Beancount 文件本质上会生成一个 directive 列表。许多语法扩展可以通过在插件处理阶段将 directive 列表转换为新的列表来实现。以下是一些你可能希望对某些 directive 执行的转换示例：</p>
+<ul>
+<li>
+<p>自动添加一些 posting</p>
+</li>
+<li>
+<p>使用共同的标签关联一些 transaction</p>
+</li>
+<li>
+<p>合成新的 transaction</p>
+</li>
+<li>
+<p>移除或替换某些 transaction 集合</p>
+</li>
+<li>
+<p>修改各个字段</p>
+</li>
+</ul>
+<p>只要你的插件生成的条目满足某些约束条件（所有 posting 平衡，所有数据类型符合预期），你可以做的事情是没有限制的。</p>
+<p>插件通过 <a href="beancount-language-syntax.html">option 语法</a> 添加到输入文件中，例如如下所示：</p>
+<pre><code>plugin "accounting.wash_sales"
+</code></pre>
+<p>通过此 directive，加载器将尝试导入 <code>accounting.wash_sales</code> Python 模块（代码必须是 Python-3.3 或更高版本），查找一个特殊的 <code>__plugins__</code> 属性（该属性应为一个要运行的函数序列），然后运行这些函数。</p>
+<p>关于运行插件，请参阅下面的“执行插件”部分。</p>
+<p>作为一个示例，你会将如下代码放在一个“<code>accounting/wash_sales.py</code>”文件中：</p>
+<pre><code>__plugins__ = ['wash_sales']
+
+def wash_sales(entries, options_map):
+    errors = []
+    for entry in entries:
+        print(type(entry))
+    return entries, errors
+</code></pre>
+<p>这是一个最小示例，它不修改条目，而是将它们打印到控制台。在实际应用中，为了做有用的事情，你会修改列表中的某些条目并输出它们。</p>
+<p>然后，你在输入文件上调用 Beancount 提供的常规工具。各种过滤器和 report 将基于你的插件输出的条目列表进行操作。有关如何操作条目的详细信息和示例，请参阅 <a href="https://github.com/beancount/beancount/tree/master/beancount/core/">beancount.core</a> 中的源代码。</p>
+<h3 id="_3">插件配置<a id="plugin-configuration"></a></h3>
+<p>某些插件需要配置。为了向插件提供特定于你文件的数据，你可以提供一个配置字符串：</p>
+<pre><code>plugin "accounting.wash_sales" "days=31"
+</code></pre>
+<p>插件函数随后将接收一个额外的参数，即配置字符串。如何解释该字符串由插件本身定义。</p>
+<h2 id="_4">编写脚本<a id="writing-scripts"></a></h2>
+<p>如果你需要生成一些无法通过内置过滤和 report 功能实现的自定义分析或可视化，你可以直接编写一个脚本来显式加载 directive。这让你能够控制程序的流程，并执行任何你想要的操作。</p>
+<h3 id="_5">从文件加载<a id="loading-from-file"></a></h3>
+<p>你可以直接调用 <code>beancount.loader.load_file()</code> 加载函数。以下是一个最小化的脚本示例：</p>
+<pre><code>#!/usr/bin/env python3
+from beancount import loader
+
+filename = "/path/to/my/input.beancount"
+entries, errors, options = loader.load_file(filename)
+…
+</code></pre>
+<p>此时，你可以按自己的意愿处理 entries，打印它们、生成 HTML、调用 Python 库等。（我建议你遵循最佳编程实践，在脚本中使用 docstring 和 main 函数；上面的脚本旨在保持最小化）。同样，请参阅 <a href="https://github.com/beancount/beancount/tree/master/beancount/core/">beancount.core</a> 中的源代码，以了解如何操作 entries 的详细信息和示例。</p>
+<h3 id="_6">从字符串加载<a id="loading-from-string"></a></h3>
+<p>你也可以直接解析字符串。使用 <code>beancount.loader.load_string()</code>：</p>
+<pre><code>#!/usr/bin/env python3
+from beancount import loader
+
+entries, errors, options = loader.load_string("""
+
+   2014-02-02 open Assets:TestAccount   USD
+   …
+
+""")
+</code></pre>
+<p>如果你希望缩进 Beancount directive 并自动去除缩进，标准库中的 <a href="https://docs.python.org/3/library/textwrap.html#textwrap.dedent">textwrap.dedent</a> 函数会很有用。要查看许多示例，请参阅 Beancount 源代码中的各种测试。</p>
+<h3 id="_7">打印错误<a id="printing-errors"></a></h3>
+<p>默认情况下，加载器在加载时不会打印任何错误；我们倾向于让加载过程默认不产生任何副作用。你可以提供一个可选参数来打印错误，该参数是一个用于写入错误字符串的函数：</p>
+<pre><code>#!/usr/bin/env python3
+import sys
+from beancount import loader
+
+filename = "/path/to/my/input.beancount"
+entries, errors, options = loader.load_file(filename, 
+                                            log_errors=sys.stderr)
+…
+</code></pre>
+<p>或者，如果你更喜欢显式地自行处理，可以调用 <code>beancount.parser.printer.print_errors()</code> 辅助函数：</p>
+<pre><code>#!/usr/bin/env python3
+from beancount import loader
+from beancount.parser import printer
+
+filename = "/path/to/my/input.beancount"
+entries, errors, options = loader.load_file(filename)
+printer.print_errors(errors)
+…
+</code></pre>
+<h3 id="entries">打印 Entries 与往返处理<a id="printing-entries-round-tripping"></a></h3>
+<p>直接打印 <a href="https://docs.python.org/3/library/collections.html#collections.namedtuple">namedtuple</a> entries 会输出一些可读但格式相对较差的内容。最好使用 <code>beancount.parser.printer.print_entry()</code> 实用函数以可读的方式打印 entry：</p>
+<pre><code>#!/usr/bin/env python3
+from beancount import loader
+from beancount.parser import printer
+
+filename = "/path/to/my/input.beancount"
+entries, errors, options = loader.load_file(filename)
+for entry in entries:
+    printer.print_entry(entry)
+</code></pre>
+<p>特别是，Beancount 保证 printer 的输出始终是可解析的，并且读回时应产生相同的数据结构。（如果不是这种情况，应被视为 bug。）</p>
+<p>请参阅 <code>beancount.parser.printer</code> 模块的源代码以获取更多实用函数。</p>
+<h2 id="_8">执行插件<a id="executing-plugins"></a></h2>
+<p>要让插件模块被找到，只需确保它存在于你的 <code>PYTHONPATH</code> 环境变量中（你需要确保相关的 <code>__init__.py</code> 文件存在以便导入）。它可以位于你自己的代码中：你无需修改 Beancount 本身。</p>
+<p>还有一个选项，可以添加到你的 beancount 文件中：</p>
+<pre><code>option "insert_pythonpath" "True"
+</code></pre>
+<p>这会将包含 beancount 文件的文件夹添加到 <code>PYTHONPATH</code> 中。结果是，你可以将插件与 beancount 文件放在同一位置，并在使用该文件时执行它们。</p>
+<p>下面是一个简短的示例，使用我们上面编写的 wash_sales.py 插件。你的 beancount 文件将包含以下行：</p>
+<pre><code>option "insert_pythonpath" "True"
+
+plugin "wash_sales"
+</code></pre>
+<p>Python 文件 wash_sales.py 将与 .beancount 文件存储在同一文件夹中。</p>
+<h2 id="_9">进一步探索<a id="going-further"></a></h2>
+<p>要了解如何操作 entries，你应该参考源代码，并且可能需要深入学习以下模块：</p>
+<ul>
+<li>
+<p><a href="https://github.com/beancount/beancount/tree/master/beancount/core/data.py">beancount.core.data</a></p>
+</li>
+<li>
+<p><a href="https://github.com/beancount/beancount/tree/master/beancount/core/account.py">beancount.core.account</a></p>
+</li>
+<li>
+<p><a href="https://github.com/beancount/beancount/tree/master/beancount/core/number.py">beancount.core.number</a></p>
+</li>
+<li>
+<p><a href="https://github.com/beancount/beancount/tree/master/beancount/core/amount.py">beancount.core.amount</a></p>
+</li>
+<li>
+<p><a href="https://github.com/beancount/beancount/tree/master/beancount/core/position.py">beancount.core.position</a></p>
+</li>
+<li>
+<p><a href="https://github.com/beancount/beancount/tree/master/beancount/core/inventory.py">beancount.core.inventory</a></p>
+</li>
+</ul>
+<p>更多详情请参阅<a href="beancount-design-doc.html">设计文档</a>。祝使用愉快！</p>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p><a href="http://validator.w3.org/check?uri=referer">严格来说，Python 并不阻止对 namedtuple 中本身可变（如列表和集合）的属性进行修改，但在实践中，按照惯例，一旦 entry 被创建，我们绝不会以任何方式修改它。避免副作用并采用函数式风格在任何语言中都能带来好处。</a>&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

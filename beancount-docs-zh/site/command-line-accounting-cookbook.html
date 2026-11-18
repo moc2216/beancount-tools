@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Command-line Accounting Cookbook · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais，2014 年 7 月">
+  <meta property="og:title" content="Command-line Accounting Cookbook · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais，2014 年 7 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">command-line-accounting-cookbook</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 会计方法 / 校验 <span class="count">8</span></div><ul>
+<li><a href="the-double-entry-counting-method.html">The Double-Entry Counting Method</a></li>
+<li><a href="command-line-accounting-in-context.html">Command-line Accounting in Context</a></li>
+<li class="active"><a href="command-line-accounting-cookbook.html">Command-line Accounting Cookbook</a></li>
+<li><a href="balance-assertions-in-beancount.html">Balance Assertions in Beancount</a></li>
+<li><a href="precision-tolerances.html">Beancount Precision &amp; Tolerances</a></li>
+<li><a href="rounding-precision-in-beancount.html">Proposal: Rounding &amp; Precision in Beancount</a></li>
+<li><a href="settlement-dates-in-beancount.html">Settlement Dates &amp; Transfer Accounts in Beancount</a></li>
+<li><a href="tutorial-example.html">Beancount Example &amp; Tutorial</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#_2">简介</a><ul>
+<li><a href="#_3">一点警示</a></li>
+</ul>
+</li>
+<li><a href="#_4">账户命名约定</a><ul>
+<li><a href="#_5">选择账户类型</a></li>
+<li><a href="#_7">选择起始日期</a></li>
+</ul>
+</li>
+<li><a href="#_8">如何处理现金</a><ul>
+<li><a href="#_9">现金取款</a></li>
+<li><a href="#_10">跟踪现金支出</a></li>
+</ul>
+</li>
+<li><a href="#_11">薪资收入</a><ul>
+<li><a href="#_12">就业收入账户</a></li>
+<li><a href="#_13">记录工资入账</a></li>
+<li><a href="#_14">休假时间</a></li>
+<li><a href="#401k">401k 缴款</a></li>
+<li><a href="#_15">归属股票授予</a></li>
+<li><a href="#_16">其他福利</a></li>
+</ul>
+</li>
+<li><a href="#_19">货币转账与兑换</a></li>
+<li><a href="#_20">投资与交易</a><ul>
+<li><a href="#_21">账户设置</a></li>
+<li><a href="#_22">资金转账</a></li>
+<li><a href="#_23">进行一笔交易</a></li>
+<li><a href="#_24">接收股息</a></li>
+<li><a href="#_25">选择日期</a></li>
+</ul>
+</li>
+<li><a href="#_26">结论</a></li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-03" data-parent="index.html#group-03">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/command_line_accounting_cookbook/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/command_line_accounting_cookbook/</p>
+</blockquote>
+<h1 id="_1">命令行会计手册<a id="title"></a></h1>
+<p><a href="mailto:blais@furius.ca">Martin Blais</a>，2014 年 7 月</p>
+<p><a href="http://furius.ca/beancount/doc/cookbook">http://furius.ca/beancount/doc/cookbook</a></p>
+<blockquote>
+<p><a href="#introduction">引言</a></p>
+<p><a href="#a-note-of-caution">注意事项</a></p>
+<p><a href="#account-naming-conventions">账户命名约定</a></p>
+<p><a href="#choosing-an-account-type">选择账户类型</a></p>
+<p><a href="#choosing-opening-dates">选择起始日期</a></p>
+<p><a href="#how-to-deal-with-cash">如何处理现金</a></p>
+<p><a href="#cash-withdrawals">现金提取</a></p>
+<p><a href="#tracking-cash-expenses">跟踪现金支出</a></p>
+<p><a href="#salary-income">工资收入</a></p>
+<p><a href="#employment-income-accounts">就业收入账户</a></p>
+<p><a href="#booking-salary-deposits">记录工资存款</a></p>
+<p><a href="#vacation-hours">休假时间</a></p>
+<p><a href="#k-contributions">401k 缴款</a></p>
+<p><a href="#vesting-stock-grants">归属股票奖励</a></p>
+<p><a href="#other-benefits">其他福利</a></p>
+<p><a href="#points">积分</a></p>
+<p><a href="#food-benefits">餐饮福利</a></p>
+<p><a href="#currency-transfers-conversions">货币转账与兑换</a></p>
+<p><a href="#investing-and-trading">投资与交易</a></p>
+<p><a href="#accounts-setup">账户设置</a></p>
+<p><a href="#funds-transfers">资金转账</a></p>
+<p><a href="#making-a-trade">执行交易</a></p>
+<p><a href="#receiving-dividends">接收股息</a></p>
+<p><a href="#conclusion">结论</a></p>
+</blockquote>
+<h2 id="_2">简介<a id="introduction"></a></h2>
+<p>学习复式记账法的最佳方式是查看真实世界的示例。这种方法很优雅，但对于初学者来说，为了执行不同类型的财务事件所需的各项操作，transaction 必须如何 posting 可能显得不太直观。这就是我编写这本 cookbook 的原因。它并不旨在全面描述所有支持的功能，而是一组实用的指南，帮助你解决问题。我认为这很可能是 Beancount 文档集中最有用的文档！</p>
+<p>这里的所有示例都适用于任何复式记账系统：Ledger、GnuCash，甚至是商业系统。某些细节可能只有细微差别。本 cookbook 使用 Beancount 软件的语法和计算方法编写。本文档还假设你已经熟悉<a href="the-double-entry-counting-method.html">复式记账法的一般平衡概念</a>，并且至少熟悉 Beancount 的某些语法，这些语法可以在其<a href="beancount-language-syntax.html">用户手册</a>或其<a href="beancount-cheat-sheet.html">速查表</a>中找到。如果你还没有开始编写你的第一个文件，请先阅读<a href="getting-started-with-beancount.html">Beancount 入门</a>并先完成该步骤。</p>
+<p>命令行记账系统对于可以计数的对象类型持中立态度，并允许你创造性地发明各种单位来跟踪不同类型的东西。例如，你可以计数“IRA 贡献美元”，这些不是真实的美元，但对应于“以真实美元计的可能贡献”，并且你可以为它们获取 asset、income 和 expense 类型的 account——它是可行的。请意识到，其中一些巧妙的方法在更传统的记账系统中可能无法实现。此外，在这些系统中通常需要手动处理的一些操作可以为我们自动化，例如，“关闭一年”完全由软件在任何时间点完成，并且 balance assertion 提供了一种保护机制，允许我们在风险很小的情况下更改过去 transaction 的细节，因此无需通过将过去“烘焙”成冻结状态来进行“对账”。更多的灵活性触手可及。</p>
+<p>最后，如果你有一个未在本文档中涵盖的 transaction 条目问题，请在页边留下评论，或把你的问题写到<a href="https://groups.google.com/forum/#!forum/ledger-cli">Ledger 邮件列表</a>。我希望本文档能覆盖尽可能多的现实场景。</p>
+<h3 id="_3">一点警示<a id="a-note-of-caution"></a></h3>
+<p>在阅读本文时，请注意作者是一个业余爱好者：我是一名计算机科学家，而不是会计师。事实上，除了我在大学修过一门通识课程并完成了 CFA 项目的第一年外，我没有接受过真正的会计培训。尽管如此，我确实有一些使用该软件维护三套账簿的实践经验：我的个人账簿（所有账户 8 年的完整财务数据）、与配偶的联合账簿，以及我曾经拥有的一家承包和咨询公司的账簿。多年来，我还使用我的复式记账系统与我的会计师进行沟通，他也提出了一些建议。然而……我可能会在这里或那里犯一些根本性的错误，如果你发现任何可疑之处，我很感激你在页边留下评论。</p>
+<h2 id="_4">账户命名约定<a id="account-naming-conventions"></a></h2>
+<p>你可以定义任何你喜欢的 account 名称，只要它以五个类别之一开头：Assets、Liabilities、Income、Expenses 或 Equity（注意，你可以通过 options 自定义这些名称 - 详见 <a href="beancount-language-syntax.html">Language Syntax 文档</a>）。account 名称通常被定义为具有多个名称 <em>components</em>，由冒号 (:) 分隔，这暗示了账户层级结构，或“<a href="http://en.wikipedia.org/wiki/Chart_of_accounts">chart of accounts</a>”：</p>
+<pre><code>Assets:Component1:Component2:Component3:...
+</code></pre>
+<p>随着时间的推移，我尝试了许多定义 account 名称的方法，并最终收敛到以下针对 Assets、Liabilities 和 Income 账户的约定：</p>
+<pre><code>Type : Country : Institution : Account : SubAccount
+</code></pre>
+<p>我喜欢这种约定的一点是，当你渲染资产负债表时，渲染出的树状结构会先按国家显示账户，然后按机构显示，效果很好。</p>
+<p>一些 account 名称示例：</p>
+<pre><code>Assets:US:BofA:Savings       ; Bank of America “Savings” account
+Assets:CA:RBC:Checking       ; Royal Bank of Canada “Checking” account
+Liabilities:US:Amex:Platinum ; American Express Platinum credit card
+Liabilities:CA:RBC:Mortgage  ; Mortgage loan account at RBC
+Income:US:ETrade:Interest    ; Interest payments in E*Trade account
+Income:US:Acme:Salary        ; Salary income from ACME corp.
+</code></pre>
+<p>当有意义时，我有时会使用进一步的子账户。例如，Vanguard 内部根据贡献是来自员工还是雇主的匹配金额，分别维护不同的账户：</p>
+<pre><code>Assets:US:Vanguard:Contrib401k:RGAGX  ; My contributions to this fund
+Assets:US:Vanguard:Match401k:RGAGX    ; Employer contributions
+</code></pre>
+<p>对于 investment 账户，我倾向于通过将每种特定类型的股票存储在其自己的子账户中来组织其所有内容：</p>
+<pre><code>Assets:US:ETrade:Cash        ; The cash contents of the account
+Assets:US:ETrade:FB          ; Shares of Facebook
+Assets:US:ETrade:AAPL        ; Shares of Apple
+Assets:US:ETrade:MSFT        ; Shares of Microsoft
+…
+</code></pre>
+<p>这会自动按股份类型组织资产负债表，我觉得这非常好。</p>
+<p>我喜欢的另一个约定是，当我拥有不同类型的关联账户时，使用相同的 institution component 名称。例如，上面的 E*Trade assets 账户有相关的 income 流，这些流会被记录在类似命名的账户下：</p>
+<pre><code>Income:US:ETrade:Interest    ; Interest income from cash deposits
+Income:US:ETrade:Dividends   ; Dividends received in this account
+Income:US:ETrade:PnL         ; Capital gains or losses from trades
+…
+</code></pre>
+<p>对于“Expenses”账户，我发现通常没有相关的机构。对于这些账户，将它们视为类别并拥有一个简单的层级结构更有意义，该结构对应于它们所计数的费用类型，一些示例：</p>
+<pre><code>Expenses:Sports:Scuba        ; All matters of diving expenses
+Expenses:Transport:Train     ; Train (mostly Amtrak, but not always)
+Expenses:Transport:Bus       ; Various “chinese bus” companies
+Expenses:Transport:Flights   ; Flights (various airlines)
+…
+</code></pre>
+<p>我有<em>很多</em>这样的账户，大概有 250 个或更多。完全由你决定要定义多少个，以及如何精细地聚合或“分类”你的费用。但当然，你应该只在你需要时定义它们；不要费心提前定义一个巨大的列表。添加新的总是很容易。</p>
+<p>值得注意的是，institution 不必是一个“真实”的机构。例如，我在一栋楼里拥有一个公寓单元，我使用 Loft4530 “institution” 用于其所有相关账户：</p>
+<pre><code>Assets:CA:Loft4530:Property
+Assets:CA:Loft4530:Association
+Income:CA:Loft4530:Rental
+Expenses:Loft4530:Acquisition:Legal
+Expenses:Loft4530:Acquisition:SaleAgent
+Expenses:Loft4530:Loan-Interest
+Expenses:Loft4530:Electricity
+Expenses:Loft4530:Insurance
+Expenses:Loft4530:Taxes:Municipal
+Expenses:Loft4530:Taxes:School
+</code></pre>
+<p>如果你所有的业务都在一个国家，并且没有计划搬到另一个国家，你可能想要为了简洁而跳过 country component。</p>
+<p>最后，对于“Equity”账户，嗯，……通常你不会定义很多，因为这些主要是为了在资产负债表上报告前一年或当前 exercise period 的净收入和货币转换。通常你至少需要一个，而它的命名并不重要：</p>
+<pre><code>Equity:Opening-Balances           ; Balances used to open accounts
+</code></pre>
+<p>你可以自定义为资产负债表自动创建的其他 Equity 账户的名称。</p>
+<h3 id="_5">选择账户类型<a id="choosing-an-account-type"></a></h3>
+<p>学习将 transaction 记入哪些账户的艺术之一，在于想出相关的账户名称，并设计一个方案来描述资金在这些账户之间如何流动，方法是记下一些示例 transaction。这可能需要一点创造力。当你试图“计算”生活中的所有财务事件时，你经常会纠结于某些账户应该选择哪种账户类型。这应该是一个“Assets”账户吗？还是一个“Income”账户？毕竟，除了生成 report 之外，Beancount 并不区别对待这些账户类型……</p>
+<p>但这并不意味着你可以随意使用任何类型。一个账户是出现在资产负债表还是利润表中确实很重要——通常有一个正确的选择。如果不确定，以下是一些选择账户类型的指导原则。</p>
+<blockquote>
+<p>首先，如果记入该账户的金额仅与<em>一段时间</em>内的报告相关，那么它应该是利润表账户之一：Income 或 Expenses。另一方面，如果金额<em>始终</em>需要包含在账户的总余额中，那么它应该是资产负债表账户：Assets 或 Liabilities。</p>
+<p>其次，如果金额通常<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">5</a></sup>为正，或者“从你的角度来看是好事”，那么该账户应该是 Assets 或 Expenses 账户。如果金额通常为负，或者“从你的角度来看是坏事”，那么该账户应该是 Liabilities 或 Income 账户。</p>
+</blockquote>
+<p>基于这两个指标，你应该能够判断任何情况。让我们通过一些例子来演练：</p>
+<ul>
+<li>
+<p>一顿餐厅餐食代表你通过交换某些资产（现金）或负债（信用卡支付）而获得的东西。没有人关心“你出生以来所有食物的总和”是多少。只有<em>过渡性</em>的价值才重要：“我<em>这个月</em>在餐厅花了多少钱？”或者，<em>自年初以来</em>？或者，<em>在这次旅行期间</em>？这显然指向一个 Expenses 账户。但你可能会想……这是一个正数，但我花掉的钱？是的，你从中支出的那个账户被减去了（借方），以换取你<em>收到</em>的费用。把 Expenses 账户中的数字想象成你收到后立即消失于虚无中的东西。这些餐食被消耗了……然后它们去了某个地方。好吧，我们在这里停止这个类比。</p>
+</li>
+<li>
+<p>你持有一些债券股份，并收到一笔利息支付。这笔利息是存入 Assets 账户（例如，一个交易账户）的现金。另一条 posting 应该记入哪里？</p>
+</li>
+</ul>
+<h4 id="_6">处理不完整的数据源<a id="dealing-with-incomplete-sources"></a></h4>
+<p>如果用户试图尽可能多地填补他们的财务历史，就会出现缺口。在某些情况下，你可能只有一笔 transaction 的一半——例如，进行了一笔 IRA 缴款，但你不知道资金来自哪个银行账户，因为你没有追溯到那么远的银行记录。你是否应该用一个特殊的 Equity 账户来建模，以免扰乱资产负债表（就像使用 Assets:Unknown 那样）？我认为你可以这样做，或者你可以使用当时持有的银行账户，并相应地 pad 到该账户。</p>
+<h3 id="_7">选择起始日期<a id="choosing-opening-dates"></a></h3>
+<p>你需要定义的一些账户并不对应现实世界中的账户。<code>Expenses:Groceries</code> 账户代表自你开始记账以来所有杂货支出的总和。就我个人而言，我喜欢在这些账户上使用我的<em>出生日期</em>。这有其合理性：它汇总了你一生中所有花费在杂货上的钱，而这始于你来到这个世界的那一刻。</p>
+<p>你可以将这一逻辑应用于其他账户。例如，与某雇主相关的所有收入账户，其起始日期应设为你开始该工作的日期，结束日期应设为你离职的日期。这很合理。</p>
+<h2 id="_8">如何处理现金<a id="how-to-deal-with-cash"></a></h2>
+<p>让我们从现金开始。我通常在出生日期定义两个 account：</p>
+<pre><code>1973-04-27 open Assets:Cash
+1973-04-27 open Assets:ForeignCash
+</code></pre>
+<p>第一个 account 用于日常活跃使用，它代表我的钱包，通常只包含我运营货币的单位，即我通常视为“现金”的商品。对我来说，它们是 USD 和 CAD 商品。</p>
+<p>第二个 account 旨在存放我从世界各地旅行时塞在口袋里保留的所有纸币，这样它们就被放在其他 account 中，不会出现在我的现金余额中。当我去这些地方旅行时，我会将它们转移到主 account，例如，如果我回到日本，我会在旅行前将 JPY 从 Assets:ForeignCash 移动到 Assets:Cash，并在该期间使用它们。</p>
+<h3 id="_9">现金取款<a id="cash-withdrawals"></a></h3>
+<p>从支票账户到现金的 ATM 取款通常看起来像这样：</p>
+<pre><code>2014-06-28 * "DDA WITHDRAW 0609C"
+  Assets:CA:BofA:Checking                     -700.00 USD
+  Assets:Cash
+</code></pre>
+<p>你会在支票账户 transaction 下载中看到此 transaction 被导入。</p>
+<h3 id="_10">跟踪现金支出<a id="tracking-cash-expenses"></a></h3>
+<p>当你告诉别人你在跟踪所有财务 account 时，人们常犯的一个错误是认为你必须将每一笔无关紧要的小额现金 transaction 都记录到笔记本中。并非如此！记录（或不记录）这些现金 transaction 中的<em>多少</em>由你决定。</p>
+<p>就个人而言，我试图将更新我的 Ledger 所投入的手工工作量降到最低。我处理现金的规则如下：</p>
+<blockquote>
+<p><em>如果是用于食物或酒精，我不跟踪它。</em></p>
+<p><em>如果是用于其他东西，我保留收据并稍后录入。</em></p>
+</blockquote>
+<p>这对我有效，因为我绝大多数的现金支出倾向于食物（或者也许我只是通过用信用卡支付其他所有东西来造成这种情况）。只有少数收据在我的桌子上堆积几个月，我才费心将它们输入。</p>
+<p>然而，你需要偶尔对你的现金 account 进行调整，以计入这些支出。我实际上并不经常这样做……也许每三个月一次，当我想这样做的时候。我使用的方法是拍摄我钱包的快照（通过手动清点纸币），并输入相应的 balance assertion：</p>
+<pre><code>2014-05-12 balance Assets:Cash       234.13 USD
+</code></pre>
+<p>每次我这样做时，我也会添加一个现金分配以平衡 account：</p>
+<pre><code>2014-06-19 * "Cash distribution"
+  Expenses:Food:Restaurant           402.30 USD
+  Expenses:Food:Alcohol              100.00 USD
+  Assets:Cash                     ; -502.30 USD
+
+2014-06-20 balance Assets:Cash       194.34 USD
+</code></pre>
+<p>如果你想知道为什么现金 account 中的金额加起来不对（234.13 -502.30 ≠ 194.34），那是因为在这两个 assertion 之间，我通过对支票账户进行一些 ATM 取款向现金 account 添加了资金，这些出现在其他地方（在支票账户部分）。取款增加了现金 account 的余额。如果我渲染 <code>Assets:Cash</code> 的 journal，它就会出现。</p>
+<p>如果我将所有东西都记录到食物中，我本可以简化我的生活并使用 Pad directive——pad 条目不仅适用于 account 历史的开头，也适用于同一 account 上任意两个 balance assertion 之间——但我想将 80% 记录到食物，20% 记录到酒精，以更准确地代表我对现金的实际使用<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">1</a></sup>。</p>
+<p>最后，如果你发现两次这样做之间的时间间隔很长，你可能想通过手动添加多个现金分配<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">2</a></sup>来“分散”你的支出，这样如果你生成月度 report，大额现金支出就不会作为该月内或外的单一块出现。</p>
+<h2 id="_11">薪资收入<a id="salary-income"></a></h2>
+<p>记录你的薪资收入是一件令人愉悦的事：你将能够获取全年收入的汇总，以及各项扣款的详细去向。当你从雇主那里收到 W-2 表格（如果你位于加拿大，则是 T4 表格）时，看到 Beancount 报告中匹配的数字会给你带来满足感。</p>
+<p>我将与某雇主相关的所有条目放在一个独立的专用部分中。我首先通过设置一个事件来标记我开始在那里工作的日期，例如，使用虚构的公司“Hooli”（来自电视剧《硅谷》）：</p>
+<pre><code>2012-12-13 event "employer" "Hooli Inc."
+</code></pre>
+<p>这使我能够自动计算我在那里工作的天数。当我离职时，我会将其更改为新的雇主，或者如果我没有立即入职另一家公司，则更改为空字符串：</p>
+<pre><code>2019-03-02 event "employer" ""
+</code></pre>
+<p>本节将做出若干假设。其目的是向你展示可用于正确记录收入的各种思路。你几乎肯定需要根据你的具体情况对这些思路进行调整。</p>
+<h3 id="_12">就业收入账户<a id="employment-income-accounts"></a></h3>
+<p>然后，你需要为工资单定义账户。你必须确保为工资单上的每一行都设置一个对应的 account。例如，以下是我为 Hooli Inc. 的这份就业收入定义的一些收入账户：</p>
+<pre><code>2012-12-13 open Income:US:Hooli:Salary          USD ; "Regular Pay"
+2012-12-13 open Income:US:Hooli:ReferralBonus   USD ; "Referral bonuses"
+2012-12-13 open Income:US:Hooli:AnnualBonus     USD ; "Annual bonus"
+2012-12-13 open Income:US:Hooli:Match401k       USD ; "Employer 401k match"
+2012-12-13 open Income:US:Hooli:GroupTermLife   USD ; "Group Term Life"
+</code></pre>
+<p>这些账户分别对应常规工资、因员工推荐而获得的奖金、年度奖金、401k 的收款（在本例中，Hooli 会按一定比例匹配你存入退休账户的缴费）、人寿保险的收款（它既作为收入也作为支出出现），以及为你健身房订阅支付的费用。还有更多项目，但这已是一个很好的示例。（在本例中，我将工资单上使用的名称作为注释写下，但如果你愿意，也可以将它们作为 metadata 插入。）</p>
+<p>你需要将预扣的税款 booking 到该年度的相应账户中（有关此操作的详细信息，请参阅税务部分）：</p>
+<pre><code>2014-01-01 open Expenses:Taxes:TY2014:US:Medicare  USD
+2014-01-01 open Expenses:Taxes:TY2014:US:Federal   USD
+2014-01-01 open Expenses:Taxes:TY2014:US:StateNY   USD
+2014-01-01 open Expenses:Taxes:TY2014:US:CityNYC   USD
+2014-01-01 open Expenses:Taxes:TY2014:US:SDI       USD
+2014-01-01 open Expenses:Taxes:TY2014:US:SocSec    USD
+</code></pre>
+<p>这些账户用于记录 Medicare 税、联邦税、纽约州税和纽约市税（是的，纽约市居民在州税之上还有一项额外税收）、州残疾保险（SDI）缴费，以及最后，用于支付社会保障的税款。</p>
+<p>你还需要在其他地方定义一些账户，用于记录从工资中自动扣除的各种费用：</p>
+<pre><code>2012-12-13 open Expenses:Health:Life:GroupTermLife  USD ; "Life Ins."
+2012-12-13 open Expenses:Health:Dental:Insurance    USD ; "Dental"
+2012-12-13 open Expenses:Health:Medical:Insurance   USD ; "Medical"
+2012-12-13 open Expenses:Health:Vision:Insurance    USD ; "Vision"
+2012-12-13 open Expenses:Internet:Reimbursement     USD ; "Internet Reim"
+2012-12-13 open Expenses:Transportation:PreTax      USD ; "Transit PreTax"
+</code></pre>
+<p>这些账户对应于典型的公司团体计划人寿保险缴费、牙科、医疗和视力保险的保费、家庭互联网使用费的报销，以及公共交通的税前缴费（纽约市允许你通过雇主使用税前资金支付 MetroCard 费用）。</p>
+<p>注意：在构建账户结构时，我发现为每个纳税年度设置一个分组很有用，例如 <code>Expenses:Taxes:TY2014</code>。这样，与该纳税年度相关的持仓可以在任何日期发生（即在次年，当你支付这些税款或收到退税时）。然而，Expenses 不具备这种特性，因此使用不带“年份”的账户就足够了。有时你确实希望进行更细致的跟踪，例如收入，如 Income:US:Etrade:Interest，这允许你使用账户名称来筛选这些 transaction。归根结底，在使用这些数据时，我们希望筛选 posting，而账户名称是 posting 的有用属性之一（但你也可以使用其他属性，例如 transaction 的 payee）。</p>
+<h3 id="_13">记录工资入账 <a id="booking-salary-deposits"></a></h3>
+<p>然后，当我导入通过直接存款支付到我支票账户的详细信息时，它会看起来像这样：</p>
+<pre><code>2014-02-28 * "HOOLI INC       PAYROLL"
+  Assets:US:BofA:Checking               3364.67 USD
+</code></pre>
+<p>如果我还没有收到工资单，我可能会暂时将其 booking 到薪资账户，直到我收到为止：</p>
+<pre><code>2014-02-28 * "HOOLI INC       PAYROLL"
+  Assets:US:BofA:Checking               3364.67 USD
+  ! Income:US:Hooli:Salary
+</code></pre>
+<p>当我收到或获取工资单时，我会移除这一项并完成其余的 posting。一个总薪资为 140,000 美元的现实条目可能看起来像这样：</p>
+<pre><code>2014-02-28 * "HOOLI INC       PAYROLL"
+  Assets:US:BofA:Checking               3364.67 USD
+  Income:US:Hooli:GroupTermLife          -25.38 USD
+  Income:US:Hooli:Salary               -5384.62 USD
+  Expenses:Health:Dental:Insurance         2.88 USD
+  Expenses:Health:Life:GroupTermLife      25.38 USD
+  Expenses:Internet:Reimbursement        -34.65 USD
+  Expenses:Health:Medical:Insurance       36.33 USD
+  Expenses:Transportation:PreTax          56.00 USD
+  Expenses:Health:Vision:Insurance         0.69 USD
+  Expenses:Taxes:TY2014:US:Medicare       78.08 USD
+  Expenses:Taxes:TY2014:US:Federal      1135.91 USD
+  Expenses:Taxes:TY2014:US:CityNYC        75.03 USD
+  Expenses:Taxes:TY2014:US:SDI             1.20 USD
+  Expenses:Taxes:TY2014:US:StateNY       340.06 USD
+  Expenses:Taxes:TY2014:US:SocSec        328.42 USD
+</code></pre>
+<p>薪资支付与上一次完全没有任何变化是相当不寻常的：来自薪资处理系统的四舍五入通常会导致一分钱的差异，社会保障支付会达到其上限，而且不时会发生各种扣除，例如对收到的应税福利的扣除。此外，对 401k 的缴款会影响预扣税的金额。因此，你最终不得不单独查看每张工资单以正确输入其信息。但这并不像听起来那么耗时！这里有一个技巧：如果你在工资单上<em>以相同的顺序</em>列出你的 posting，更新你的 transaction 会容易得多。你只需复制粘贴上一个条目，从上到下阅读工资单并相应地调整数字。每个条目只需一分钟。</p>
+<p>值得注意的是上一个条目中的一些不寻常之处。“团体定期寿险”条目既有 25.38 美元的 income 部分，也有 expense 部分。这是因为 Hooli 支付了保费（工资单上正是这样写的）。Hooli 还报销部分家庭互联网费用，因为我用它来处理生产问题。这显示为一个<em>负数</em> posting，以减少我的 Expenses:Internet 账户的费用金额。</p>
+<h3 id="_14">休假时间<a id="vacation-hours"></a></h3>
+<p>我们的工资单还包含累计的休假时间以及休假总余额，单位为休假小时数。你也可以在同一笔 transaction 中跟踪这些金额。你需要声明相应的 account：</p>
+<pre><code>2012-12-13 open Income:US:Hooli:Vacation           VACHR
+2012-12-13 open Assets:US:Hooli:Vacation           VACHR
+2012-12-13 open Expenses:Vacation:Hooli            VACHR
+</code></pre>
+<p>累计的休假是你所获得的，因此被视为以“VACHR”为单位的 <em>Income</em>，并累积在一个 <em>Assets</em> account 中，该 account 记录你当前可用于“消费”作为休息时间的这些小时数。更新之前的薪资收入 transaction 条目：</p>
+<pre><code>2014-02-28 * "HOOLI INC       PAYROLL"
+  Assets:US:BofA:Checking               3364.67 USD
+  … 
+  Assets:US:Hooli:Vacation                 4.62 VACHR
+  Income:US:Hooli:Vacation                -4.62 VACHR
+</code></pre>
+<p>每两周一次的工资单上有 4.62 VACHR，一年 26 次，即 26 x 4.62 ~= 120 小时。按每天 8 小时计算，这相当于 15 个工作日，或 3 周，这是本例中新入职的美国 Hooli 员工的标准休假套餐。</p>
+<p>当你实际休假时，你针对累计的休假时间记录一笔 expense：</p>
+<pre><code>2014-06-17 * "Going to the beach today"
+  Assets:US:Hooli:Vacation     -8 VACHR
+  Expenses:Vacation:Hooli
+</code></pre>
+<p><em>Expenses</em> account 跟踪你已使用的休假量。你可以不时检查工资单上报告的余额——即雇主认为你剩余的休假量——是否与你所记录的相同：</p>
+<pre><code>2014-02-29 balance Assets:US:Hooli:Vacation   112.3400 VACHR
+</code></pre>
+<p>你可以为你的休假小时单位设定 price，使其对应你的时薪，这样你的休假 <em>Assets</em> account 就会显示如果你决定辞职，公司会支付给你多少钱。假设年薪为 140,000 美元，每周工作 40 小时，每年工作 50 周，即每年 2000 小时，我们得到 70 美元/小时的费率，你可以这样输入：</p>
+<pre><code>2012-12-13 price VACHR  70.00 USD
+</code></pre>
+<p>类似地，如果你的休假小时数会过期或达到上限，你可以计算出由于工作过多而放弃休假时间所损失的美元等值金额。你会将 <em>Assets</em> account 中的一部分 VACHR 注销到一个 income account（代表损失）中。</p>
+<h3 id="401k">401k 缴款<a id="k-contributions"></a></h3>
+<p>401k 计划允许您使用税前资金向递延纳税的退休账户进行缴款。这通过从您的工资中扣除来实现。为了记录这些缴款，您只需包含一个 posting，将相应的缴款金额记入您的退休账户：</p>
+<pre><code>2014-02-28 * "HOOLI INC       PAYROLL"
+  Assets:US:BofA:Checking               3364.67 USD
+  …
+  Assets:US:Vanguard:Cash               1000.00 USD
+  …
+</code></pre>
+<p>如果您正在核算您的可用缴款额度，您希望同时减少您的“401k 缴款” <em>Assets</em> 账户。您需要在该 transaction 中添加另外两个 posting：</p>
+<pre><code>2014-02-28 * "HOOLI INC       PAYROLL"
+  Assets:US:BofA:Checking                       3364.67 USD
+  …
+  Assets:US:Vanguard:Cash                       1000.00 USD
+  Assets:US:Federal:PreTax401k                 -1000.00 US401K
+  Expenses:Taxes:TY2014:US:Federal:PreTax401k   1000.00 US401K
+  …
+</code></pre>
+<p>如果您的雇主对您的缴款进行匹配，这可能不会显示在您的工资单上。因为这些缴款无需纳税——它们直接存入递延纳税账户——您的雇主无需将其包含在预扣预缴声明中。您会看到它们直接作为存款出现在您的 investment 账户中。您可以像这样将其 booking 到退休账户的税务余额中：</p>
+<pre><code>2013-03-16 * "BUYMF - MATCH"
+  Income:US:Hooli:Match401k           -1173.08 USD
+  Assets:US:Vanguard:Cash              1173.08 USD
+</code></pre>
+<p>然后，当您投资这笔现金时，插入第二个 transaction；或者，如果您已指定资产配置且由券商自动执行，则直接从缴款中购买资产：</p>
+<pre><code>2013-03-16 * "BUYMF - MATCH"
+  Income:US:Hooli:Match401k    -1173.08 USD
+  Assets:US:Vanguard:VMBPX       106.741 VMBPX {10.99 USD}
+</code></pre>
+<p>请注意，管理您 401k 账户的基金可能会将您的缴款和雇主的缴款分别记录在不同的类别中。您需要为此声明子账户并进行相应的更改：</p>
+<pre><code>2012-12-13 open Assets:US:Vanguard:PreTax401k:VMBPX  VMBPX
+2012-12-13 open Assets:US:Vanguard:Match401k:VMBPX   VMBPX
+</code></pre>
+<p>他们通常这样做是为了单独跟踪每个缴款来源，因为向其他账户进行 rollover 时存在若干依赖于此的约束条件。</p>
+<h3 id="_15">归属股票授予<a id="vesting-stock-grants"></a></h3>
+<p>有关此主题的更多详细信息，请参阅<a href="stock-vesting-in-beancount.html">专用文档</a>。</p>
+<h3 id="_16">其他福利<a id="other-benefits"></a></h3>
+<p>如果你想，可以尽情记录各种福利。这里有一些大胆的想法。</p>
+<h4 id="_17">积分<a id="points"></a></h4>
+<p>如果你的雇主提供现场赞助的按摩理疗项目，你很可能可以从工资中扣除费用来预约按摩，甚至通过公司内部网站（如果公司比较现代化的话）进行预约，并使用某种内部积分系统支付费用，例如“Hooli 积分”。你可以使用一种虚构的货币来追踪这些积分，例如“MASSA”，其价格可以设定为 0.50 USD，即你购买这些积分的价格：</p>
+<pre><code>2012-12-13 open Assets:US:Hooli:Massage    MASSA
+2012-12-13 price MASSA  0.50 USD
+</code></pre>
+<p>当我购买新的按摩积分时，我</p>
+<pre><code>2013-03-15 * "Buying points for future massages"
+  Liabilities:US:BofA:CreditCard    -45.00 USD
+  Assets:US:Hooli:Massage              90 MASSA {0.50 USD}
+</code></pre>
+<p>如果你偶尔会获得一些这些积分，并且可以追踪它们，你可以将其记录在一个 Income 账户中。</p>
+<h4 id="_18">餐饮福利<a id="food-benefits"></a></h4>
+<p>像许多大型科技公司一样，Hooli 很可能为其员工提供免费餐饮。这节省了时间，并鼓励人们健康饮食。这是目前科技界的一个趋势。这项福利不会出现在任何地方，但如果你想将其作为薪酬包的一部分进行估值，你可以使用一个 <em>Income</em> 账户来追踪它：</p>
+<pre><code>2012-12-13 open Income:US:Hooli:Food
+</code></pre>
+<p>根据你最终在工作的频率，你可以估算每月的餐饮补贴：</p>
+<pre><code>2013-06-30 * "Distribution for food eaten at Hooli"
+  Income:US:Hooli:Food      -350 USD
+  Expenses:Food:Restaurant
+</code></pre>
+<h2 id="_19">货币转账与兑换<a id="currency-transfers-conversions"></a></h2>
+<p>如果你在不同货币之间进行转换，例如在银行之间进行国际转账，你需要向 Beancount 提供汇率。它看起来像这样：</p>
+<pre><code>2014-03-03 * "Transfer from Swiss account"
+  Assets:CH:UBS:Checking       -9000.00 CHF
+  Assets:US:BofA:Checking      10000.00 USD @ 0.90 CHF
+</code></pre>
+<p>第二个 posting 的余额金额计算为 10,000.00 USD x 0.90 CHF/USD = 9,000 CHF，从而使 transaction 达到平衡。根据你的偏好，你也可以将汇率放在另一个 posting 上，如下所示：</p>
+<pre><code>2014-03-03 * "Transfer from Swiss account"
+  Assets:CH:UBS:Checking       -9000.00 CHF @ 1.11111 USD
+  Assets:US:BofA:Checking      10000.00 USD
+</code></pre>
+<p>第一个 posting 的余额金额计算为 -9000.00 CHF x 1.11111 USD/CHF = 10000.00 USD<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">3</a></sup>。通常，我会选择报告给我的汇率，并将其放在相应的一侧。你可能还希望使用外汇市场交易汇率的方向，例如，瑞士法郎以 USD/CHF 进行交易，因此我更喜欢第一个 transaction。价格数据库会在两个方向上转换汇率，因此这并不重要<sup id="fnref:5"><a class="footnote-ref" href="#fn:5">4</a></sup>。</p>
+<p>如果你使用电汇，这对于此类资金转账来说很常见，你可能会产生费用：</p>
+<pre><code>2014-03-03 * "Transfer from Swiss account"
+  Assets:CH:UBS:Checking       -9025.00 CHF
+  Assets:US:BofA:Checking      10000.00 USD @ 0.90 CHF
+  Expenses:Fees:Wires             25.00 CHF
+</code></pre>
+<p>如果你在旅游景点那些看起来不太正规的货币兑换处兑换现金，它可能看起来像这样：</p>
+<pre><code>2014-03-03 * "Changed some cash at the airport in Lausanne"
+  Assets:Cash             -400.00 USD @ 0.90 CHF
+  Assets:Cash              355.00 CHF
+  Expenses:Fees:Services     5.00 CHF
+</code></pre>
+<p>无论如何，你<em>永远</em>不应该使用 cost basis 语法来转换货币单位，因为在存入单位后，原始汇率需要被遗忘，而不是保留在简单的货币上。例如，以下用法是错误的：</p>
+<pre><code>2014-03-03 * "Transfer from Swiss account"
+  Assets:CH:UBS:Checking       -9000.00 CHF
+  Assets:US:BofA:Checking      10000.00 USD {0.90 CHF}  ; &lt;-bad!
+</code></pre>
+<p>如果你不小心这样做了，当你尝试使用新存入的 USD 时，你会遇到错误：Beancount 将要求你指定这些“USD”在 CHF 中的 cost，例如“从我以 0.90 USD/CHF 兑换的 USD 中借记”。在现实世界中没有人这样做，你在表示你的 transactions 时也不应该这样做：<em>一旦资金完成转换，它就只是另一种货币的资金，没有相关的 cost。</em></p>
+<p>最后，一个相当微妙的问题是，随着时间推移以不同汇率来回使用这些价格转换会在一定程度上破坏会计等式：汇率变动可能会凭空产生少量资金，并且所有余额最终不会加总为零。然而，这不是一个问题，因为 Beancount 实现了一个优雅的解决方案来自动纠正此问题，因此你可以自由地使用这些转换，而无需担心此问题：它会在资产负债表上插入一个特殊的 conversions 条目，以反转转换的累积效果，从而在 report 中获得干净的零余额。（关于 conversions 问题的讨论超出了本 cookbook 的范围；如果你想了解更多，请参阅 <a href="http://furius.ca/beancount/doc/conversions">解决 Conversions 问题</a>。）</p>
+<h2 id="_20">投资与交易 <a id="investing-and-trading"></a></h2>
+<p>跟踪交易及相关收益是一个相当复杂的话题。你可以在专门讨论此主题的文档<a href="trading-with-beancount.html">Trading with Beancount</a>中找到关于损益的更完整介绍以及各种场景的详细讨论。在这里，我们将讨论如何设置你的 account，并提供简单的示例 transaction 以帮助你入门。</p>
+<h3 id="_21">账户设置<a id="accounts-setup"></a></h3>
+<p>你应该创建一个 account 前缀，以根植于你的 investment 账户相关的各种子 account。假设你在 ETrade 有一个账户，这可以是“<code>Assets:US:ETrade</code>”。选择一个合适的机构名称。</p>
+<p>你的 investment 账户将包含现金部分。你应该创建一个专用的子 account 来表示未投资的现金存款：</p>
+<pre><code>2013-02-01 open Assets:US:ETrade:Cash     USD
+</code></pre>
+<p>我建议你为每种你将要投资的 commodity 类型进一步定义一个子 account。虽然这并非严格必要——Beancount 的 account 可以包含任意数量的 commodity——但这是将所有该 commodity 的持仓汇总在一起以便 report 的一种好方法。假设你将购买 LQD 和 BND 的股票，这是两种流行的债券 ETF：</p>
+<pre><code>2013-02-01 open Assets:US:ETrade:LQD      LQD
+2013-02-01 open Assets:US:ETrade:BND      BND
+</code></pre>
+<p>这也有助于生成更美观的 report：余额通常以 cost 显示，出于各种原因（即，每种 commodity 提供对不同 market 特征的风险敞口），按 commodity 汇总总 cost 是很好的。在机构内为每种持有的 commodity 使用专用的子 account 是做到这一点的好方法。除非你有具体的理由不这样做，我强烈建议默认坚持这种做法（你以后可以通过重命名 account 随时更改）。</p>
+<p>在你的 account 上指定 commodity 约束将有助于你检测数据输入错误。股票交易往往比常规 transaction 更复杂，这肯定会很有帮助。</p>
+<p>然后，你希望在这个账户中收到收入，形式有两种：资本利得，或“P&amp;L”，以及股息。我喜欢按机构来核算这些，因为这是报税时必须申报的方式。你可能还会收到利息收入。定义这些：</p>
+<pre><code>2013-02-01 open Income:US:ETrade:PnL          USD
+2013-02-01 open Income:US:ETrade:Dividends    USD
+2013-02-01 open Income:US:ETrade:Interest     USD
+</code></pre>
+<p>最后，为了核算 transaction 费用和佣金，你需要一些通用 account 来接收这些：</p>
+<pre><code>1973-04-27 open Expenses:Financial:Fees
+1973-04-27 open Expenses:Financial:Commissions
+</code></pre>
+<h3 id="_22">资金转账<a id="funds-transfers"></a></h3>
+<p>通常，您会通过从外部账户（例如支票账户）转账来向该账户添加一些初始资金：</p>
+<pre><code>2014-02-04 * "Transferring money for investing"
+  Assets:US:BofA:Checking        -2000.00 USD
+  Assets:US:ETrade:Cash           2000.00 USD
+</code></pre>
+<h3 id="_23">进行一笔交易<a id="making-a-trade"></a></h3>
+<p>购买股票时，应有一个 posting，将新商品存入该商品的子 account，并从现金 account 中借记相应金额加上佣金：</p>
+<pre><code>2014-02-16 * "Buying some LQD"
+  Assets:US:ETrade:LQD                 10 LQD {119.24 USD}
+  Assets:US:ETrade:Cash          -1199.35 USD
+  Expenses:Financial:Commissions     6.95 USD
+</code></pre>
+<p>请注意，当您购买某种商品的单位时，您正在该 account 的库存中建立一个新的 trade lot，因此必须提供每个单位的 cost（在本例中，LQD 每股 119.24 USD）。这使我们能够正确核算资本利得。</p>
+<p>卖出部分相同的股票操作类似，只是会额外增加一个 posting 来吸收资本利得或损失：</p>
+<pre><code>2014-02-16 * "Selling some LQD"
+  Assets:US:ETrade:LQD                 -5 LQD {119.24 USD} @ 123.40 USD
+  Assets:US:ETrade:Cash            610.05 USD
+  Expenses:Financial:Commissions     6.95 USD
+  Income:US:Etrade:PnL
+</code></pre>
+<p>请注意，从 <code>Assets:US:ETrade:LQD</code> account 中移除股份的 posting 是一个 lot <em>reduction</em>，您必须提供信息以识别您正在减少的是哪个 lot，在本例中，通过提供每股 119.24 USD 的 cost basis 来实现。</p>
+<p>我通常让 Beancount 为我计算资本利得或损失，这就是为什么我在最后一个 posting 中不指定它的原因。Beancount 会自动平衡该 transaction，将此 posting 的金额设置为 -20.80 USD，这代表 20.80 USD 的 <em>gain</em>（请记住，对于收入 account，符号是相反的）。指定 123.40 USD 的卖出价格是可选的，并且在平衡 transaction 时会被<em>忽略</em>，现金存入和佣金部分决定了利润。在这种情况下，收到的现金 + 佣金，以及所卖出部分的 cost basis，足以填充缺失的 P/L posting 金额。</p>
+<h3 id="_24">接收股息<a id="receiving-dividends"></a></h3>
+<p>接收股息有两种形式。首先，你可以以现金形式接收股息，这将进入现金账户：</p>
+<pre><code>2014-02-16 * "Dividends from LQD"
+  Income:US:ETrade:Dividends      -87.45 USD
+  Assets:US:ETrade:Cash            87.45 USD
+</code></pre>
+<p>请注意，此处未指定股息的来源。你可以使用 income account 的子账户来单独统计。</p>
+<p>或者，你可以接收再投资的股份形式的股息：</p>
+<pre><code>2014-06-27 * "Dividends reinvested"
+  Assets:US:Vanguard:VBMPX      1.77400 VBMPX {10.83 USD}
+  Income:US:Vanguard:Dividends   -19.21 USD
+</code></pre>
+<p>这与股票购买的 booking 方式类似，你也必须提供所接收单位的 cost basis。这种情况通常发生在非应税退休账户中。</p>
+<p>请参阅 <a href="trading-with-beancount.html">Trading with Beancount</a> 文档，以获取更深入的讨论以及更多更复杂的示例。</p>
+<h3 id="_25">选择日期<a id="choosing-a-date"></a></h3>
+<p>买入或卖出单一 lot 的股票通常涉及随时间推移发生的多个事件：交易下单、交易成交（通常在同一天）、交易结算。结算通常在交易成交后的 2 或 3 个工作日发生。</p>
+<p>为了简化，我建议将交易日期用作你的 transaction 的日期。在美国，这是税务上认可的日期，且结算对你的 account 没有影响（无论如何，经纪商通常不会允许你在没有相应现金或保证金的情况下进行交易）。因此，我通常不会费心为结算创建单独的条目，这并没有太大用处。</p>
+<p>可以设想更复杂的方案，例如，你可以将结算日期存储为元数据字段，然后在脚本中稍后使用它，但这超出了本文档的范围。</p>
+<h2 id="_26">结论<a id="conclusion"></a></h2>
+<p>本文档尚不完整。我还有许多计划在此添加的示例用例，随着它们的完成，我会逐步补充。一旦这些内容成形，我将在邮件列表上发布公告。特别是，以下主题将被讨论：</p>
+<ul>
+<li>
+<p>医疗保健费用，例如保险保费和返利</p>
+</li>
+<li>
+<p>税务</p>
+</li>
+<li>
+<p>IRA、401k 和其他递延纳税账户</p>
+</li>
+<li>
+<p>房地产</p>
+</li>
+<li>
+<p>期权</p>
+</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:2">
+<p>我正在考虑支持 Pad 指令的扩展版本，该版本可以接受百分比值，从而允许仅对全额的特定百分比进行 pad，以实现自动化。&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p>Beancount 的另一个扩展涉及支持在两个 balance assertion 之间使用多个 Pad 指令，并自动支持这种 padding 指令的分散处理。&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p>如果你担心平衡过程中的 precision 或舍入问题，请参阅<a href="precision-tolerances.html">本文档</a>。&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p>请注意，如果价格数据库需要反转日期，其计算结果可能是一个具有大量数字的价格。Beancount 使用 IEEE 十进制对象，而 Python 实现的默认上下文为 28 位数字，因此反转 0.9 将得到 1.111111….111，共 28 位数字。&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:1">
+<p>这并不总是严格成立的：在公司会计中，出于某些原因（通常是为了抵消同类型另一个账户的价值），某些账户类型会以相反的值持有。这些被称为“备抵”账户。但作为个人，你几乎不太可能拥有这类账户。如果你正在为公司设置账户表，Beancount 实际上并不关心余额是正号还是负号。你只需像普通账户一样声明备抵账户即可。&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

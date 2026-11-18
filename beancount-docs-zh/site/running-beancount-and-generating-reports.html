@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Running Beancount &amp; Generating Reports · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais，2014 年 7 月至 9 月">
+  <meta property="og:title" content="Running Beancount &amp; Generating Reports · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais，2014 年 7 月至 9 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">running-beancount-and-generating-reports</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 入门 / 安装 / 运行 <span class="count">5</span></div><ul>
+<li><a href="beancount-user-manual.html">Beancount User&#x27;s Manual</a></li>
+<li><a href="getting-started-with-beancount.html">Getting Started with Beancount</a></li>
+<li><a href="installing-beancount.html">Installing Beancount</a></li>
+<li><a href="installing-beancount-v3.html">Installing Beancount (C++ version)</a></li>
+<li class="active"><a href="running-beancount-and-generating-reports.html">Running Beancount &amp; Generating Reports</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#v2-v3">重要提示：本文档适用于 v2 分支中已弃用的工具。其中许多工具在 v3 及更高版本中已被删除。</a></li>
+<li><a href="#_1">简介</a></li>
+<li><a href="#_2">工具</a><ul>
+<li><a href="#bean-check">bean-check（校验）</a></li>
+<li><a href="#bean-report">bean-report（报表）</a></li>
+<li><a href="#bean-query">bean-query（查询）</a></li>
+<li><a href="#bean-webweb">bean-web（Web 界面）</a></li>
+<li><a href="#bean-bake">bean-bake（打包）</a></li>
+<li><a href="#bean-doctor">bean-doctor（诊断）</a></li>
+<li><a href="#bean-format">bean-format（格式化）</a></li>
+<li><a href="#bean-example">bean-example（示例账本）</a></li>
+</ul>
+</li>
+<li><a href="#_5">过滤交易</a></li>
+<li><a href="#_6">报表</a><ul>
+<li><a href="#_7">余额报告</a></li>
+<li><a href="#_8">日记账报表</a></li>
+<li><a href="#holdings">holdings 报表</a></li>
+<li><a href="#_12">其他报告类型</a></li>
+</ul>
+</li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-01" data-parent="index.html#group-01">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/running_beancount_and_generating_reports/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/running_beancount_and_generating_reports/</p>
+</blockquote>
+<h1 id="beancount-report">运行 Beancount 与生成 Report<a id="title"></a></h1>
+<p><a href="mailto:blais@furius.ca">Martin Blais</a>，2014 年 7 月至 9 月</p>
+<p><a href="http://furius.ca/beancount/doc/tools">http://furius.ca/beancount/doc/tools</a></p>
+<p><a href="#introduction">简介</a></p>
+<p><a href="#tools">工具</a></p>
+<blockquote>
+<p><a href="#bean-check">bean-check</a></p>
+<p><a href="#bean-report">bean-report</a></p>
+<p><a href="#bean-query">bean-query</a></p>
+<p><a href="#bean-web">bean-web</a></p>
+<p><a href="#global-pages">全局页面</a></p>
+<p><a href="#view-reports-pages">查看 Report 页面</a></p>
+<p><a href="#bean-bake">bean-bake</a></p>
+<p><a href="#bean-doctor">bean-doctor</a></p>
+<p><a href="#context">上下文</a></p>
+<p><a href="#bean-format">bean-format</a></p>
+<p><a href="#bean-example">bean-example</a></p>
+</blockquote>
+<p><a href="#filtering-transactions">过滤 Transaction</a></p>
+<p><a href="#reports">Report</a></p>
+<blockquote>
+<p><a href="#balance-reports">余额 Report</a></p>
+<p><a href="#trial-balance-balances">试算平衡表 (balances)</a></p>
+<p><a href="#balance-sheet-balsheet">资产负债表 (balsheet)</a></p>
+<p><a href="#opening-balances-openbal">期初余额 (openbal)</a></p>
+<p><a href="#income-statement-income">利润表 (income)</a></p>
+<p><a href="#journal-reports">日记账 Report</a></p>
+<p><a href="#journal-journal">日记账 (journal)</a></p>
+<p><a href="#rendering-at-cost">按 Cost 渲染</a></p>
+<p><a href="#adding-a-balance-column">添加余额列</a></p>
+<p><a href="#character-width">字符宽度</a></p>
+<p><a href="#precision">Precision</a></p>
+<p><a href="#compact-normal-or-verbose">紧凑、普通或详细</a></p>
+<p><a href="#summary">摘要</a></p>
+<p><a href="#equivalent-sql-query">等效 SQL 查询</a></p>
+<p><a href="#conversions-conversions">转换 (conversions)</a></p>
+<p><a href="#documents-documents">文档 (documents)</a></p>
+<p><a href="#holdings-reports">持仓 Report</a></p>
+<p><a href="#holdings-aggregations-holdings">持仓与聚合 (holdings*)</a></p>
+<p><a href="#net-worth-networth">净资产 (networth)</a></p>
+<p><a href="#other-report-types">其他 Report 类型</a></p>
+<p><a href="#cash">现金</a></p>
+<p><a href="#prices-prices">价格 (prices)</a></p>
+<p><a href="#statistics-stats">统计 (stats)</a></p>
+<p><a href="#update-activity-activity">更新活动 (activity)</a></p>
+</blockquote>
+<h2 id="v2-v3">重要提示：本文档适用于 v2 分支中已弃用的工具。其中许多工具在 v3 及更高版本中已被删除。 <a id="important-this-document-applies-to-tools-from-the-v2-branch-which-have-been-deprecated.-many-of-these-tools-have-been-deleted-for-v3-and-beyond."></a></h2>
+<h2 id="_1">简介<a id="introduction"></a></h2>
+<p>本文档介绍了用于处理 Beancount 输入文件的工具，以及从中生成的多种 report。该语言的语法在 <a href="beancount-language-syntax.html">Beancount 语言语法</a> 文档中有详细说明。本手册仅涵盖从命令行使用 Beancount 的技术细节。</p>
+<h2 id="_2">工具<a id="tools"></a></h2>
+<h3 id="bean-check">bean-check（校验） <a></a></h3>
+<p><strong>bean-check</strong> 是用于验证您的输入语法和 transaction 是否正确的程序。它所做的全部工作就是加载您的输入文件，并运行其中配置的各种插件，外加一些额外的验证检查。它会报告错误（如果有的话），然后退出。您需要在输入文件上运行它，例如：</p>
+<pre><code>bean-check /path/to/my/file.beancount
+</code></pre>
+<p>如果没有错误，则不应有任何输出，程序应安静地退出。如果存在错误，它们将连同文件名、行号和错误描述一起打印到 stderr（采用 Emacs 可理解的格式，因此如果您愿意，可以直接使用 <code>next-error</code> 和 <code>previous-error</code> 导航到该文件）：</p>
+<pre><code>/home/user/myledger.beancount:44381:   Transaction does not balance: 34.46 USD
+
+   2014-07-12 * "Black Iron Burger" ""
+     Expenses:Food:Restaurant               17.23 USD
+     Assets:Cash                            17.23 USD
+</code></pre>
+<p>在生成 report 之前，您应该始终修复所有错误。</p>
+<h3 id="bean-report">bean-report（报表） <a></a></h3>
+<p>这是用于将专用 report 以文本或其他多种格式提取到控制台的主要工具。调用方式如下：</p>
+<pre><code>bean-report /path/to/my/file.beancount &lt;report-name&gt;
+</code></pre>
+<p>例如：</p>
+<pre><code>bean-report /path/to/my/file.beancount balances
+</code></pre>
+<p>有许多可用的 report。请参阅 report 章节以了解主要 report 的说明。如果您想生成完整的 report 列表，可以请求帮助：</p>
+<pre><code>bean-report --help-reports
+</code></pre>
+<p>Report 名称有时可以接受参数。目前，参数作为 report 名称的一部分指定，通常用冒号 (:) 分隔，如下所示：</p>
+<pre><code>bean-report /path/to/my/file.beancount balances:Vanguard
+</code></pre>
+<p>有几个特殊的 report 您应该了解：</p>
+<ul>
+<li>
+<p>check 或 validate：这与运行 bean-check 命令相同。</p>
+</li>
+<li>
+<p>print：这仅打印出 Beancount 已解析的条目，使用 Beancount 语法。这可用于确认 Beancount 是否正确读取和解释了您的输入数据（如果您正在调试某些困难的问题）。</p>
+</li>
+</ul>
+<p>其他 report 则是您预期的那样：它们打印出各种金额聚合的表格。您可以生成的 report 在下方的专用章节中进行了描述。</p>
+<table><tbody><tr class="odd"><td><em><strong>请注意！</strong></em> 在发布时，从网页可用的 report 列表将与从控制台可用的列表不同。在未来的版本中，我将整合这两个列表，所有从网页可用的 report 也将可以从控制台使用，并且支持多种不同的格式。敬请期待。</td></tr></tbody></table>
+
+<h3 id="bean-query">bean-query（查询） <a></a></h3>
+<p>Beancount 解析后的 transaction 和 posting 列表就像一个内存数据库。<strong>bean-query</strong> 是一个命令行工具，它充当该内存数据库的客户端，你可以在其中输入 SQL 变体查询。调用方式如下：</p>
+<pre><code>bean-query /path/to/my/file.beancount
+Input file: "/path/to/my/file.beancount"
+Ready with 14212 directives (21284 postings in 8879 transactions).
+beancount&gt; _
+</code></pre>
+<p>更多详细信息请参见其<a href="beancount-query-language.html">独立文档</a>。</p>
+<h3 id="bean-webweb">bean-web（Web 界面） <a id="bean-web"></a></h3>
+<p><strong>bean-web</strong> 在运行于您计算机上的 web 服务器上提供所有 report。运行方式如下：</p>
+<pre><code>bean-web /path/to/my/file.beancount
+</code></pre>
+<p>它将在您机器的 8080 端口上提供所有页面。使用 web 浏览器导航至 <a href="http://localhost:8080">http://localhost:8080</a>。您应该能够轻松地点击浏览所有 report。</p>
+<p>该 web 界面提供一组全局页面，以及针对每个“view”的一组 report 页面。</p>
+<h4 id="_3">全局页面<a id="global-pages"></a></h4>
+<p>顶层目录页面在顶部提供了指向所有全局页面的链接：</p>
+<ul>
+<li>
+<p>目录（即您正在查看的页面）</p>
+</li>
+<li>
+<p>您的 ledger 文件中出现的错误列表</p>
+</li>
+<li>
+<p>您的 Ledger 文件的源代码视图（当其他链接引用您输入文件中的位置时，会使用此视图。）</p>
+</li>
+</ul>
+<p>目录提供了指向所有常见 view 的便捷链接列表，例如</p>
+<ul>
+<li>
+<p>“按年查看”，</p>
+</li>
+<li>
+<p>“按 tag 查看”，当然还有</p>
+</li>
+<li>
+<p>“查看所有 transaction。”</p>
+</li>
+</ul>
+<p>还有更多。</p>
+<h4 id="view-report">View Report 页面<a id="view-reports-pages"></a></h4>
+<p>当您点击一个 view report 页面时，您会进入针对该 view 的 transaction 子集的一组页面。可以从这里获取关于这些 transaction 的各种 report：</p>
+<ul>
+<li>
+<p>期初余额（view 开始时的资产负债表）</p>
+</li>
+<li>
+<p>资产负债表（view 结束时的资产负债表）</p>
+</li>
+<li>
+<p>利润表（针对 view 的期间）</p>
+</li>
+<li>
+<p>每个 account 的各种 journal（只需点击 account 名称）</p>
+</li>
+<li>
+<p>view 结束时持仓的各种 report</p>
+</li>
+<li>
+<p>包含在 view 条目中的文档和 price 列表</p>
+</li>
+<li>
+<p>关于 view 数据的一些统计信息</p>
+</li>
+</ul>
+<p>……以及更多内容。应该有一个所有可用 view report 的索引。</p>
+<h3 id="bean-bake">bean-bake（打包） <a></a></h3>
+<p><strong>bean-bake</strong> 会运行一个 <strong>bean-web</strong> 实例，并将所有页面烘焙（bake）到一个目录中：</p>
+<pre><code>bean-bake /path/to/my/file.beancount myfinances
+</code></pre>
+<p>它也支持直接烘焙到归档文件：</p>
+<pre><code>bean-bake /path/to/my/file.beancount myfinances.zip
+</code></pre>
+<p>支持多种压缩方式，例如 .tar.gz。</p>
+<p>这在需要与会计师或其他通常无法运行 Beancount 的人共享 web 界面时非常有用。页面链接已全部转换为相对链接，他们只需将归档文件解压到一个目录，即可像使用 <strong>bean-web</strong> 一样浏览所有 report。</p>
+<h3 id="bean-doctor">bean-doctor（诊断） <a></a></h3>
+<p>这是一个调试工具，用于执行各种诊断和运行调试命令，并帮助提供报告 bug 所需的信息。例如，它可以执行以下操作：</p>
+<ul>
+<li>
+<p>列出您机器上已安装的 Beancount 依赖项以及缺失的依赖项。它可以告诉您缺少哪些应该安装的组件。</p>
+</li>
+<li>
+<p>打印输入文件的解析器词法分析器（lexer）token 转储。如果您报告解析 bug，查看词法分析器输出可能很有用（如果您知道自己在做什么的话）。</p>
+</li>
+<li>
+<p>它可以对输入文件进行解析往返测试，即打印出文件并重新读取它，然后进行比较。这是一个有用的解析器和打印器测试。</p>
+</li>
+<li>
+<p>它可以检查目录层次结构是否与 Beancount 输入文件的账户表（chart-of-accounts）对应，并报告不合规的目录。如果您决定更改某些 account 名称，并且正在维护一个需要相应调整的文档归档，这将非常有用。</p>
+</li>
+</ul>
+<h4 id="_4">上下文 <a id="context"></a></h4>
+<p>它可以列出 transaction 应用时的上下文，即该 transaction 的 postings 所修改的每个 account 的库存余额，分别显示在应用之前和应用之后。请像这样使用它：</p>
+<pre><code>$ bean-doctor context /home/blais/accounting/blais.beancount 28514
+/home/blais/accounting/blais.beancount:28513:
+
+;   Assets:US:ETrade:BND             100.00 BND {81.968730000000 USD}
+;   Assets:US:ETrade:Cash           8143.97 USD
+
+2014-07-25 * "(TRD) BOT +50 BND @82.10" ^273755872
+ Assets:US:ETrade:BND                 50.00 BND {82.10 USD}  
+ Assets:US:ETrade:Cash             -4105.00 USD
+
+;   Assets:US:ETrade:BND                    100.00 BND {81.968730000000 USD}
+
+; ! Assets:US:ETrade:BND              50.00 BND {82.10 USD}
+; ! Assets:US:ETrade:Cash           4038.97 USD
+</code></pre>
+<p>有一个对应的 Emacs 绑定（C-c x）可以在光标周围调用此功能。</p>
+<h3 id="bean-format">bean-format（格式化） <a></a></h3>
+<p>这个纯文本处理工具会重新格式化 Beancount 输入，将所有数字右对齐到相同的最小列。它会将所有货币左对齐。它仅修改空白字符。该工具接受文件名作为参数，并将对齐后的文件输出到 stdout（类似于 UNIX <code>cat</code>）。</p>
+<h3 id="bean-example">bean-example（示例账本） <a></a></h3>
+<p>此程序生成一个示例 Beancount 输入文件。有关此示例文件内容的更多详细信息，请参阅<a href="tutorial-example.html">教程</a>。</p>
+<h2 id="_5">过滤交易<a id="filtering-transactions"></a></h2>
+<p>为了生成财务交易的不同视图，我们会从解析后的完整交易列表中选择一个子集，例如“2013 年发生的所有交易”，然后使用它来生成 Beancount 提供的各种可用 report。</p>
+<p>目前，Web 界面仅将预定义的过滤器列表作为“视图”提供。这些视图包括：</p>
+<ul>
+<li>所有 transaction</li>
+<li>在特定年份发生的 transaction</li>
+<li>带有特定 tag 的 transaction</li>
+<li>具有特定 payee 的 transaction</li>
+<li>涉及至少一个具有特定名称组件的 account 的 transaction</li>
+</ul>
+<p>目前，为了访问这些交易子集的 report，您需要使用 <strong>bean-web</strong> Web 界面，并在根全局页面中点击相关的关键词，这将使您进入该视图的一组 report。</p>
+<h2 id="_6">报表 <a id="reports"></a></h2>
+<p>将 transaction 录入到单一输入文件中的根本目的，在于允许你对数据的各个子集进行求和、过滤、聚合和整理，从而生成各种常见的 report。从 Beancount 生成 report 有三种不同的方式：使用 <strong>bean-web</strong> 浏览到某个视图，然后选择特定的 report（这是最简单的方式）；使用 <strong>bean-report</strong> 并提供所需 report 的名称（以及可能的 report 特定参数）；或者使用 <strong>bean-query</strong> 并通过指定 SQL 语句来请求数据。</p>
+<p>Report 有时可以渲染为不同的文件格式。每种 report 类型都支持渲染为一系列常见格式，例如控制台文本、HTML 和 CSV。有些 report 直接以 Beancount 语法本身进行渲染，我们将这种格式名称简单地称为“beancount”。</p>
+<p>目前可用的 report 类型有很多，未来还会有更多，因为路线图上的许多功能都涉及新的输出类型。本节概述了其中最常见的一些。使用 bean-report 可以查询你的安装版本所支持的完整列表：</p>
+<pre><code>bean-report --help-reports
+</code></pre>
+<table><tbody><tr class="odd"><td><em><strong>请注意！</strong></em> 目前，从 web 界面和从控制台可用的 report 集合是不同的，尽管存在一些重叠。在后续版本中，report 列表将得到统一，所有 report 都将通过 web 界面和控制台以多种数据格式（文本、CSV、HTML 以及可能的其他格式）提供。目前，我们将在下面的章节中分别记录这些内容。</td></tr></tbody></table>
+
+<h3 id="_7">余额报告<a id="balance-reports"></a></h3>
+<p>所有余额报告都类似，它们都会生成一组 account 及其关联余额的表格：<a href="http://furius.ca/beancount/examples/tutorial/balances.output">[output]</a></p>
+<pre><code>|-- Assets                               
+|   `-- US                               
+|       |-- BofA                         
+|       |   `-- Checking                       596.05 USD
+|       |-- ETrade                       
+|       |   |-- Cash                         5,120.50 USD
+|       |   |-- GLD                             70.00 GLD
+|       |   |-- ITOT                            17.00 ITOT
+|       |   |-- VEA                             36.00 VEA
+|       |   `-- VHT                            294.00 VHT
+|       |-- Federal                      
+|       |   `-- PreTax401k               
+|       |-- Hoogle                       
+|       |   `-- Vacation                       337.26 VACHR
+|       `-- Vanguard                     
+...
+</code></pre>
+<p>以“成本”持有的商品余额会按其账面价值显示。（未实现收益，如果存在，会通过一个可选插件作为单独的 transaction 插入，如果在与 cost basis 相同的 account 中渲染，结果金额会与 cost basis 混合在一起。）</p>
+<p>如果一个 account 的余额包含许多不同类型的货币（非“成本”持有的商品，例如美元、欧元、日元），每种货币都会单独打印在一行上。这可能会使余额列显得过于杂乱，并破坏 account 名称的垂直规律性。这在一定程度上是不可避免的妥协，但实际上，只有少数几种商品构成了用户账本的大多数：即本国的货币单位。因此，可以使用“<code>operating_currency</code>”选项将常用货币的金额拆分到单独的列中：</p>
+<pre><code>option "operating_currency" "USD"
+option "operating_currency" "CAD"
+</code></pre>
+<p>如果您拥有多种此类货币，可以多次使用此选项（例如，我就是一个例子，因为我是外籍人士，在居住国和祖国都持有资产）。声明运营货币还有一个优点，即无需渲染货币名称，因此更容易导入电子表格。</p>
+<p>最后，如果某些 account 尚未关闭，则被视为“活跃”。在过滤后的 transaction 集合中没有 transaction 的已关闭 account 将不会被渲染。</p>
+<h4 id="balances">试算平衡表 (<code>balances</code>)<a id="trial-balance-balances"></a></h4>
+<p><a href="http://en.wikipedia.org/wiki/Trial_balance">试算平衡表</a> 报告简单地生成所有活跃 account 的最终余额表格，所有 account 垂直渲染。</p>
+<p>所有余额的总和会在底部报告。与资产负债表不同，由于货币转换，它不一定总是平衡为零。（这相当于 Ledger 的 <code>bal</code> 报告。）</p>
+<p>等效的 bean-query 命令是：</p>
+<pre><code>SELECT account, sum(position) 
+GROUP BY account 
+ORDER BY account;
+</code></pre>
+<h4 id="balsheet">资产负债表 (<code>balsheet</code>)<a id="balance-sheet-balsheet"></a></h4>
+<p><a href="http://en.wikipedia.org/wiki/Balance_sheet">资产负债表</a> 是 Assets、Liabilities 和 Equity account 在特定时间点的余额快照。为了构建这样的报告，我们必须将其他 account 的余额转移到其中：</p>
+<ol>
+<li>
+<p>计算该时间点 Income 和 Expenses account 的余额，</p>
+</li>
+<li>
+<p>插入 transaction，通过将这些 account 的余额转移到 Equity account (<code>Equity:Earnings:Current</code>) 来将其余额清零，</p>
+</li>
+<li>
+<p>在左侧渲染 Assets account 余额的树状结构，</p>
+</li>
+<li>
+<p>在右侧渲染 Liabilities account 的树状结构，</p>
+</li>
+<li>
+<p>在 Liabilities account 下方渲染 Equity account 的树状结构。</p>
+</li>
+</ol>
+<p>请参阅<a href="the-double-entry-counting-method.html">介绍文档</a>查看示例。</p>
+<p>请注意，Equity account 包括从 Income 和 Expenses account 报告的金额，通常也称为“净利润”。</p>
+<p>此外，在实践中，我们进行<em>两次</em>转移，因为我们通常查看的是一个报告期间，并且我们希望区分在期间开始之前转移的净利润金额（<code>Equity:Earnings:Previous</code>）和期间本身转移的金额（<code>Equity:Earnings:Current</code>）。并且，为了处理货币转换，也会执行类似的成对转移（这是一个有点棘手的话题，但有一个很好的解决方案；如果您想要所有细节，请参阅<a href="http://furius.ca/beancount/doc/conversions">专用文档</a>）。</p>
+<p>等效的 bean-query 命令是：</p>
+<pre><code>SELECT account, sum(position) 
+FROM CLOSE ON 2016-01-01 
+GROUP BY account ORDER BY account;
+</code></pre>
+<h4 id="openbal">期初余额 (<code>openbal</code>)<a id="opening-balances-openbal"></a></h4>
+<p>期初余额报告只是在报告期间开始时绘制的资产负债表。此报告仅对于代表一段时间（例如“2014 年”）的过滤条目列表有意义。资产负债表仅使用在过滤 transaction 时合成的汇总条目生成（请参阅<a href="the-double-entry-counting-method.html">复式记账法文档</a>）。</p>
+<p>所有余额的总和会在底部报告。与资产负债表不同，由于货币转换的原因，它不一定总是平衡为零。（这相当于 Ledger 的 <code>bal</code> 报告。）</p>
+<p>等效的 bean-query 命令是：</p>
+<pre><code>SELECT account, sum(position) 
+GROUP BY account 
+ORDER BY account;
+</code></pre>
+<h4 id="balsheet_1">资产负债表 (<code>balsheet</code>)<a></a></h4>
+<p><a href="http://en.wikipedia.org/wiki/Balance_sheet">资产负债表</a> 是 Assets、Liabilities 和 Equity 账户在特定时间点的余额快照。为了构建这样的报告，我们必须将其他账户的余额转移到该报告中：</p>
+<ol>
+<li>
+<p>计算该时间点 Income 和 Expenses 账户的余额，</p>
+</li>
+<li>
+<p>插入 transaction，通过将这些账户的余额转移到 Equity 账户（<code>Equity:Earnings:Current</code>）来将其余额清零，</p>
+</li>
+<li>
+<p>在左侧渲染 Assets 账户余额的树状结构，</p>
+</li>
+<li>
+<p>在右侧渲染 Liabilities 账户的树状结构，</p>
+</li>
+<li>
+<p>在 Liabilities 账户下方渲染 Equity 账户的树状结构。</p>
+</li>
+</ol>
+<p>请参阅 <a href="the-double-entry-counting-method.html">入门文档</a> 以获取示例。</p>
+<p>请注意，Equity 账户包括从 Income 和 Expenses 账户报告的金额，这些金额通常也被称为“Net Income”。</p>
+<p>此外，在实践中，我们进行<em>两次</em>转移，因为我们通常查看的是一个报告期间，并且我们希望区分在期间开始之前转移的 Net Income 金额（<code>Equity:Earnings:Previous</code>）和在该期间内转移的金额（<code>Equity:Earnings:Current</code>）。为了处理货币转换，也会执行类似的成对转移（这是一个有点棘手的话题，但有一个很好的解决方案；如果您想要所有细节，请参阅 <a href="http://furius.ca/beancount/doc/conversions">专用文档</a>）。</p>
+<p>等效的 bean-query 命令是：</p>
+<pre><code>SELECT account, sum(position) 
+FROM CLOSE ON 2016-01-01 
+GROUP BY account ORDER BY account;
+</code></pre>
+<h4 id="openbal_1">期初余额 (<code>openbal</code>)<a></a></h4>
+<p>期初余额报告只是在报告期间开始时绘制的资产负债表。该报告仅对于代表一段时间（例如“2014 年”）的过滤条目列表有意义。资产负债表仅使用在过滤 transaction 时合成的汇总条目生成（请参阅 <a href="the-double-entry-counting-method.html">复式记账法文档</a>）。</p>
+<h4 id="income">利润表 (<code>income</code>)<a id="income-statement-income"></a></h4>
+<p><a href="http://en.wikipedia.org/wiki/Income_statement">利润表</a> 列出了 Income 和 Expenses 账户的最终余额。它代表了这些账户中临时活动的汇总。如果说资产负债表是特定时间点的快照，那么利润表则是一个期间（在我们的情况下：一组经过筛选的 transaction）开始与结束之间的差异。活跃的 Income 账户余额显示在左侧，活跃的 Expenses 账户余额显示在右侧。请参阅 <a href="the-double-entry-counting-method.html">入门文档</a> 以查看示例。</p>
+<p>Income 和 Expenses 余额的总和之差即为 Net Income。</p>
+<p>请注意，Income 和 Expenses 账户的初始余额应通过在该期间开始时发生的汇总 transaction 清零，因为我们只关心这些账户中的变化。</p>
+<h3 id="_8">日记账报表 <a id="journal-reports"></a></h3>
+<p>本节中的 report 以线性方式渲染 transaction 和其他 directive 的列表。</p>
+<h4 id="journal">日记账报表（<code>journal</code>）<a id="journal-journal"></a></h4>
+<p>此 report 相当于机构提供的“账户对账单”，即列出至少有一个 posting 在该 account 中的 transaction 列表。这相当于 Ledger 的 register report（<code>reg</code>）。</p>
+<p>你可以通过以下方式生成 journal report：</p>
+<pre><code>bean-report myfile.beancount journal …
+</code></pre>
+<p>默认情况下，这会渲染<em>所有</em> transaction 的 journal，这通常不是你所需要的。选择特定的 account 进行渲染，如下所示：</p>
+<pre><code>bean-report myfile.beancount journal -a Expenses:Restaurant
+</code></pre>
+<p>目前，“<code>-a</code>” 选项仅接受完整的 account 名称或其中一个父 account 的名称。最终我们将扩展它以处理表达式。</p>
+<h5 id="cost">按 cost 渲染 <a id="rendering-at-cost"></a></h5>
+<p>右侧的数字列显示所选 account 的 posting 带来的变化。请注意，仅渲染影响给定 account 的 posting 的余额。</p>
+<p>Change 列渲染受影响单位的变化。例如，如果选中此 posting：</p>
+<pre><code>  Assets:Investments:Apple      2 AAPL {402.00 USD}
+</code></pre>
+<p>报告的 change 值将为“<code>2 AAPL</code>”。如果你希望以 cost 渲染值，请使用“<code>--at-cost</code>”或“<code>-c</code>”选项，在这种情况下，它将渲染“<code>804.00 USD</code>”而不是前者。</p>
+<p>没有“market value”选项。未实现收益会自动由“<code>beancount.plugins.unrealized</code>”插件插入到历史记录末尾。请参阅该插件的选项以插入其未实现收益。</p>
+<p>请注意，如果所选 posting 的总和为零，change 列中不会渲染任何金额。</p>
+<h5 id="_9">增加余额列 <a id="adding-a-balance-column"></a></h5>
+<p>如果你想添加一列来汇总报告变化的 running balance，请使用“<code>--render-balance</code>”或“<code>-b</code>”选项。这并不总是有意义，因此是否想要 running balance 由你决定。</p>
+<h5 id="_10">字符宽度 <a id="character-width"></a></h5>
+<p>默认情况下，report 的宽度将尽可能宽，以适配你的终端。使用“-w”选项将宽度限制为特定字符数。</p>
+<h5 id="precision">precision <a></a></h5>
+<p>数字渲染的小数位数可以通过“<code>--precision</code>”或“<code>-k</code>”指定。</p>
+<h5 id="compact-normal-verbose">三种详略（compact / normal / verbose） <a id="compact-normal-or-verbose"></a></h5>
+<p>在正常操作下，Beancount 会在 transaction 之间渲染一个空行。这有助于区分涉及多种货币的 transaction，因为它们会渲染在不同的行上。如果你希望更紧凑的渲染，请使用“<code>--compact</code>”或“<code>-x</code>”选项。</p>
+<p>另一方面，如果你希望在 transaction 行下方渲染受影响的 posting，请使用“<code>--verbose</code>”或“<code>-X</code>”选项。</p>
+<h5 id="_11">摘要 <a id="summary"></a></h5>
+<p>以下是其参数的摘要：</p>
+<pre><code>optional arguments:
+  -h, --help            show this help message and exit
+  -a ACCOUNT, --account ACCOUNT
+                        Account to render
+  -w WIDTH, --width WIDTH
+                        The number of characters wide to render the report to
+  -k PRECISION, --precision PRECISION
+                        The number of digits to render after the period
+  -b, --render-balance, --balance
+                        If true, render a running balance
+  -c, --at-cost, --cost
+                        If true, render values at cost
+  -x, --compact         Rendering compactly
+  -X, --verbose         Rendering verbosely
+</code></pre>
+<h5 id="sql-query">等价 SQL query <a id="equivalent-sql-query"></a></h5>
+<p>等效的 bean-query 命令是：</p>
+<pre><code>SELECT date, flag, description, account, cost(position), cost(balance);
+</code></pre>
+<h4 id="conversions">换算（<code>conversions</code>） <a id="conversions-conversions"></a></h4>
+<p>此 report 列出了由所选 transaction 产生的货币转换总额。（大多数人不需要此功能。）</p>
+<h4 id="document-documents">document 报表（<code>documents</code>） <a id="documents-documents"></a></h4>
+<p>此 report 生成一个 HTML 列表，列出在账本中发现的所有外部文档，这些文档可能来自显式的 directive，也可能来自自动查找文档并将其添加到 transaction 流中的插件。</p>
+<h3 id="holdings">holdings 报表 <a id="holdings-reports"></a></h3>
+<p>这些 report 生成按 cost 持有的资产的聚合数据。</p>
+<h4 id="holdings-holdings">holdings 与聚合（<code>holdings*</code>） <a id="holdings-aggregations-holdings"></a></h4>
+<p>此 report 生成账本中所有持仓的详细列表。您可以使用 “-g” 选项按商品和 account 生成聚合数据。</p>
+<h4 id="networth">净资产（<code>networth</code>） <a id="net-worth-networth"></a></h4>
+<p>此 report 生成账本净资产（权益）的简短摘要，分别以每种运营货币表示。</p>
+<h3 id="_12">其他报告类型<a id="other-report-types"></a></h3>
+<h4 id="_13">现金<a id="cash"></a></h4>
+<p>此报告以非 cost 持有的商品（即现金）显示余额：</p>
+<pre><code>bean-report example.beancount cash -c USD
+
+Account                         Units  Currency  Cost Currency  Average Cost  Price  Book Value  Market Value
+
+--------------------------  ---------  --------  -------------  ------------  -----  ----------  ------------
+
+Assets:US:BofA:Checking        596.05       USD            USD                           596.05        596.05
+
+Assets:US:ETrade:Cash        5,120.50       USD            USD                         5,120.50      5,120.50
+
+Assets:US:Hoogle:Vacation      337.26     VACHR
+
+Assets:US:Vanguard:Cash         -0.02       USD            USD                            -0.02         -0.02
+
+Liabilities:US:Chase:Slate  -2,891.85       USD            USD                        -2,891.85     -2,891.85
+
+--------------------------  ---------  --------  -------------  ------------  -----  ----------  ------------
+</code></pre>
+<p>该报告允许将所有货币转换为一种通用货币（在上面的示例中，“将所有内容转换为 USD”）。还有一个选项仅报告运营货币。我使用此功能来获取所有未投资 cash 的概览。</p>
+<h4 id="prices">价格（<code>prices</code>）<a id="prices-prices"></a></h4>
+<p>此报告以报价货币表示基础货币的价格点列表。列表按日期排序。您也可以以 beancount 格式输出此表格。这便于将价格数据库保存到文件中，然后将其合并并加载到另一个输入文件中。</p>
+<h4 id="stats">统计信息（<code>stats</code>）<a id="statistics-stats"></a></h4>
+<p>此报告仅提供有关已解析条目的各种统计信息。</p>
+<h4 id="activity">更新活动（<code>activity</code>）<a id="update-activity-activity"></a></h4>
+<p>此表格为每个 account 显示最后一条条目的日期。</p>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

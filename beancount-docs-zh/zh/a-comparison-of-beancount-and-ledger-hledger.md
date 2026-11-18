@@ -1,0 +1,281 @@
+> 非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+> 原文：https://beancount.github.io/docs/a_comparison_of_beancount_and_ledger_hledger/
+
+# Beancount 与 Ledger 的比较<a id="title"></a>
+
+[Martin Blais](http://plus.google.com/+MartinBlais)，2014 年 9 月
+
+[http://furius.ca/beancount/doc/comparison](http://furius.ca/beancount/doc/comparison)
+
+*关于 Beancount 与 Ledger 及 HLedger 有何不同这一问题，曾在邮件列表和私人邮件中多次被提出。本文旨在突出这些系统之间的关键差异，因为它们在设计和实现上存在显著的不同。*
+
+*请注意，本文是从 Beancount 及其作者的角度撰写的，反映了我个人对于命令行会计系统设计应如何的有偏见的观点。我在此的目的并非贬低其他系统，而是为了突出实质性的差异，以帮助新手理解这些系统在操作和功能上的不同之处，并或许能激发与其他开发者之间关于设计选择的富有成效的讨论。*
+
+## 哲学差异<a id="philosophical-differences"></a>
+
+（参见[此讨论串](https://groups.google.com/d/msg/ledger-cli/B9qDXoSIJxQ/LVdzPkT6DAAJ)。）
+
+首先，Ledger 是乐观的。它假设用户输入正确数据是容易的。根据我在进行此类数据录入方面的经验，如果没有大量的自动化检查，是不可能做到正确的。例如，在未进行 balance assertion 的 account 上出现符号错误是非常常见的。相比之下，Beancount 是高度悲观的。它假设用户是不可靠的。它对输入施加了一系列约束。例如，如果你向一个空 account 添加了一份额为 $100 的 AAPL，它不会允许你从中移除一份额为 $101 的 AAPL；你根本就没有那一份额。它不假设用户有能力或应当被信赖以正确的顺序输入 transaction（使用基于日期的断言，而不是基于文件顺序的断言）。它可选地检查收益是否匹配 sale price（sellgains 插件）。它还允许你对你的 chart of accounts 施加额外的约束，例如，一个拒绝向非叶节点 account 添加 posting 的插件，或者拒绝每个 account 超过一种 commodity 的插件，或者要求你使用 Open directive 声明所有 account 的插件；你可以按需选择你的挑剔程度。它比复式记账法提供的自动化交叉检查更多。毕竟，交叉检查正是我们最初选择使用复式记账法的原因，为什么不在检查正确性方面做到极致呢？Beancount 应该吸引那些不太信任自己的人。并且由于这一点，它不提供对不平衡/虚拟 posting 的支持；这不是一个缺陷，而是有意为之。
+
+其次，存在设计理念上的差异。正如用户手册所示，Ledger 提供了无数的选项。这肯定会吸引许多人，但在我看来，它已经发展成为一个非常复杂的单体工具。这些选项如何交互以及许多选项的语义后果是令人困惑且非常微妙的。Beancount 提供了一种极简主义的方法：虽然有一些[少量选项](http://github.com/beancount/beancount/tree/v2/beancount/parser/options.py)，但它极力避免拥有这些选项。而那些确实影响 transaction 语义的选项总是出现在输入文件中（命令行上没有），并且与特定工具的选项区分开来。加载文件总是产生相同的 transaction 流，无论消费它们的 report 工具是什么。存在的唯一命令行选项是那些影响所调用 report 工具特定行为的选项；这些选项从不改变流本身的语义。
+
+第三，Beancount 在更深程度上拥抱流处理。其 loader 创建一个单一的有序 directive 列表，并且所有 directive 共享一些共同属性（名称、日期、元数据）。这就是所有数据。在 Ledger 中被视为“语法”的 directive 被定义为普通的 directive 对象，例如，“Open” 在 Beancount 中没有什么特别之处，本身也不做任何事情。它只是在一些应用约束（account 是否出现，之前是否见证过 Open directive？）或可能希望将每 account 元数据附加到它们的例程中使用。Price 也作为 directive 指定并嵌入在流中，并且可以以此方式生成。所有内部操作都定义为处理和输出 directive 流。这使得允许用户在处理管道中插入自己的代码，以对该 directive 流执行任意转换成为可能——任何事都是可能的，不受特定表达式语言语义的限制。这是一种机制，允许用户通过编写短的 Python 插件来构建新功能，该插件在 Beancount 的核心运行，而不是访问其边缘数据的 API。如果说有什么的话，Beancount 自身的内部处理将朝着做越来越少的工作并将所有工作转移到这些插件的方向发展，甚至可能发展到允许插件声明 directive 类型（Transaction 对象除外）。它正在演变为一个浅层驱动程序，只是组装一个处理管道以产生 directive 流，并附带一个方便的库和函数式操作。
+
+## 具体差异<a id="specific-differences"></a>
+
+### 库存记账与成本基础处理<a id="inventory-booking-cost-basis-treatment"></a>
+
+Beancount 对从跟踪账户内容的库存中减少持仓应用了严格规则。这意味着你只能从账户中取出你之前（在时间上）放入的东西，否则将生成错误。这一规则适用于“按成本持有”的单位（例如股票股份），以确保：
+
+-   成本基础永远不会从账户中泄漏，
+-   我们可以检测交易数据录入中的错误（这类错误非常常见），以及
+-   我们能够正确计算资本利得。
+
+相比之下，Ledger 不实施随时间推移的库存记账检查：所有 lot 只是简单地累积，而不考虑库存之前的内容（没有区分 lot 的添加与减少）。在 Beancount 中，库存内容的减少必须与具有指定成本基础的特定 lot 相匹配。
+
+在 Ledger 中，输出在这方面略显误导：为了简化报告输出，用户可以指定几种 lot 合并算法之一。默认情况下，会打印所有 lot 的单位总和，但通过使用这些选项，你可以告诉报告生成器考虑成本基础（它称之为“prices”）和/或 lot 创建的日期，在这种情况下，它将单独报告具有不同成本基础和/或日期的 lot 集合。你可以通过命令行选项选择发生哪种类型的合并，例如 --lot-dates。最重要的是，这意味着在 Ledger 中从账户中移除一个从未添加到该账户的 lot 是合法的。这导致了多头和空头 lot 的混合，无法准确代表账户中实际发生的变化。然而，它轻松地允许进行平均成本基础报告。
+
+我认为这不仅令人困惑，而且是对账户库存的[不正确](https://groups.google.com/d/msg/ledger-cli/zRSMle5AV3Q/gAK4EbwbgXsJ)处理，并认为这可能导致泄漏和错误计算。更多细节和示例[可在此处查看](a-proposal-for-an-improvement-on-inventory-booking.md)。此外，[直到最近](https://groups.google.com/d/msg/ledger-cli/A4-_OL3vvGE/Qn_4Qd5z9msJ)，Ledger 并未以正确计算资本利得的方式使用成本基础来平衡 posting。因此，我怀疑 Ledger 用户可能没有用它来计算并将其利得与经纪商报告的数值进行比较。
+
+为了使 Beancount 能够有意义地检测此类错误，并在减少 lot 时实施严格的匹配纪律，事实证明它需要应用的唯一约束是，不允许特定账户同时持有同一商品的多头和空头头寸。例如，它只需要强制规定你不能在同一库存中同时持有 1 GOOG 单位的 lot 和 -1 GOOG 单位的 lot（无论其获取成本如何）。对特定单位集合的任何减少都被检测为“lot reduction”，并寻找一个与减少 posting 的规格相匹配的 lot，通常，是寻找一个以与 posting 指定相同成本持有的 lot。在实践中，强制实施这一约束并不太令人担忧，因为没有你希望在同一账户中同时持有多头和空头头寸的情况，但如果你确实需要这样做，你可以简单地使用单独的账户来持有你的多头和空头头寸（反正已经建议你使用子账户来跟踪你在任何单一商品中的头寸，这会很自然）。
+
+最后，Beancount 正在实施[一项提案](a-proposal-for-an-improvement-on-inventory-booking.md)，这将显著扩展其库存记账的范围：语法将允许对 lot 减少进行宽松指定，使用户能够轻松编写没有歧义的 posting，同时支持以平均成本记账 lot，这在加拿大和全球所有税收递延账户中很常见。它还将提供一种新语法，用于同时指定每单位成本和总成本，这一功能将使正确[跟踪不含佣金的资本利得](trading-with-beancount.md)成为可能。
+
+### 货币转换<a id="currency-conversions"></a>
+
+Beancount 在简单的货币转换与以成本持有（即需要跟踪 cost basis）的商品转换之间做出了重要的语义区分。例如，将 20,000 USD 转换为 22,000 CAD 属于货币转换（例如在银行之间进行），在将生成的 CAD 单位插入目标 account 后，它们并不被视为“每个 CAD 成本为 1.1 USD 的 CAD”，而是简单地作为 account 中的 CAD 单位存在，不记录用于转换的汇率。这准确地模拟了现实世界的运作方式。另一方面，将 5,000 USD 转换为 10 股 GOOG 股票，每股 cost basis 为 500 USD，被视为与货币转换不同的操作：生成的 GOOG 单位附带特定的 cost basis，库存 lot 上保留了每单位价格的记忆（以及日期），并且对这类 lot 的减少应用了严格的规则（即前文提到的“booking”）。这用于计算和报告资本利得，最重要的是，它能检测数据录入中的*大量*错误。
+
+相比之下，Ledger [不区分这两种类型的转换](https://groups.google.com/d/msg/ledger-cli/zRSMle5AV3Q/kBCYjVEB-gsJ)。Ledger 将以成本持有的商品转换与货币转换以相同的方式处理。之所以这没有像直觉上那样引起那么多麻烦，是因为没有库存 booking——所有 lot 无论以何种转换汇率发生，都会累积在 account 中，具有正值或负值——而对于简单商品（例如货币，如美元），在不考虑每单位成本的情况下对总单位数进行净额计算即可得到正确答案。检查 account 库存 lot 的完整列表作为一个选项提供（参见 Ledger 的“--lot-dates”），并且不是渲染 account 余额的默认方式。我怀疑很少有用户使用此功能：如果你为过去发生过许多货币转换的真实世界 account 渲染 lot 列表，你会观察到大量无关的 lot。我认为货币转换的 cost basis 最好被省略。
+
+HLedger [不解析 cost basis 语法](https://groups.google.com/d/msg/hledger/ZB8pzWJGFy8/RziOVQ2XQ-QJ)，因此也不识别它。
+
+### 输入隔离<a id="isolation-of-inputs"></a>
+
+Beancount *仅*从您提供的文本文件中读取其全部输入。这种隔离是有意为之的设计。它不与外部数据格式或在线服务（例如用于获取历史价格数据的抓取器）建立任何关联。获取和转换外部数据是一项足够独立的任务，我认为它应该由独立的项目来处理。这些问题领域也可以非常清晰且自然地划分开来：Beancount 提供了一个隔离的核心，允许您摄取所有 transaction 数据，并从中生成各种聚合的 report；其语法是连接外部 transaction 存储库或 price 数据库的枢纽。通过这种方式，它将自己与外部数据源的丑陋细节隔离开来。
+
+包含 transaction 信息的可下载文件的外部格式种类繁多，无法全部覆盖。您从大多数机构获取的数据文件以各种格式提供：OFX、Quicken、XLS 或 CSV，查看其内容后，显而易见的是，编写输出这些代码的程序员并未过多关注细节或其格式的标准定义；这相当令人头疼。这些文件几乎总是非常杂乱，而且随着这些文件的演变，其杂乱程度也会随时间变化。
+
+获取历史或当前 price 信息同样是一项令人烦恼的任务。虽然 Yahoo 和 Google Finance 能够为美国交易所的常见股票提供一定程度的基本 price 数据，但当您需要获取在外国交易所交易的工具，或通常不在交易所交易的工具（如共同基金）的信息时，要么数据不可用，要么如果可用，您需要弄清楚他们决定将其映射到哪个 ticker 符号，这方面几乎没有标准。您必须手动签署 ticker。最后，完全有可能您想要管理那些没有现有外部 price 来源的工具，因此您的记账软件必须提供一种机制，使您可以手动输入 price 值（Beancount 和 Ledger 都提供了这种方式）。相同的声明机制也用于缓存历史 price 数据，因此 Beancount 完全不需要网络。
+
+大多数用户希望编写自己的导入脚本，但也存在一些库：[beancount.ingest](http://github.com/beancount/beancount/tree/v2/beancount/ingest) 库（位于 Beancount 内部）提供了一个框架，用于自动化识别、从各种机构的可下载文件中提取 transaction 以及归档文件。有关详细信息，请参阅其 [设计文档](http://furius.ca/ledgerhub/doc/design-doc)。
+
+相比之下，Ledger 和 HLedger 支持 [从 CSV 文件进行基本的 transaction 转换](http://ledger-cli.org/3.0/doc/ledger3.html#Converting-from-other-formats) 以及 [自动获取当前 price](http://ledger-cli.org/3.0/doc/ledger3.html#Commodity-reporting)，后者使用您应该提供的外部脚本（`getquote`）。如果您要跟踪所有账户，CSV 导入对于实际使用来说远远不够，因此需要对其进行扩展。挂钩外部脚本是正确的做法，但 Beancount 倾向于对此问题采取强硬立场，而不是提供会触发任何类型网络访问或支持任何外部格式作为输入的代码。在 Beancount 中，您应该自行集成 price 更新，也许通过您自己的脚本，并可能通过 include 文件引入数据。（但如果您不喜欢这种方式，您也可以编写自己的插件模块来获取实时 price。）
+
+### 语言语法<a id="language-syntax"></a>
+
+Beancount 的语法比 Ledger 的更简单，且限制也严格得多。在 2.0 版本中，Beancount 的语法经过重新设计，以便能够通过文法轻松地向 parser generator 进行规范说明。为了消除 tokenization 的歧义，token 被简化了。例如：
+
+-   货币代码必须完全使用大写字母（允许包含数字和某些特殊字符，如 “\_” 或 “-”）。不支持货币符号（如 $ 或 €）。（另一方面，在 Ledger 中，包含数字的货币代码需要加引号。）
+
+-   账户名称不允许包含空格（尽管可以使用连字符），且必须至少包含两个由冒号分隔的组件。
+
+-   描述字符串必须加引号，例如：“AMEX PMNT”。不再支持将自由文本作为字符串。
+
+-   日期仅从 ISO8601 格式解析，即 “YYYY-MM-DD”。
+
+-   标签必须以 “\#” 开头，链接必须以 “^” 开头。
+
+-   除了 tag stack 之外，所有上下文信息均已被移除。例如，没有账户别名，也没有 Ledger 中 “apply” 的概念（参见 “apply root” 和 “apply tag”）。这要求输入更加冗长——必须使用完整的账户名称——因此假设你在编辑器中已配置了账户名称自动补全功能。
+
+作为副作用，这些更改使得输入语法看起来更像一种编程语言。这些限制可能会让一些用户感到不便，但总体而言，它们简化了解析 ledger 内容的任务，而这种简洁性将为人们更容易地用其他语言编写 parser 铺平道路。（在解析缩进方面仍存在一些细微之处，缩进在语法中是有意义的，但通过构建自定义 lexer，在所有上下文中都应能轻松解决。）
+
+由于其语法更宽松且对用户更友好，Ledger 使用自定义 parser。如果你需要从其他语言解析其内容，最佳方法可能是创建对其源代码的绑定，或者使用它来将 ledger 内容导出为 XML，然后解析该 XML（这种方法效果很好）。我推测在 Ledger 的下一个版本中，解析方法可能会被重新审视，因为使用 parser generator 对于实验来说是一种解放。
+
+### 顺序无关性<a id="order-independence"></a>
+
+Beancount 保证输入文件中 directive 的顺序与其计算结果无关。您应该能够按照最方便的方式组织输入文件并重新排列任何声明，而无需担心软件将如何执行计算。即使是声明 account 的 directive（“Open”）也不需要在文件中该 account 被使用之前出现。所有 directive 都会被解析，然后在任何计算或验证发生之前基本上进行稳定排序。这也使得包含多个文件变得非常简单（如果您愿意，只需将文件拼接在一起即可）。
+
+相比之下，Ledger 在解析输入文件时处理其 posting 上的金额。就实现而言，这种方法的优点在于只需一次遍历即可检查所有断言和 balance assertion，而在 Beancount 中，需要对整个 directive 列表进行多次遍历（不过，这在 Beancount 中并不是一个大问题，因为即使是现实数量级的 transaction 对于我们的计算机来说也相当温和；Beancount 的大部分处理时间都花在解析和数值计算上）。
+
+Ledger 计算方法的一个不幸副作用是，用户必须注意 transaction 在文件中出现的顺序。在编辑非常大的输入文件时，这可能具有欺骗性且难以理解。这种差异在[balance assertion 中尤为明显](https://groups.google.com/forum/#!topic/ledger-cli/vwkrPh74NFI)。Ledger 的 balance assertion 附加在 transaction directive 的 posting 上，并按文件顺序计算（我将这些称为“文件断言”）。Beancount 的 balance assertion 是独立的 directive，无论其在文件中的位置如何，都会在其声明日期的开始时应用（将这些称为“日期断言”）。我认为日期断言更实用且不易出错，因为它们不依赖于声明的顺序。另一方面，Ledger 风格的文件断言自然地支持对日内余额进行 balance assertion，而无需在 transaction 上指定时间，这是日期断言无法做到的。
+
+因此，已经[撰写了一份提案](balance-assertions-in-beancount.md)，考虑在 Beancount 中实现文件断言（作为其日期断言的补充）。这可能会作为一个 plugin 来实现。Ledger 不支持日期断言。
+
+### 账户类型<a id="account-types"></a>
+
+Beancount 账户必须具有五种类别之一的特定类型：Assets、Liabilities、Income、Expenses 和 Equity。Ledger 账户不受此限制，您可以定义任何根账户，且没有要求将账户标识为属于这些类别之一。这反映了 Ledger 更为宽松的方法：其设计旨在成为适用于任何需求的更通用的“计算器”。系统不强制或不使用任何账户类型。
+
+根据我的经验，我从未遇到无法将我的某个账户归类到这些类别之一的情况。对于更奇特的商品，例如“允许存入 IRA 的美元”，可能需要一点想象力来理解哪个账户适合哪个类别，但其中存在逻辑：如果账户具有我们关心的*绝对*值，那么它是 Assets 或 Liabilities 账户；如果我们只关心*过渡*值，或在一段时间内累积的值，那么它应该是 Income 或 Expenses 账户。如果符号为正，则它应该是 Assets 或 Expenses 账户；反之，如果符号为负，则它应该是 Liabilities 或 Income 账户。Equity 账户几乎从不被显式使用，而是由 Beancount 本身定义和使用，以将期初余额、留存收益和净利润转移到特定报告期间（您选择的任何期间）的资产负债表 report 中。这一原则使得确定账户应具有哪种类型变得容易。我拥有 2008 年至 2014 年的数据，并且能够使用这五个类别来表示我*所有*想要记录的内容。此外，我认为要求用户以这种方式对其账户进行分类在任何方面都不具有限制性；它只需要一点前瞻性。
+
+要求这些账户类型的原因在于，它允许我们基于其类型执行逻辑。我们可以隔离 Income 和 Expenses 账户，并推导出损益表和单一的净利润值。然后，我们可以将留存收益（考虑期间之前的收入）和净利润（期间内的收入）转移到 Equity 账户，并编制资产负债表。我们可以生成持仓列表，自动排除收入和支出，以计算净资产、每个账户的价值等。此外，我们可以使用账户类型来识别一组账户的外部 cash flow，并以可与目标配置的 market return 进行比较的方式计算这些账户的正确投资回报（注意：尚未集成，但已进行原型设计和规范制定，它是可行的）。归根结底，拥有账户类型是一个有用的属性，因此我们强制要求您为每个账户选择一个类型。
+
+缺乏账户类型可能也是 Ledger 不提供资产负债表或损益表 report，而只提供试算平衡表的原因。其优势是表面上更宽松和更宽容的命名结构。但也要注意，要求类型本身并不会导致两个系统之间的任何计算差异，您仍然可以在这些账户中累积任何您想要的“豆子”，其通用性并不逊色。类型只是 Beancount 的 report 所使用的额外信息。
+
+### 语言语法<a id="language-syntax"></a>
+
+Beancount 的语法比 Ledger 的更简单，且限制也严格得多。在 2.0 版本中，Beancount 的语法经过重新设计，以便能够通过文法轻松地向 parser generator 进行规范说明。为了消除 tokenization 的歧义，token 被简化了。例如：
+
+-   货币代码必须完全使用大写字母（允许包含数字和某些特殊字符，如 “\_” 或 “-”）。不支持货币符号（如 $ 或 €）。（另一方面，在 Ledger 中，包含数字的货币代码需要加引号。）
+
+-   账户名称不允许包含空格（尽管可以使用连字符），且必须至少包含两个由冒号分隔的组件。
+
+-   描述字符串必须加引号，例如：“AMEX PMNT”。不再支持将自由文本作为字符串。
+
+-   日期仅从 ISO8601 格式解析，即 “YYYY-MM-DD”。
+
+-   标签必须以 “\#” 开头，链接必须以 “^” 开头。
+
+-   除了 tag stack 之外，所有上下文信息均已被移除。例如，没有账户别名，也没有 Ledger 中 “apply” 的概念（参见 “apply root” 和 “apply tag”）。这要求输入更加冗长——必须使用完整的账户名称——因此假设你在编辑器中已配置了账户名称自动补全功能。
+
+作为副作用，这些更改使得输入语法看起来更像一种编程语言。这些限制可能会让一些用户感到不便，但总体而言，它们简化了解析 ledger 内容的任务，而这种简洁性将为人们更容易地用其他语言编写 parser 铺平道路。（在解析缩进方面仍存在一些细微之处，缩进在语法中是有意义的，但通过构建自定义 lexer，在所有上下文中都应能轻松解决。）
+
+由于其语法更宽松且对用户更友好，Ledger 使用自定义 parser。如果你需要从其他语言解析其内容，最佳方法可能是创建对其源代码的绑定，或者使用它来将 ledger 内容导出为 XML，然后解析该 XML（这种方法效果很好）。我推测在 Ledger 的下一个版本中，解析方法可能会被重新审视，因为使用 parser generator 对于实验来说是一种解放。
+
+### 顺序无关性<a id="order-independence"></a>
+
+Beancount 保证输入文件中 directive 的顺序与其计算结果无关。您应该能够按照最方便的方式组织输入文件并重新排列任何声明，而无需担心软件将如何执行计算。即使是声明 account 的 directive（“Open”）也不需要在文件中该 account 被使用之前出现。所有 directive 都会被解析，然后在任何计算或验证发生之前基本上进行稳定排序。这也使得包含多个文件变得非常简单（如果您愿意，只需将文件拼接在一起即可）。
+
+相比之下，Ledger 在解析输入文件时处理其 posting 上的金额。就实现而言，这种方法的优点在于只需一次遍历即可检查所有断言和 balance assertion，而在 Beancount 中，需要对整个 directive 列表进行多次遍历（不过，这在 Beancount 中并不是一个大问题，因为即使是现实数量级的 transaction 对于我们的计算机来说也相当温和；Beancount 的大部分处理时间都花在解析和数值计算上）。
+
+Ledger 计算方法的一个不幸副作用是，用户必须注意 transaction 在文件中出现的顺序。在编辑非常大的输入文件时，这可能具有欺骗性且难以理解。这种差异在[balance assertion 中尤为明显](https://groups.google.com/forum/#!topic/ledger-cli/vwkrPh74NFI)。Ledger 的 balance assertion 附加在 transaction directive 的 posting 上，并按文件顺序计算（我将这些称为“文件断言”）。Beancount 的 balance assertion 是独立的 directive，无论其在文件中的位置如何，都会在其声明日期的开始时应用（将这些称为“日期断言”）。我认为日期断言更实用且不易出错，因为它们不依赖于声明的顺序。另一方面，Ledger 风格的文件断言自然地支持对日内余额进行 balance assertion，而无需在 transaction 上指定时间，这是日期断言无法做到的。
+
+因此，已经[撰写了一份提案](balance-assertions-in-beancount.md)，考虑在 Beancount 中实现文件断言（作为其日期断言的补充）。这可能会作为一个 plugin 来实现。Ledger 不支持日期断言。
+
+### 账户类型<a id="account-types"></a>
+
+Beancount 账户必须具有五种类别之一的特定类型：Assets、Liabilities、Income、Expenses 和 Equity。Ledger 账户不受此限制，您可以定义任何根账户，且没有要求将账户标识为属于这些类别之一。这反映了 Ledger 更为宽松的方法：其设计旨在成为您想要的任何事物的更通用的“计算器”。系统不强制使用或应用任何账户类型。
+
+根据我的经验，我没有遇到过无法将我的某个账户归类到这些类别之一的情况。对于更奇特的商品，例如“允许存入 IRA 的美元”，理解哪个账户适合哪个类别可能需要一点想象力，但其中是有逻辑的：如果账户具有我们关心的*绝对*值，那么它是 Assets 或 Liabilities 账户；如果我们只关心*过渡*值，或在一段时间内累积的值，那么它应该是 Income 或 Expenses 账户。如果符号为正，则它应该是 Assets 或 Expenses 账户；反之，如果符号为负，则它应该是 Liabilities 或 Income 账户。Equity 账户几乎从不被显式使用，而是由 Beancount 本身定义和使用，以将期初余额、留存收益和净利润转移到特定报告期间（您选择的任何期间）的资产负债表 report 中。这一原则使得确定账户应具有哪种类型变得容易。我拥有 2008 年至 2014 年的数据，并且能够使用这五个类别来表示我*曾经*想要表示的*所有*内容。此外，我认为要求用户以这种方式对其账户进行分类在任何方面都不具有限制性；它只需要一点远见。
+
+要求这些账户类型的原因是，它允许我们基于其类型执行逻辑。我们可以隔离 Income 和 Expenses 账户，并推导出损益表和单一的净利润值。然后，我们可以将留存收益（考虑期间之前的收入）和净利润（期间内的收入）转移到 Equity 账户，并编制资产负债表。我们可以生成持仓列表，自动排除收入和支出，以计算净资产、每个账户的价值等。此外，我们可以使用账户类型来识别一组账户的外部 cash flow，并以可与目标配置的 market return 进行比较的方式计算这些账户的正确投资回报（注意：尚未集成，但已进行原型设计和规范制定，它是可行的）。归根结底，拥有账户类型是一个有用的属性，因此我们强制要求您为每个账户选择一个类型。
+
+账户类型的缺失可能也是 Ledger 不提供资产负债表或损益表报告，而仅提供试算平衡表的原因。其优势在于命名结构看似更宽松、更灵活。但请注意，要求指定类型本身并不会导致两个系统在计算上产生任何差异，你仍然可以在这些账户中累积任何类型的“豆子”（即交易记录），其通用性丝毫不减。类型只是 Beancount 报告功能所利用的额外信息。
+
+### 交易必须平衡<a id="transactions-must-balance"></a>
+
+Beancount 中的 transaction 必须平衡，没有例外。我在这方面不做任何妥协，没有变通方法。这样做的优点是，任何 transaction 子集的 posting 余额之和始终精确为 *零*（并且我会对此进行检查）。
+
+Ledger 允许用户使用两种特殊类型的 posting：
+
+-   [虚拟 posting](http://ledger-cli.org/3.0/doc/ledger3.html#Virtual-postings)：这些 posting 用括号输入，并且*不*计入 transaction 余额的总和，你可以在其中填入任何值而不会导致错误。
+
+-   [平衡虚拟 posting](http://ledger-cli.org/3.0/doc/ledger3.html#Working-with-multiple-funds-and-accounts)：这些 posting 用方括号输入。它们的限制更严格：方括号内的 posting 集合必须自身平衡。
+
+第二种情况可以证明等价于两个 transaction：一个包含常规 posting 集合的 transaction，以及一个仅包含平衡虚拟 posting 的独立 transaction（这不会造成问题）。第一种情况是有问题的：在尝试解决会计问题时，初学者通常会将其作为逃避手段，而不是用复式记账法来建模他们的问题。显然，大多数采用命令行会计系统的人是计算机科学家，而不是会计专业人士，而且随着我们都在学习如何创建我们的 account 结构并填充我们的账本，我们都在犯错。很多时候，解决这些问题确实并不明显；它只需要经验。
+
+但事实是，在 8 年的使用过程中，我没有遇到任何真正需要虚拟 posting 的情况。Beancount 的第一版曾经支持虚拟 posting，但我已经设法随着时间的推移移除了所有支持。我总是能够想出更好的一组 account，或者使用一种虚拟货币来追踪我需要追踪的任何内容。并且这总是导致一个更好的解决方案，带有意外且有时优雅的副作用。
+
+但这类系统必须易于使用，那么我们该如何解决这个问题呢？邮件列表是一个很好的起点，你可以在那里提问，人们会分享他们如何解决类似问题的信息（实际上，纯粹的“会计问题”并不多）。我目前正在将所有我提出的、用于解决自身会计问题的解决方案记录在 [Beancount Cookbook](command-line-accounting-cookbook.md) 中，基本上涵盖了我迄今为止学到的所有内容；这是一项正在进行的工作。我希望这份不断演进的文档能成为一份有用的参考资料，引导他人找到符合复式记账框架的解决方案，并提供充足的示例作为模板，供他人复制并适配自己的数据。
+
+用 Ledger 作者的话说：
+
+“如果人们不想使用它们 [virtual accounts]，那也没关系。但 Ledger 不是一个会计工具；它是一个可用于进行会计工作的工具。因此，我认为 virtual accounts 扮演着一个角色，那些没有会计问题的人可能希望填补这一角色。”
+
+我恭敬地表示不同意。因此，Beancount 采取了更为激进的立场，明确避免支持 virtual postings。如果你强烈认为你需要它们，你应该使用 Ledger。
+
+### 数字与运算精度<a id="numbers-and-precision-of-operations"></a>
+
+Beancount、Ledger 和 HLedger 在内部如何表示数字，以及如何处理 transaction 的 posting 余额检查精度方面，均存在差异。
+
+首先，关于数字的表示方式：Ledger [使用有理数](http://www.ledger-cli.org/3.0/doc/ledger3.html#Internal-Design)，试图保持数学运算结果数字的完整精度。这种做法是可行的，但 [我认为这可能并非最合适的选择](https://groups.google.com/d/msg/ledger-cli/m-TgILbfrwA/YjkmOM3LHXIJ)。绝大多数发生运算的场景，都涉及将单位数量和 price 或 cost 转换为账户 posted 变化的总价值（例如，units x cost = total cost）。我们在表示 transaction 信息时的任务，是复现主要发生在机构中的运算。这些运算始终涉及对单位和货币数字的舍入（银行确实会应用随机舍入），而从这些机构以及政府的角度来看，*正确* 的数字正是 *舍入后* 的数字本身。这不是一个数学纯粹性的问题，而是一个实用性的问题，我们的系统应该像银行那样做。因此，我认为我们应该始终将舍入后的数字 post 到 account 中。使用有理数在这方面并不构成限制，但我们必须注意在关键位置存储舍入后的数字。我认为 Ledger 实现的方案是尽可能保留原始精度。
+
+Beancount 选择 [十进制](https://docs.python.org/3/library/decimal.html) 数字表示法，以与输入中书写时相同的精度存储从输入中解析出的数字。这种方法与使用有理数存在同样的问题，即十进制数字之间数学运算的结果目前会以完整精度存储（尽管是以十进制形式）。诚然，我尚未在需要时应用显式量化，而这才是正确的做法。必须设计一种方案，以推断合适的 precision，从而在运算后自动对数字进行量化。十进制表示法为运算后的舍入提供了自然的机会，并且是此用途的合适选择，实现通常甚至提供用于执行 precision 的 context。另外请注意，永远不需要以无限精度存储数字：机构本身也从不这样做。
+
+Hledger（自 2014 年起）内部将数字存储为 [十进制数](https://hackage.haskell.org/package/Decimal)，允许“无限”的整数位和最多 255 位小数位。
+
+其次，在检查 transaction 的 postings 是否平衡为零时，这三种系统都需要对这些金额允许一定的 tolerance。当你考虑到在文本文件中输入数字意味着有限的小数表示时，这种需求就很明显了。例如，如果你要将一个单位数量和一个 cost 相乘，假设两者都以 2 位小数记录，你可能会得到一个具有 4 位小数的数字，然后你需要将该结果与通常仅以 2 位小数输入的 cash 金额进行比较。你必须在某种程度上允许一些宽松度。
+
+这些系统在如何确定该 tolerance 方面有所不同：
+
+-   Ledger 试图通过使用最近解析的上下文（按文件顺序）来自动推导用于其 balance checks 的 precision。要使用的 precision 是针对特定 commodity 最近解析的值的 precision。这可能存在问题：它可能导致 [交易之间不必要的副作用，且难以调试](https://groups.google.com/d/msg/ledger-cli/m-TgILbfrwA/cTHg2juqEJgJ)。
+
+-   另一方面，Hledger 使用每个 commodity 的全局显示 precision。首先处理整个文件，检测每个 commodity 的推断或配置的显示 precision。然后，如果一个 transaction 的总和在使用这些 precision 显示时看起来为零，则认为该 transaction 是平衡的。（未来 Hledger 可能仅使用从当前 journal entry 推断的局部 precision 来进行平衡，以获得更好的局部性和鲁棒性。）
+
+-   目前，Beancount 在其 balance checking 算法中使用一个常数作为 tolerance（任何单位的 0.005）。这是薄弱的，至少应该是 commodity-dependent 的，如果不是还依赖于使用该 commodity 的特定 account 的话。归根结底，它取决于用于表示特定 postings 的数字位数。我们有一个 [提案](precision-tolerances.md) 正在推进以修复此问题。
+
+我计划修复这个问题：Beancount 最终将使用一种完全 *local* 于每个 transaction 的方法来推导其 precision，也许会有一个全局值作为默认值（这仍在进行中 - *2014 年 10 月*）。最精确数字的一半将作为 tolerance。这将类似于 HLedger 的方法进行推导，但针对每个 transaction 单独进行。这将允许用户通过使用输入中更多的数字来使用任意 precision。仅使用小数位来推导 precision。不会应用由 transaction 暗示的全局效果。任何 transaction 都不应影响其他 transaction 的平衡上下文。[如果你想要监控舍入误差，可以选择将其累积到一个 Equity account 中](https://groups.google.com/d/msg/ledger-cli/m-TgILbfrwA/YjkmOM3LHXIJ)。
+
+至于自动量化运算结果中的数字，我仍需研究一种自动实现的方法。
+
+### 在 Transaction 层面进行过滤<a id="filtering-at-the-transactional-level"></a>
+
+这两个系统存在差异的另一个方面在于，Beancount 不支持在 posting 层面进行过滤，仅支持在 transaction 层面进行过滤。也就是说，当对输入数据应用过滤器时，即使过滤条件针对的是 posting，最终生成的也只会是*完整*的 transaction 集合。这样做的目的是确保生成的 posting 集合的总和恰好为零。我们不会忽略某个 transaction 中的部分 posting。不过，我们仍然允许在计算完所有 balance assertion 之后，通过 report 剔除任意子集的 account。
+
+Ledger 的过滤机制可以在[transaction 或 posting 层面](https://groups.google.com/d/msg/ledger-cli/i2ouOXgyVbE/EyWEXqZDHmkJ)工作。我认为这令人困惑。我并不真正理解它为何如此运作，或者它实际上是如何运作的。
+
+（请注意，这一点目前并不是非常相关，因为我尚未实现自定义的任意过滤；目前可用的唯一过滤功能是通过 web 界面获取的“视图”，但我很快就会提供一个简单的逻辑表达式语言，以便像 Ledger 那样对解析后的 transaction 应用自定义过滤器，因为我认为这是一个强大的功能。直到最近，大多数 report 仅通过 web 界面渲染，而现在 Beancount 实现了控制台 report，因此这一功能的需求比以往更加迫切。）
+
+### 扩展机制<a id="extension-mechanisms"></a>
+
+Beancount 和 Ledger 都提供了针对其数据语料库编写脚本的机制。这些机制都有用，但各不相同。
+
+Ledger 提供：
+
+-   一种自定义表达式语言，通过解释该语言来生成 report
+-   一个将内容导出为 XML 的命令
+-   一个将内容导出为 LISP 的命令
+-   一个 Python 绑定库，提供对其 C++ 数据结构的访问
+-   *（……还有其他吗？）*
+
+（注：由于其依赖项、所使用的 C++ 特性以及构建系统，我发现很难在我的原生 Ubuntu 机器或 Mac OS 计算机上构建 Ledger。使用 Python 绑定进行构建则更加困难。如果你有耐心、有时间，并且这对你来说不是问题，那很好，但如果你能找到预打包的版本，我建议使用那个。）
+
+Beancount [提供](beancount-scripting-plugins.md)：
+
+-   一个原生 Python 插件系统，允许你指定要导入和调用的 Python 模块列表，以过滤和转换解析后的 directive，从而实现新功能；
+-   一个简单的 loader 函数，允许你访问解析和处理 Beancount 账本后产生的内部数据结构。这也是一个原生 Python 库。
+
+基本上，你必须编写 Python 来扩展 Beancount。我计划提供输出到 XML 和 SQL 的功能（由于我使用的数据结构很简单，这些实现都将非常简单）。此外，使用 Beancount 自己的 “printer” 模块生成的文本保证可以解析回完全相同的数据结构（Beancount 保证其语法和数据结构的往返一致性）。
+
+一个优势是，插件系统允许你对生成的 directive 列表执行流内任意转换，这是原型化新功能和更简单语法的绝佳方式。例如，你可以分配一个特殊标签，该标签将触发对带有此类标签的 transaction 的任意转换。并且这些模块不必与 Beancount 集成：它们可以只存在于你自己的 PYTHONPATH 上的任何位置，因此你可以在无需向上游贡献新功能或修补源代码的情况下进行实验。
+
+（注：Beancount 是用 Python 3 实现的，因此你可能需要安装一个较新的版本才能与其配合使用，例如 Python-3.4，如果你没有的话。目前，Python 3 已经相当普及，所以我不认为这是一个问题，但你可能正在使用较旧的操作系统。）
+
+### 通过插件实现自动交易<a id="automated-transactions-via-plugins"></a>
+
+Ledger 提供了一种特殊语法，用于[在现有 transaction 上自动插入 posting](http://ledger-cli.org/3.0/doc/ledger3.html#Automated-Transactions)，基于某些匹配条件。该语法允许用户访问 posting 的部分数据，例如金额和 account 名称。该语法还专门设计为支持对 transaction 和 posting 应用“标签”。
+
+Beancount 允许你通过其插件扩展机制实现相同的功能，甚至更多。你编写的插件能够完全修改、创建甚至删除解析后的 transaction 流中任何对象及其任何属性，从而让你执行任意程度的自动化和汇总。这不需要特殊语法——你只需使用 Python 进行开发，即可访问其所有功能——并且你可以将你的自动化逻辑叠加在现有语法之上。在 `beancount.plugins.*` 下提供了一些示例。
+
+然而，也有理由认为，对于仅添加一些 posting 这一最常见情况，提供一种快速且简便的方法是有价值的。我对此尚未完全确信，但 Beancount 最终可能会获得此功能（如果你愿意，现在就可以轻松地在插件文件中对此进行原型开发）。
+
+### 不支持时间或生效日期<a id="no-support-for-time-or-effective-dates"></a>
+
+Beancount 不表示 transaction 的日内时间，其粒度为天。Ledger 允许你将 transaction 的时间指定到秒级 precision。出于简洁性的考虑，我选择限制其范围，并且我认为支持日内操作的用例很少。
+
+请注意，虽然 Beancount 的最大分辨率是一天，但在对 directive 进行排序时，它会保持同一天内所有 transaction 的相对顺序，因此可以在 Beancount 中表示同一天发生的多个 transaction，并仍然进行正确的 inventory booking。但我认为，如果你要进行日内交易，你需要一个更专业的系统来计算日内回报、进行技术分析以及计算日内盈亏。Beancount 不适合这些用途（如果那是它的范围，则需要许多其他功能）。
+
+Ledger 还支持*生效日期*，这基本上是 transaction 的替代日期。报告功能允许 Ledger 用户使用主要日期或替代日期。Beancount 曾经拥有此功能，但我将其移除了，主要是因为我并不想引入报告选项，并且为了处理两个日期（例如 transaction 日期和结算日期），我希望强制规定在任何时间点所有 transaction 都必须平衡。我也很少使用它，这表明它可能是徒劳的。处理在不同时间点发生的 posting 会造成不平衡，或者我必须想出一个涉及“悬置”或“中转”账户的解决方案。我更喜欢直接移除该功能：在 8 年的数据中，我*始终*能够调整日期以使所有条目平衡。这不是一个大问题。
+
+请注意，处理这些拆分 transaction 并将它们合并在一起的功能将会被处理；一项[提案](settlement-dates-in-beancount.md)正在进行中。
+
+### 文档<a id="documents"></a>
+
+Beancount 支持将文档的目录层级与账本中账户体系的内容进行集成。您可以提供一个目录路径，Beancount 会自动在镜像账户名称的目录中查找以日期开头的文件名，并创建相应的 Document 指令，然后将这些文档关联到对应的账户。此外，经过少量配置，bean-file 工具可以自动将下载的文档归档到这样的目录层级中。
+
+Ledger 通过通用元数据将文档与 transaction 绑定。用户可以将任意键值对附加到他们的 transaction 上，这些值可以是文件名。除此之外，Ledger 没有提供针对文档组织的特定支持。
+
+### 更简洁且更严格<a id="simpler-and-more-strict"></a>
+
+最后，Beancount 的输入语法总体上比 Ledger 更简洁。命令行选项非常少——这是有意为之，我希望将所有输入都本地化在文件内部——并且 directive 语法更加统一：所有 transaction 都以日期和关键字开头。如果你看重简洁性这一优点，你可能会更喜欢使用 Beancount。我觉得 Ledger 提供的选项数量令人望而生畏，我也无法声称自己完全理解这些选项之间所有可能的相互作用方式。如果这一点不让你担心，你可能会更喜欢使用 Ledger。
+
+Beancount 也比 Ledger 更严格。某些类型的 Beancount 输入是无效的。例如，账户中的任何 transaction 都需要有一个 open directive 来初始化该账户（尽管其中一些约束可以通过可选插件放宽）。如果你维护一个 Beancount 账本，你可以预期需要对其进行规范化，以修复许多被报告的常见错误。我认为这是一件好事：它能检测出许多潜在问题，并对输入施加一系列严格约束，这使我们在后续处理 directive 流时能够做出合理的假设。如果你不关心 precision 或检测潜在错误，Ledger 会允许你更加宽松。另一方面，如果你希望生成精确且无瑕疵的 transaction 记录，Beancount 在验证你的输入方面提供了更多支持。
+
+### Web 界面 <a id="web-interface"></a>
+
+Beancount 内置了一个 web 界面，此外还有一个名为 [Fava](https://github.com/beancount/fava) 的外部项目，它在同一主题上进行了显著改进。这是浏览 report 的默认模式。我认为 HLedger 也有一个 web 界面。
+
+## 缺失的功能<a id="missing-features"></a>
+
+Beancount 通常试图*最小化*其提供的功能数量。这与 Ledger 的实现形成对比，后者为了实验复式记账法而增加了大量功能。Ledger 拥有大量的选项。这反映了两种不同的方法：我认为存在一个由基本功能组成的小型核心，当我们能够最小化并移除任何并非严格必要的功能时，就能取得进展。我的目标是提供尽可能小的功能内核，以支持完整的记账活动范围，并允许用户扩展系统以自动化重复的语法。
+
+但以下是 Beancount 不支持而 Ledger 支持的功能列表，我认为最终最好能拥有这些功能。下面的列表不太可能是详尽的。
+
+### 对 Unicode 的支持有限<a id="limited-support-for-unicode"></a>
+
+Beancount 仅支持 UTF8 或其他编码 ***在字符串中***（即，对于带引号的输入）。例如，你可以使用非 ASCII 字符输入收款方和备注，但不能用于账户名称（账户名称不带引号）。Ledger 支持在整个文件中使用其他编码。
+
+Beancount 缺乏更通用编码支持的原因是当前分词器（tokenizer）工具的限制。我一直使用 [GNU flex](https://www.gnu.org/software/flex/) 来实现我的词法分析器（lexer），但它不支持任意编码。我只需要 [编写一个更好的词法分析器](https://groups.google.com/d/msg/ledger-cli/C6GOOj8kGtQ/Jt9jMdRQIH4J) 并使其与 [Bison](http://www.gnu.org/software/bison/) 配合工作，这并非一项困难的任务。我最终会手动编写自己的词法分析器——这还有其他优势——并使其支持 Unicode（Python 3 对此有完整支持，因此只需修改词法分析器，它是一个简单的编译单元）。这是一个相对容易且独立的任务。
+
+### 无预测或周期性 Transaction 功能<a id="no-forecasting-or-periodic-transactions"></a>
+
+Beancount 不支持生成用于预测的周期性 transaction，尽管提供了一个插件来实现其简化形式，作为插件工作原理的示例（参见 `beancount.plugins.forecast`）。Ledger 支持 [周期性 transaction 生成](http://www.ledger-cli.org/3.0/doc/ledger3.html#Periodic-Transactions)。
+
+我确实希望最终将此功能添加到核心 Beancount 中，但在实现之前，我希望非常清晰地定义其语义。更新账本本质上是一个复制和重复在别处发生的 transaction 数据的过程。我不认为定期 transaction 在现实中真的那么“定期”；根据我的经验，实际的 transaction 中总是存在一定程度的微小变化，这使得通过生成器自动生成一系列 transaction 变得不可能，从而无法让用户免于逐一更新它们。在我看来，它的有用之处在于生成*暂定*的未来 transaction。我强烈认为，这些 transaction 应被限制为不跨越已对账的历史，并且已对账的历史应取代任何类型的自动生成的 transaction。
+
+我有一些相当完整的想法来实现此功能，但我目前自己并不使用预测功能，所以它被搁置了。虽然理论上你可以使用 Ledger 的周期性 transaction 进行预测，但要*精确*表示你的账户历史，你可能需要在每次向账户添加新 transaction 并替换预测的 transaction 时，调整这些 transaction 的开始日期。我认为 Ledger 中自动 transaction 的当前语义除了创建账户内容的近似值外，并没有太大用处。
+
+（在此期间，鉴于通过插件扩展 Beancount 的便利性，我建议你现在开始自行尝试预测 transaction，如果我们能推导出一种通用的方法来创建它们，我愿意将其合并到主代码中。）
+
+---
+
+> **版权与许可**：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 [NOTICE.md](../NOTICE.md)。

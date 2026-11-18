@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beancount 中文文档</title>
+  <meta name="description" content="Beancount 官方文档正文的非官方中文译文，共 39 篇，含语言语法、查询、精度与 tolerance、投资账本、导入插件等主题。">
+  <meta property="og:title" content="Beancount 中文文档">
+  <meta property="og:description" content="Beancount 官方文档正文的非官方中文译文，共 39 篇，含语言语法、查询、精度与 tolerance、投资账本、导入插件等主题。">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">全量正文 · 39 篇</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="sidebar-label">目录</p>
+      <nav class="toc"><li><a href="#group-01">入门 / 安装 / 运行</a></li>
+<li><a href="#group-02">语言 / 查询</a></li>
+<li><a href="#group-03">会计方法 / 校验</a></li>
+<li><a href="#group-04">投资账本</a></li>
+<li><a href="#group-05">导入 / 插件</a></li>
+<li><a href="#group-06">架构 / 版本</a></li>
+<li><a href="#group-07">对比 / 导出 / 社区</a></li>
+<li><a href="#group-08">专题建模</a></li>
+<li><a href="#group-09">历史</a></li></nav>
+    </aside>
+    <main>
+      <article>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>MTPLX Qwen3.8-27B</span>
+          <span>术语保留英文 · 代码原样</span>
+        </div>
+        <h1>Beancount 中文文档</h1>
+        <p>本页是官方 <code>beancount/docs</code> 正文的全量中文译文，共 39 篇。除 API reference 外，正文页面已全部覆盖。</p>
+        <p><strong>说明：</strong>这是非官方译文，不是人工定稿。代码、account、option、币种已尽量原样保留；术语按约定保留英文。建议按主题选读，再对关键章节人工审校。</p>
+        <h2 id="group-01">入门 / 安装 / 运行</h2>
+<ul>
+<li><a href="beancount-user-manual.html">Beancount User&#x27;s Manual</a></li>
+<li><a href="getting-started-with-beancount.html">Getting Started with Beancount</a></li>
+<li><a href="installing-beancount.html">Installing Beancount</a></li>
+<li><a href="installing-beancount-v3.html">Installing Beancount (C++ version)</a></li>
+<li><a href="running-beancount-and-generating-reports.html">Running Beancount &amp; Generating Reports</a></li>
+</ul>
+<h2 id="group-02">语言 / 查询</h2>
+<ul>
+<li><a href="beancount-language-syntax.html">Beancount Language Syntax</a></li>
+<li><a href="beancount-options-reference.html">Beancount Options Reference</a></li>
+<li><a href="beancount-cheat-sheet.html">Beancount Syntax Cheat Sheet</a></li>
+<li><a href="beancount-query-language.html">Beancount Query Language</a></li>
+</ul>
+<h2 id="group-03">会计方法 / 校验</h2>
+<ul>
+<li><a href="the-double-entry-counting-method.html">The Double-Entry Counting Method</a></li>
+<li><a href="command-line-accounting-in-context.html">Command-line Accounting in Context</a></li>
+<li><a href="command-line-accounting-cookbook.html">Command-line Accounting Cookbook</a></li>
+<li><a href="balance-assertions-in-beancount.html">Balance Assertions in Beancount</a></li>
+<li><a href="precision-tolerances.html">Beancount Precision &amp; Tolerances</a></li>
+<li><a href="rounding-precision-in-beancount.html">Proposal: Rounding &amp; Precision in Beancount</a></li>
+<li><a href="settlement-dates-in-beancount.html">Settlement Dates &amp; Transfer Accounts in Beancount</a></li>
+<li><a href="tutorial-example.html">Beancount Example &amp; Tutorial</a></li>
+</ul>
+<h2 id="group-04">投资账本</h2>
+<ul>
+<li><a href="how-inventories-work.html">How Inventories Work</a></li>
+<li><a href="trading-with-beancount.html">Trading with Beancount</a></li>
+<li><a href="calculating-portfolio-returns.html">Calculating Portfolio Returns</a></li>
+<li><a href="fetching-prices-in-beancount.html">Prices in Beancount</a></li>
+<li><a href="stock-vesting-in-beancount.html">Stock Vesting in Beancount</a></li>
+</ul>
+<h2 id="group-05">导入 / 插件</h2>
+<ul>
+<li><a href="importing-external-data.html">Importing External Data in Beancount</a></li>
+<li><a href="beancount-scripting-plugins.html">Beancount Scripting &amp; Plugins</a></li>
+</ul>
+<h2 id="group-06">架构 / 版本</h2>
+<ul>
+<li><a href="beancount-design-doc.html">Beancount Design Doc</a></li>
+<li><a href="beancount-v3.html">Beancount Vnext: Goals &amp; Design</a></li>
+<li><a href="beancount-v3-dependencies.html">Beancount C++ version: Dependencies</a></li>
+<li><a href="beangulp-design-doc-for-new-repo.html">Beangulp Design Doc for New Repo</a></li>
+<li><a href="ledgerhub-design-doc.html">Design Doc for Ledgerhub</a></li>
+<li><a href="a-proposal-for-an-improvement-on-inventory-booking.html">Inventory Booking</a></li>
+</ul>
+<h2 id="group-07">对比 / 导出 / 社区</h2>
+<ul>
+<li><a href="a-comparison-of-beancount-and-ledger-hledger.html">A Comparison of Beancount and Ledger</a></li>
+<li><a href="exporting-your-portfolio.html">Exporting Your Portfolio</a></li>
+<li><a href="external-contributions.html">External Contributions to Beancount</a></li>
+</ul>
+<h2 id="group-08">专题建模</h2>
+<ul>
+<li><a href="fund-accounting-with-beancount.html">Fund Accounting with Beancount</a></li>
+<li><a href="health-care-expenses.html">Health Care Expenses</a></li>
+<li><a href="how-we-share-expenses.html">How We Share Expenses</a></li>
+<li><a href="sharing-expenses-with-beancount.html">Sharing Expenses in Beancount</a></li>
+<li><a href="tracking-medical-claims.html">Tracking Out-of-Network Medical Claims in Beancount</a></li>
+</ul>
+<h2 id="group-09">历史</h2>
+<ul>
+<li><a href="beancount-history-and-credits.html">Beancount History and Credits</a></li>
+</ul>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+</body>
+</html>

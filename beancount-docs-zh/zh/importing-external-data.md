@@ -1,0 +1,522 @@
+> 非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+> 原文：https://beancount.github.io/docs/importing_external_data/
+
+# 在 Beancount 中导入外部数据<a id="title"></a>
+
+[Martin Blais](mailto:blais@furius.ca), [Moritz Lell](mailto:mlell08@gmail.com), 2026
+
+[http://furius.ca/beancount/doc/beangulp](http://furius.ca/beancount/doc/beangulp)
+
+## 简介<a id="introduction"></a>
+
+这是 Beancount 中用于**自动化导入外部 transaction 数据**到 Beancount 输入文件，并管理从金融机构网站下载文档的库和工具的用户手册。
+
+## 快速入门<a id="quickstart"></a>
+
+要创建一个 importer，请遵循以下步骤。
+
+1.  创建一个 python 文件 “import.py”。更多信息请参阅 Configuration 部分。
+
+2.  在 importers 目录中定义 importer(s)。更多细节请参阅 Writing an importer 部分。
+
+3.  将来自金融机构的 .csv/.xml/.pdf 文件放入 downloads 目录。更多细节请参阅 Organizing your files 部分。
+
+4.  运行 uv run python import.py extract ./downloads &gt; tmp.beancount
+
+在 [beangulp 仓库](https://github.com/beancount/beangulp/tree/master/examples/) 和 “Writing an Importer” 部分中有示例。
+
+## 导入流程<a id="the-importing-process"></a>
+
+人们常常好奇我们是如何做到这一点的，因此让我坦诚且更详细地描述一下我们在这里要做的事情。
+
+当前任务的核心是将一个人所有账户中发生的 transaction 转录到一个单一的文本文件中：即 Beancount 输入文件。将所有 transaction 摄入单一系统，是我们为了生成关于个人财富和支出的全面 report 所必须做的。有些人将此称为“对账”（reconciling）。
+
+我们可以手动从纸质对账单上输入所有 transaction 进行转录。然而，如今大多数金融机构都有一个网站，允许你下载历史 transaction 的对账单，格式包括多种数据格式，你可以解析这些格式以输出对应的 Beancount 语法。
+
+从这些文档中导入 transaction 涉及以下步骤：
+
+-   手动审查 transaction 的**正确性**，甚至检查是否存在欺诈行为；
+
+-   将新导入的 transaction 与从其他账户导入的先前 transaction 进行**合并**。例如，从银行账户支付信用卡账单的交易，通常既会从银行账户导入，也会从信用卡账户导入。你必须手动将对应的 transaction 合并在一起[^1]。
+
+-   为支出 transaction 分配正确的**类别**
+
+-   通过将生成的 directive 移动到文件中的正确位置来**组织**你的文件。
+
+-   通过视觉检查或插入 Balance directive 来**验证余额**，该 directive 断言在插入新 transaction 后账户的最终余额应为多少。
+
+如果我的 importer 没有 bug，这个过程花费我 30-60 分钟来更新我大多数活跃账户。不太活跃的账户则每季度更新一次，或者在我想更新时更新。我倾向于在周六早上进行，每月大约两次，有时每周一次。如果你维护一个组织良好的输入文件并包含大量断言，不匹配的情况很容易被发现，这是一个令人愉快且简单的过程，完成之后生成更新的资产负债表会很有成就感（我通常重新导出到 Google Finance 投资组合）。
+
+### 典型下载<a id="typical-downloads"></a>
+
+以下是对所涉及的典型文件类型的描述；这描述了我的使用场景以及我所实现的功能。这应该能让你对其中涉及的内容有一个定性的了解。
+
+-   **信用卡和银行**提供质量相当好的历史对账单下载，格式为 OFX 或 CSV 文件，但我需要手动对账这些 transaction 的另一方，并将某些 transaction 合并在一起。
+
+-   **投资账户**为我提供高质量的可处理对账单，购买 transaction 的提取是完全自动化的，但我需要手动编辑销售 transaction 以关联正确的 cost basis。一些提供专门产品（例如 P2P 借贷）的机构仅提供 PDF 文件，这些文件是手动转录的。
+
+-   **工资单和归属事件**通常仅以 PDF 形式提供，我不费心尝试自动提取数据；我手动转录这些内容，保持输入非常规整，posting 的顺序与对账单上出现的顺序相同。这使得事情更容易。
+
+-   **现金交易**：我必须手动输入这些。我只将非食品支出作为单独的 transaction 直接记录，而对于食品支出，我可能每六个月数一次钱包余额，并为每个月插入一个汇总 transaction，将现金账户借方记入食品支出以使其平衡。如果你这样做，最终需要手动输入的 transaction 数量会少得惊人，可能每周只有几个（这取决于生活方式选择，对我来说是可行的）。当我外出时，我只需在手机上的 Google Keep 中记下这些，等积累起来后再转录。
+
+## 导入配置<a id="import-configuration"></a>
+
+要将文件内容导入到 Beancount 账本中，你必须创建一个*导入配置*。这是一个普通的 Python 文件，它调用一个能够处理该文件格式的*Importer*。如果你执行此文件：
+
+-   每个已配置的 importer 都会测试输入文件，判断其是否可以处理该文件
+
+-   如果任何 Importer 匹配了该文件，它会将文件内容转换为 beancount 语句以添加到你的账本中，或者将文件移动到归档目录。你可以通过命令行参数选择操作。
+
+### 快速入门：一个最小的 CSV 导入配置<a id="quick-start-a-minimal-csv-import-configuration"></a>
+
+假设你想导入以下包含账户对账单的 CSV 文件，该文件是你从银行下载的：
+
+    "Date";"Amount";"Purpose";"Balance after"
+    2017-02-14;"-100,00";" BANKOMAT  00000483 K2 UM 11:56";"4.467,89"
+    2017-02-13;"-50,00";"Payment to Company XYZ";"4.567,89"
+
+此 CSV 文件使用“;”作为列分隔符，使用“,”作为小数分隔符。为了简化起见，假设你总是将下载的文件命名为“mybank.csv”。这些特征必须在 importer 中指定，包括列名映射。这是 importer 配置，你将其保存为“import.py”：
+
+⎯⎯⎯ import.py ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+    import csv
+    import beangulp  # Importing tools
+    from beangulp.importers import csvbase
+    class MyCSVImporter(csvbase.Importer):
+        date = csvbase.Date("Date", "%Y-%m-%d")
+        narration = csvbase.Column("Purpose")
+        amount = csvbase.Amount("Amount", subs={r",": "."})
+        balance = csvbase.Amount("Balance after", subs={r",": "."}) # optional
+        order = csvbase.Order.DESCENDING # optional
+        dialect = csv.excel
+        dialect.delimiter = ";"
+        def identify(self, filepath: str) -> bool:
+            "Return True if this importer is suitable for the given filename."
+            return filepath.endswith("mybank.csv")
+    # List all available importers, one for each file format you need to process
+    CONFIG = [
+          # Default account name is applied if account column is undefined or empty
+    MyCSVImporter(account="Assets:MyBank", currency="EUR")
+    ]
+    # Hooks: Process beancount transaction objects after they have been extracted
+    HOOKS = []
+    # Allows to call this script as './import extract <filename.csv>'.
+    if __name__ == "__main__":
+        ingest = beangulp.Ingest(CONFIG, HOOKS)
+        ingest()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ (END) ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+调用脚本“`python import.py --help`”以查看选项：
+
+-   “`python import.py extract mybank.csv >> new.beancount`”：  
+    转换为 beancount 语句并追加到你选择的 beancount 文件中
+
+-   “`python import.py archive mybank.csv` “：  
+    将文件移动到子文件夹 Assets/MyBank/2017-01-14.mybank.csv，即它会：
+
+    -   根据配置的 account 选择子文件夹
+
+    -   根据最后一笔 transaction 选择前缀
+
+此示例将为每个输入 CSV 行生成一个 beancount transaction。然而，它将只有一个 posting（到你的银行账户）。你必须手动添加第二个 posting（或多个），例如添加到收入或支出 account，才能拥有一个有效的 transaction。如果你想自动化这个过程，你需要重载 finalize() 函数，如“如何编写 CSV importer”一节中所述。
+
+如果你正在使用 Beancount 的图形用户界面 Fava，请确保脚本中存在名为 CONFIG 和 HOOKS 的变量，因为 Fava 期望这两个名称存在。
+
+## 编写 Importer<a id="writing-an-importer"></a>
+
+你在快速入门部分已经看到，Beancount 的 Importer 是一个位于常规 Python 模块中的普通 Python 类，你通过执行它来处理输入文件。在这里，“处理”意味着两个不同的步骤：
+
+a) 它可以从输入文件生成 Beancount 语句的输出，这些语句将被追加到你的 Beancount Ledger 中
+
+b) 它可以将文件移动到文档文件夹中，子文件夹结构为 &lt;account&gt;/&lt;subaccount&gt;/&lt;date&gt;\_&lt;original-file-name&gt;。
+
+这两个功能分别通过调用 `extract` 或 `archive` 命令来执行，如快速入门部分所示。
+
+然而，快速入门部分介绍的是一个特殊情况：从 CSV 文件导入。还有其他多种格式，例如基于 XML 的 CAMT、较旧的 MF940，甚至需要自定义逻辑来解析的 PDF 文件。对于所有这些格式，你可以通过编写 `beangulp.Importer` 的子类来创建 Beancount Importer。这将在下一节中详细说明。CSV 解析的特殊情况随后介绍。
+
+### 导入器协议：为任意文件格式编写导入器<a id="the-importer-protocol-writing-an-importer-for-any-file-format"></a>
+
+所有导入器都必须遵守特定的协议，并至少实现其必需的方法（identify() 和 account()）。该协议的完整细节最好在源代码本身中查找：[importer.py](https://github.com/beancount/beangulp/blob/master/beangulp/importer.py)。上述工具会负责查找下载文件并调用导入器对象上的相应方法。
+
+以下是这些方法的简要概述（为简洁起见，我省略了第一个 'self' 参数）::
+
+-   identify(filepath): 如果此导入器能够处理给定的文件名，该方法仅返回 true。所有后续工具都会调用此函数来确定 (file, importer) 对的列表。您的导入器必须实现此方法。
+
+-   account(filepath): account 用于确定文档的归档文件夹。虽然接口允许为不同文档返回不同的 account，但通常返回的 account 名称对于导入器子类来说只是一个常量。您的导入器必须实现此方法。
+
+<!-- -->
+
+-   extract(filepath, existing_entries): 从文件内容中提取一些 Beancount directive。该方法接收文件路径（字符串）和所有现有 beancount directive 的列表。它必须通过实例化 beancount.core.data 中定义的对象来创建新的 directive，并将它们作为列表返回。如果您不实现此方法，您的导入器将不会创建任何 beancount 语句，而只会将您的文件移动到文档文件夹中。
+
+-   name(filepath): 此方法为每个导入器实例提供唯一的 id。能够使用唯一名称引用您的导入器是很方便的；例如，它会在识别过程中打印出来。如果您未在导入器中定义此方法，将生成一个默认名称。
+
+以下函数与导入后在文档文件夹中归档下载的文件有关：
+
+-   date(filepath): 如果可以从对账单内容中提取日期，请在此处返回。这对于带日期的 PDF 对账单很有用……通常可以使用正则表达式从转换为文本的 PDF 中 grep 出日期。这允许归档脚本添加相关的日期，而不是使用文件下载时的日期（默认值）。
+
+-   filename(filepath): 最方便的做法是不费心重命名下载的文件。通常，从银行生成的文件要么都有唯一的名称，要么在您下载多个文件且名称冲突时会被浏览器重命名。此函数用于导入器为下载文件提供一个“美观”的名称进行归档。
+
+-   您可以覆盖另外两个函数，**`sort(...)`** 和 **`deduplicate(...)`**，不过，默认实现在大多数情况下可能已经足够。
+
+使用快速入门部分中显示的最终代码行，创建一个可执行的 Python 脚本，该脚本将为给定文件识别正确的导入器。您可以使用  
+`./your-import-script.py --help`  
+来了解如何执行导入脚本。
+
+最好尽可能通用地编写导入器，并使用您在输入文件中使用的特定 account 名称对其进行参数化。这有助于使您的代码独立于特定 account，并迫使您定义逻辑 account，我发现这有助于提高清晰度。
+
+或者不……归根结底，这些导入器代码存在于您自己的个人位置，而不是与 Beancount 一起。如果您愿意，可以将它们保持得尽可能具体，或者像您喜欢的那样杂乱且不可共享。
+
+### 特殊情况：编写 CSV importer <a id="special-case-writing-a-csv-importer"></a>
+
+如果你正在从 CSV 文件导入数据，则无需在你的 Importer 中重新实现 CSV 文件解析逻辑，因为 beangulp 项目提供了一个通用的 CSV importer：`beangulp.importers.csvbase.Importer`。在以下部分中，我们将该模块名称简称为“`csvbase`”。类 `csvbase.Importer` 实现了 Importer 协议的所有方法，除了 “identify()”。它拥有自己的 Metaclass，允许你将 CSV 列名定义为简单的成员变量。这样，你自己的 Importer 子类可以几乎完全是声明式的。
+
+像这样编写你的 `csvbase.Importer` 子类：
+
+-   实现方法 **`identify(self, filename)`**，如上一节所述，如果你的 Importer 可以处理给定的文件，则返回 True。
+
+-   定义类型为 `csvbase.Column` 或其子类的类成员，以定义列映射：  
+    `<beancount-name> = csvbase.Column_or_Subclass(“<Column name in CSV>”)`
+
+    -   必需的名称：date, narration, amount
+
+    -   可选的名称：flag, payee, account, currency, tag, link, balance。它们填充 beancount directive 的相应部分。如果你指定了 balance 列，则在最后一个导入的 transaction 之后会自动生成一个 Balance assertion。
+
+    -   所有其他类型为 csvbase.Column 或其子类的类成员定义了可供用户定义的后处理函数使用的额外数据。这些函数接收一个命名元组（参数 “row”），其中包含输入 CSV 文件每一行的值。例如，你可以通过这种方式将列内容作为自定义元数据添加到你的 transactions 或 postings 中。参见子章节“Further customizations”。
+
+-   Column 类型可以是：
+
+    -   csvbase.Column(*names, default = None)：列值按原样作为字符串获取，如果值为空，则使用可选的默认值
+
+    -   csvbase.Columns(*names, …, sep = ‘ ‘)：使用 ‘sep’ 合并多个列
+
+    -   csvbase.Date(name, frmt = ‘%Y-%m-%d’)：将值解析为给定格式的日期
+
+    -   csvbase.Amount(name, subs = {})：将值解析为数字。要替换字符，可以使用 ‘subs’ 字典：{ ‘regex1’: ‘replacement1’, ‘regex2’: ‘replacement2’, …}。例如，要解析像 ‘1.000,00 EUR’ 这样的数字，请使用 
+                subs = {r”\.”: “”, r”,”: “.”, r” EUR”: “”}, 
+            首先将点替换为无，然后将逗号替换为点，最后将 “ EUR” 替换为无。这将数字转换为 “1000.00”，Python 可以解析它。
+
+    -   csvbase.CreditOrDebit(credit, debit, subs = {}, default = None)：从两列创建单个金额，其中 Credit（账户增加）和 Debit（账户减少）分别列为正数。
+
+-   通过覆盖 `csvbase.CSVReader` 的成员（`csvbase.Importer` 的两个超类之一）来定义 CSV 文件的格式。截至 beangulp 0.2.0 的选项如下（带默认值）：
+
+    -   dialect (required) : 输入文件中使用的 CSV dialect，与同名 csv.Reader() 的参数相同。
+
+    -   encoding = "utf8" : 文件编码
+
+    -   header = 0  : 要跳过的标题行数。
+
+    -   footer = 0 : 要忽略的页脚行数。
+
+    -   names = True : 数据文件是否包含一行列名。
+
+    -   comments = "#" : 注释字符。以该字符开头的行将被跳过。
+
+    -   order = None. CSV 文件中条目的顺序。如果为 None，顺序将从文件内容中推断。使用 csvbase.Order.ASCENDING 或 ….DESCENDING。
+
+如 Quick Start 部分所示，你需要向 `beangulp.Ingest` 提供你的 importer 子类的实例。你的 CSV importer 子类继承了一个带有参数 `(account, currency, flag = “*”)` 的构造函数。你可以使用它（如 Quick Start 示例中所示），或者提供你自己的 `__init__` 函数，该函数调用 `super().__init__(account=…, currency=…, …)`。
+
+#### 进一步自定义 <a id="further-customizations"></a>
+
+要自定义 CSV 文件的解析，你可以覆盖以下方法。此外，你当然可以覆盖“Writing an Importer”部分中介绍的所有方法，但这需要重新实现由 csvbase.Importer 和 csvbase.CSVReader 执行的一些逻辑。
+
+-   metadata(filepath: str, lineno: int, row: Row) -> Meta
+        这会在每个解析的 transaction 上调用，你可以添加元数据
+
+-   finalize(txn: Transaction, row: Row) -> Transaction 
+        此方法在每个生成的 beancount  transaction 对象 上调用，允许你对其进行自定义。预期返回修改后的对象或 None，后者将跳过此 transaction。
+
+类型注解提供了关于预期输入和输出的指导：
+
+-   Meta: 使用模块 beancount.core.data 中的函数 
+              new_metadata(filename, lineno, kvlist)
+        创建此类型的对象。通常，你会从 metadata(...) 函数的参数列表中转发前两个参数。第三个参数是你的自定义元数据，作为具有字符串键的 dict 对象。
+
+-   Row：这是一个命名元组对象，表示单个 CSV 行的数据。对于你的 Importer 子类中每个类型为 csvbase.Column 或其子类的成员变量，它都会包含一个对应的元素。除了诸如 date、amount 等（见上文）必需和可选成员外，你还可以创建任意名称的类成员，以对应任意 CSV 列，其数据将在此对象中可用。
+
+-   Transaction：此对象是 Beancount 中 transaction 的内部表示。与其他所有 Beancount directive 一样，它作为命名元组定义在 beancount.core.data 模块中。对于自定义后处理可能感兴趣的元素包括 payee、narration、meta（一个 dict）和 postings（Postings 的列表）。请注意，作为命名元组，它是一个不可变对象。要修改其某些字段，请使用其 _replace() 方法或 'copy' 模块来创建更新后的 Transaction 对象。建议对 metadata 和 postings 列表等可变元素也遵循此模式。
+
+## hook 函数 <a id="hook-functions"></a>
+
+`beangulp.Ingest()` 的第二个参数（除 importers 外）是一个 hook functions 列表。Hook functions 会应用于所有导入的 transaction。一个 hook function 看起来类似于这样：
+
+**def** my\_hook\_function(new\_entries\_list, existing\_entries):
+
+out = \[\]
+
+**for** filename, entries, account, importer **in** new\_entries\_list
+
+modified\_entries = \[\]
+
+**for** entry in entries:
+
+\# ... ‘entry’ 的类型为 beancount.core.data.Directive
+
+\# ... 在此处对 entries 进行后处理...
+
+\# ...
+
+modified\_entries.append(entry)
+
+out.append( (filename, modified\_entries, account, importer) )
+
+**return** out
+
+参数 new\_entries\_list 本身是一个元组列表，每个输入文件对应一个元素。每个元组包含以下元素：输入文件名、importer 返回的 entries 列表、account 以及 importer 对象。
+
+元素 existing\_entries 是一个 beancount.core.data.Directive 类型对象的列表，包含导入之前 ledger 中的所有 entries。这样，ledger 中的信息就可以被访问，例如用于去重或实现基于机器学习的修改。
+
+## 进阶主题<a id="further-topics"></a>
+
+### 从输入文件进行配置<a id="configuring-from-an-input-file"></a>
+
+一个我尚未测试过的有趣想法是，利用你的 Beancount 输入文件来推断 importer 的配置。如果你想尝试并自行开发相关功能，可以在 import 配置的 Python 配置中，通过 API 的 `beancount.loader.load_file()` 函数加载你的输入文件。
+
+### 自动化网络下载<a id="automating-network-downloads"></a>
+
+文件的下载并不是我自动化的部分，Beancount 也没有提供连接网络并获取文件的工具。现有的协议种类实在太多，以至于要为此问题做出有意义的贡献[^2]几乎是不可能的。考虑到当今安全网站的特性以及用于实现它们的 JavaScript 城堡，实现起来将是一场噩梦。网页抓取（web scraping）可能过于复杂，难以成为一种值得投入且可行的解决方案。
+
+我**手动**使用用户名和密码登录各个网站，并点击正确的按钮来生成我所需的下载文件。这些文件会被导入器自动识别，而提取 transaction 以及将文档归档到组织良好的目录层级中，则通过本文档中描述的工具实现自动化。
+
+虽然我没有对获取过程进行脚本化，但我认为在某些网站上这是可行的。这项工作留给你去实现，前提是你认为值得花费时间。
+
+### 从 PDF 文件中提取数据<a id="extracting-data-from-pdf-files"></a>
+
+我在将 PDF 文件中的数据转换方面取得了一些进展，这是一个常见需求，但目前尚不完整；事实证明，在一般情况下完全自动化地从 PDF 中提取表格并不容易。我有一些接近可用的代码，会在合适的时候发布。否则，我找到的最佳 FOSS（自由开源软件）解决方案是一个名为 [TabulaPDF](http://tabula.technology/) 的工具，但你仍然需要手动识别数据表格在页面上的位置；你可能能够使用其姊妹项目 [tabula-java](https://github.com/tabulapdf/tabula-java) 来自动化部分获取过程。
+
+尽管如此，我的导入器通常能很好地通过 grep 在转换为丑陋文本的 PDF 对账单中查找，以识别其所属机构并提取文档的签发日期。
+
+最后，有许多不同的工具用于从 PDF 文档中提取文本，例如 [PDFMiner](https://pypi.python.org/pypi/pdfminer2)、[LibreOffice](https://www.libreoffice.org)、[xpdf](http://www.tutorialspoint.com/unix_commands/pdftotext.htm) 库、[poppler](https://poppler.freedesktop.org/) 库[^3] 等等……但它们都不能在所有输入文档上一致地工作；你最终可能会安装许多工具，并针对不同输入文件依赖不同的工具。因此，我不要求 Beancount 内部依赖 PDF 转换工具。你应该测试哪些工具适用于你的特定文档，并在你的导入器实现中调用这些工具。
+
+### 对导入器进行回归测试<a id="regression-testing-your-importers"></a>
+
+随着时间推移，我发现回归测试对于保持导入器代码正常运行至关重要。导入器通常是针对没有官方规范的文件格式编写的，因此经常会遇到意想不到的问题。例如，我有一些 XML 文件包含未转义的 "&" 字符，这要求我为该银行编写一个专门的修复方案[^4]。我还曾目睹一家折扣券商将其日期格式在 MM/DD/YY 和 DD/MM/YY 之间切换；该导入器现在需要能够处理这两种类型。于是你做出必要的调整，最终却发现其他东西坏了；这并不理想。而且时机特别令人烦恼：通常问题发生在你试图更新账本的时候：你还有其他事情要做。
+
+测试这些导入器最简单、最省力且最相关的方法是使用一些**真实数据文件**，并将你的导入器从中提取的内容与预期输出进行比较。为了使导入器至少具有一定的可靠性，你真的需要能够在多个真实输入上重现提取过程。而且由于输入如此不可预测且定义不明确，编写穷尽所有可能性的测试是不切实际的。在实践中，我每隔几个月就必须对我的*某些*导入器进行*某些*修复，而通过这个过程，它只占用我大约半小时的时间：我将导致故障的新下载文件添加到导入器目录中，我通过在那里本地运行它作为测试来修复代码。我还会对该目录中*所有*之前下载的测试输入（旧的和新的）运行测试，以确保我的导入器在旧文件上仍然按预期工作。
+
+[beancount.ingest.regression](https://github.com/beancount/beancount/tree/master/beancount/ingest/regression.py) 中有一些支持自动化此过程的功能。我们需要的是一个例程，它将列出导入器的包目录，识别用于测试的输入文件，并生成一套单元测试，将导入器方法产生的输出与放置在测试文件旁边的“预期文件”的内容进行比较。
+
+例如，给定一个包含导入器实现和两个示例输入文件的包：
+
+    /home/joe/importers/acmebank/__init__.py   <- 代码放在这里
+    /home/joe/importers/acmebank/sample1.csv
+    /home/joe/importers/acmebank/sample2.csv
+
+你可以将此代码放在 Python 模块中（即 \_\_init\_\_.py 文件）：
+
+    from beancount.ingest import regression
+    …
+    def test():
+        importer = Importer(...)
+        yield from regression.compare_sample_files(importer)
+
+如果你的导入器重写了 `extract()` 和 `file_date()` 方法，这将生成四个由 [pytest](https://docs.pytest.org/en/latest/) 自动运行的单元测试：
+
+1.  一个测试，它对 `sample1.csv` 调用 extract()，将提取的条目打印到字符串中，并将此字符串与 sample1.csv.extract 的内容进行比较。
+
+2.  一个测试，它对 `sample1.csv` 调用 `file_date()`，并将日期与在 `sample1.csv.file_date` 文件中找到的日期进行比较。
+
+3.  一个类似于 (1) 但针对 `sample2.csv` 的测试
+
+4.  一个类似于 (2) 但针对 `sample2.csv` 的测试
+
+#### 生成测试输入<a id="generating-test-input"></a>
+
+起初，包含预期输出的文件并不存在。当预期输出文件缺失时，回归测试会自动从提取的输出中生成这些文件。这将导致以下文件列表：
+
+    /home/joe/importers/acmebank/__init__.py   <- 代码放在这里
+    /home/joe/importers/acmebank/sample1.csv
+    /home/joe/importers/acmebank/sample1.csv.extract
+    /home/joe/importers/acmebank/sample1.csv.file_date
+    /home/joe/importers/acmebank/sample2.csv
+    /home/joe/importers/acmebank/sample2.csv.extract
+    /home/joe/importers/acmebank/sample2.csv.file_date
+
+你应该检查预期输出文件的内容，以直观地断言它们代表下载文件的内容。
+
+如果你在这些文件存在的情况下再次运行测试，预期输出文件将用作测试的输入。如果内容将来有所不同，测试将失败并生成错误。（如果你想，现在就可以通过手动编辑并在其中一个文件中插入一些意外数据来测试这一点。）
+
+当你编辑源代码时，你总是可以重新运行测试，以确保它在那些旧文件上仍然有效。当一个新下载的文件失败时，你重复上述过程：你将其副本放在该目录中，修复导入器，运行它，检查预期文件。就这样[^5]。
+
+#### 进行增量改进<a id="making-incremental-improvements"></a>
+
+有时我会对 importer 进行改进，使得即使是旧文件也能生成更多或更好的输出，从而导致所有旧测试现在都会失败。处理这种情况的一个好方法是：将这些文件全部纳入版本控制，在本地删除所有预期文件，运行测试以重新生成新文件，然后与最近的 commit 进行 diff，以检查更改是否符合预期。
+
+### 缓存数据<a id="caching-data"></a>
+
+针对二进制文件的部分数据转换可能代价高昂且速度缓慢。将 PDF 文件转换为文本[^6]通常就是这种情况。这一点尤为棘手，因为在摄取我们下载的数据过程中，我们通常会多次运行这些工具——如果一切顺利，至少需要运行两次：一次用于提取，一次用于归档——而如果有问题，则通常需要运行更多次。因此，我们希望缓存这些转换，例如，避免让一次耗时 40 秒的 PDF 转文本转换运行两次。
+
+Beancount 旨在为下载文件的转换提供两个级别的缓存：
+
+1.  转换的内存缓存，使得多个请求相同转换的 importer 只需运行一次转换，以及
+
+2.  转换的磁盘缓存，使得工具的多次调用可以复用结果。
+
+#### 内存缓存<a id="in-memory-caching"></a>
+
+内存缓存的工作方式如下：你的方法接收给定文件的包装对象，并调用该包装对象的 `convert()` 方法，同时提供一个转换器 callable/函数。
+
+    class MyImporter(ImporterProtocol):
+        ...
+        def extract(self, file):
+            text = file.convert(slow_convert_pdf_to_text)
+            match = re.search(..., text)
+
+此转换会自动被记忆化（memoized）：如果两个 importer 或两个不同的方法对同一文件使用相同的转换器，该转换只会运行一次。这是在内存中处理冗余转换的一种简单方式。请确保始终通过 `.convert()` 方法调用这些转换，并共享转换器函数，以利用此功能。
+
+#### 磁盘缓存<a id="on-disk-caching"></a>
+
+目前，Beancount 仅实现了 (1)。磁盘缓存将在后续实现。*请跟踪此 [ticket](https://github.com/beancount/beancount/issues/113) 以获取状态更新。*
+
+## 组织你的文件<a id="organizing-your-files"></a>
+
+本文档中描述的工具在让你指定以下方面时相当灵活：
+
+-   **导入配置**：提供导入器对象列表作为配置的 Python 文件；
+-   **导入器实现**：实现各个导入器及其回归测试文件的 Python 模块；
+-   **下载目录**：下载文件所在的目录；
+-   **归档目录**：下载文件计划归档到的目录。
+
+你可以从任何位置指定这些内容。尽管如此，许多人经常询问如何组织他们的文件，因此我在 `beancount/examples/ingest/office` 下提供了一个模板示例，并在此处进行说明。
+
+我建议你按照以下结构创建一个 Git 或 Mercurial[^7] 源代码控制仓库：
+
+    office
+    ├── documents
+    │   ├── Assets
+    │   ├── Liabilities
+    │   ├── Income
+    │   └── Expenses
+    ├── importers
+    │   ├── __init__.py
+    │   └── … 
+    │       ├── __init__.py
+    │       ├── sample-download-1.csv
+    │       ├── sample-download-1.extract
+    │       ├── sample-download-1.file_date
+    │       └── sample-download-1.file_name
+    ├── personal.beancount
+    └── personal.import
+
+根目录 “office” 是你的仓库。它包含你的账本文件（“`personal.beancount`”）、你的导入器配置（“`personal.import`”）、你的自定义导入器源代码（“`importers/`”）以及你的文档历史记录（“`documents/`”），后者应按 bean-file 良好地组织。你始终从这个根目录运行命令。
+
+将文档与导入器源代码存储在同一仓库中的一个优点是，你可以直接将回归测试符号链接到 `documents/` 目录下的某些文件。
+
+你可以通过运行 identify 来检查你的配置：
+
+    python import.py identify ~/Downloads
+
+如果它正常工作，你可以立即从下载的文件中提取 transaction：
+
+    python import.py extract -e example.beancount~/Downloads > tmp.beancount
+
+然后打开 tmp.beancount 并将其内容移动到 personal.beancount 文件中。
+
+完成后，你可以像这样将下载的文件归档以备后查：
+
+    python import.py archive ~/Downloads -o documents
+
+如果我的导入器正常工作，我通常甚至懒得打开那些文件。你可以使用 `--dry-run` 选项在这样做之前测试移动目标。
+
+要运行自定义导入器的回归测试，请使用以下命令：
+
+    pytest -v importers
+
+个人而言，我在根目录中有一个 `Makefile`，其中包含这些目标以使我的生活更轻松。请注意，你必须安装 “pytest”，它是一个测试运行器；它通常打包为 “python3-pytest” 或 “pytest”。
+
+## 示例导入器<a id="example-importers"></a>
+
+除了上述文档外，我还编写了一个针对虚构 CSV 文件格式和虚构 investment 账户的示例导入器。参见[此目录](https://github.com/beancount/beangulp/blob/master/examples/importers/utrade.py)。
+
+还有一个使用外部工具（PDFMiner2）将 PDF 文件转换为文本以进行识别并从中提取对账单日期的导入器示例。参见[此目录](https://github.com/beancount/beancount/tree/master/examples/ingest/office/importers/acme/)。
+
+Beancount 还附带了一些非常基础的通用导入器。参见[此目录](https://github.com/beancount/beancount/tree/master/beancount/ingest/importers/)。
+
+-   有一个简单的 OFX 导入器，多年来一直运行良好。虽然它相当简单，但我已经使用了好几年，足以从大多数信用卡账户中提取信息。
+
+-   还有几个 mixin 类，可以混合到你的导入器实现中以提高便利性；这些是 LedgerHub 项目的遗留物——你实际上不需要使用它们——可以帮助过渡到该项目。
+
+最终，我计划在此框架中构建并提供一个通用的 CSV 文件解析器，以及一个 QIF 文件解析器，后者应允许从 Quicken 过渡到 Beancount。（我需要示例输入来完成这项工作；如果你愿意分享你的文件，我可以使用它来构建此功能，因为我没有真实的输入，我不使用 Quicken。）将来构建一个从 GnuCash 转换的工具也会很好；这也将放在这里。
+
+## 清理<a id="cleaning-up"></a>
+
+### 自动分类<a id="automatic-categorization"></a>
+
+新手用户经常问的一个问题，也是一个常见的想法，是“如何为我导入的、只有一侧的 transaction 自动分配一个类别？”例如，从信用卡账户导入 transaction 通常只提供一条 posting，如下所示：
+
+    2016-03-18 * "UNION MARKET"
+      Liabilities:US:CreditCard    -12.99 USD
+
+你必须手动插入一条 Expenses posting，如下所示：
+
+    2016-03-18 * "UNION MARKET"
+      Liabilities:US:CreditCard    -12.99 USD
+      Expenses:Food:Grocery
+
+人们常常觉得这样做很耗时。
+
+我的标准回答是，虽然这听起来很有趣，但如果你有一个配置了 account 名称自动补全功能的文本编辑器，手动完成这件事其实轻而易举，你并不真正需要它。通过自动化来消除这一步并不会节省多少时间。而且，我个人喜欢逐条检查每个 transaction 的内容，有时还会添加注释（例如，我和谁吃了晚餐，那笔 Amazon 扣款是用于什么的，等等），正是在这个时候我会进行分类。
+
+这个问题最终可以通过让用户提供一些简单规则，或者利用过去 transaction 的历史数据来训练一个简单的学习分类器来解决。
+
+*Beancount 目前不提供自动分类 transaction 的机制。你可以在你的 importer 代码中构建此功能。我希望提供一个钩子，让用户可以注册一个补全函数，该函数可以跨所有 importer 运行，你可以在那里接入该代码。*
+
+### 清理收款方<a id="cleaning-up-payees"></a>
+
+在下载文件中找到的收款方名称通常很难看：
+
+-   它们有时是企业的法定名称，由于各种原因，这往往不能反映你去的地点的街道名称。例如，我最近在纽约一家名为“Lucky Bee”的餐厅吃饭，而 OFX 文件中的备注是“KING BEE”。
+
+-   名称有时是缩写或包含一些杂乱字符。在上面的例子中，实际的备注是“KING BEE NEW YO”，其中“NEW YO”是一个被截断的位置字符串。
+
+-   不同数据源之间的“难看”程度不一致。
+
+如果在导入时能够将收款方名称进行转换以规范化，那就太好了。我认为你可以使用一些简单规则，将正则表达式映射到用户提供的名称，从而完成大部分工作。实际上并没有好的自动化方法来获取收款方的“干净名称”。
+
+*Beancount 目前尚未提供让你执行此操作的钩子。未来会提供。你也可以构建一个插件，在加载你的账本时重命名这些 account。我也会构建这个功能——这很容易，并且会产生更美观的输出。*
+
+## 未来工作<a id="future-work"></a>
+
+以下是我真正希望添加的功能列表，除了加固现有功能之外：
+
+-   一个通用的、可配置的 CSV 导入器，你可以对其进行实例化。我计划对此进行一些尝试，并构建一个嗅探器（sniffer），它可以自动确定每一列的作用。
+
+-   一个钩子（hook），允许你注册一个用于后处理 transaction 的回调，该回调在所有导入器中都能工作。
+
+## 相关讨论线程<a id="related-discussion-threads"></a>
+
+-   [入门指南；将账户分配给银行 .csv 数据](https://groups.google.com/d/msg/ledger-cli/u648SA1o-Ek/DzZmu8wVCAAJ)
+
+-   [LedgerHub 的现状……我该如何开始？](https://groups.google.com/d/msg/beancount/qFZvGBLuJos/WSaNY0sEc-wJ)
+
+-   [Rekon 需要你的 CSV 文件](https://groups.google.com/d/msg/ledger-cli/n_WNc-tZabU/sh09irl-C-kJ)
+
+## 历史备注<a id="historical-notes"></a>
+
+曾经存在过本文档所述流程的初始实现。该项目名为 LedgerHub，已于 2016 年 2 月停止维护，经过重写后，其代码被整合进了 Beancount 本身，具体位于 [beancount.ingest](https://github.com/beancount/beancount/tree/master/beancount/ingest/) 库中，而该库现已进一步迁移至 beangulp 项目。原始项目旨在包含各种 importer 的实现，以便与他人共享，但这种共享并未取得太大成功。因此，重写后的版本仅包含用于构建和调用自定义 importer 的基础框架，以及数量非常有限的示例 importer 实现。
+
+关于 LedgerHub 的文档已被保留，它们有助于你理解 Beancount importer 支持的起源和设计选择。你可以在这里找到它们：
+
+-   [原始设计](ledgerhub-design-doc.md)
+
+-   [原始说明 & 最终状态](http://furius.ca/beancount/doc/ledgerhub/manual)（本文档的旧版本）
+
+-   [关于该项目终止原因的分析](http://furius.ca/beancount/doc/ledgerhub/postmortem)（事后分析）
+
+[^1]: 输入此类 transaction 本质上存在三种概念模式：(1) 用户手动创建单个 transaction；(2) 用户将两侧作为单个 transaction 输入以进行账户转账；(3) 两个独立的 transaction 被自动合并为一个。这些模式互为对偶。故事中的复杂之处在于，同一个 transaction 在其各个 account 中往往以不同的日期 posting。Beancount 目前 \[2016 年 3 月\] 不支持单个 transaction 的 postings 具有多个日期，但关于实现对这些输入模式支持的讨论正在进行中。更多详情请参阅 [此文档](settlement-dates-in-beancount.md)。
+
+[^2]: 在自由软件领域，你能找到的最接近通用下载器的工具是用于 OFX 文件的 [ofxclient](https://github.com/captin411/ofxclient)；而在商业领域，[Yodlee](http://www.yodlee.com/) 提供了一项可连接众多金融机构的服务。
+
+[^3]: poppler 中的 ‘pdftotext’ 实用工具提供了有用的 ‘-layout’ 标志，该标志输出的文本文件不会破坏表格结构，这在“每行一笔 transaction”的常规情况下可能很有帮助。
+
+[^4]: 在就此事向他们发送了几封详细邮件后，由于未收到任何回复，也未在下载文件中看到任何变化，我已放弃等待他们修复此问题。
+
+[^5]: 如你所见，这一过程部分解释了我为何不共享我的 importer 代码。为了保持其正常运行，需要存储过多的个人数据。
+
+[^6]: 我确实不太理解原因，因为打开它们进行查看几乎是瞬间完成的，但几乎所有将它们转换为其他格式的工具都慢得多。
+
+[^7]: 我个人更倾向于 Mercurial，因为其命令和输出的清晰度以及其可扩展性，但 Git 存储模型的一个优势是，在其中移动文件是免费的（不会存储额外的副本）。在 Mercurial 仓库中移动文件会消耗一些存储空间。如果你重命名 account 或更改文件组织方式，最终可能会复制许多大文件。
+
+---
+
+> **版权与许可**：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 [NOTICE.md](../NOTICE.md)。

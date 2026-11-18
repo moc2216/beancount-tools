@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beancount Syntax Cheat Sheet · Beancount 中文文档</title>
+  <meta name="description" content="示例账户名称： Assets:US:BofA:Checking">
+  <meta property="og:title" content="Beancount Syntax Cheat Sheet · Beancount 中文文档">
+  <meta property="og:description" content="示例账户名称： Assets:US:BofA:Checking">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">beancount-cheat-sheet</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 语言 / 查询 <span class="count">4</span></div><ul>
+<li><a href="beancount-language-syntax.html">Beancount Language Syntax</a></li>
+<li><a href="beancount-options-reference.html">Beancount Options Reference</a></li>
+<li class="active"><a href="beancount-cheat-sheet.html">Beancount Syntax Cheat Sheet</a></li>
+<li><a href="beancount-query-language.html">Beancount Query Language</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul></ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-02" data-parent="index.html#group-02">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/beancount_cheat_sheet/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/beancount_cheat_sheet/</p>
+</blockquote>
+<h1 id="beancount">Beancount 语法速查表<a id="title"></a></h1>
+<table><tbody><tr class="odd"><td><p><em>示例账户名称：</em> Assets:US:BofA:Checking</p><table><tbody><tr class="odd"><td><h2 id="account-types">账户类型<a></a></h2><table><tbody><tr class="odd"><td><p>Assets</p><p>Liabilities</p><p>Income</p><p>Expenses</p><p>Equity</p></td><td><p><strong>+</strong></p><p><strong>-</strong></p><p><strong>-</strong></p><p><strong>+</strong></p><p><strong>-</strong></p></td></tr></tbody></table></td><td><h2 id="commodities">商品<a></a></h2><p><em>全部大写：</em></p><p>USD, EUR, CAD, AUD</p><p>GOOG, AAPL, RBF1005</p><p>HOME_MAYST, AIRMILES<br />
+HOURS</p></td></tr></tbody></table><h2 id="directives">指令<a></a></h2><blockquote><p><em>通用语法：</em></p><p><strong>YYYY-MM-DD <em>&lt;directive&gt; &lt;arguments...&gt;</em></strong></p></blockquote><h2 id="opening-closing-accounts">开设与关闭账户<a></a></h2><p>2001-05-29 open Expenses:Restaurant</p><p>2001-05-29 open Assets:Checking USD,EUR <em>；货币约束</em></p><p>2015-04-23 close Assets:Checking</p><h2 id="declaring-commodities">声明商品<a></a></h2><p><em>这是可选的；仅当您想按货币附加元数据时使用。</em></p><p>1998-07-22 commodity AAPL<br />
+name: "Apple Computer Inc."</p><h2 id="prices">价格<a></a></h2><p><em>多次使用以填充历史价格数据库：</em></p><p>2015-04-30 price AAPL 125.15 USD</p><p>2015-05-30 price AAPL 130.28 USD</p><h2 id="notes">备注<a></a></h2><p>2013-03-20 note Assets:Checking "Called to ask about rebate"</p><h2 id="documents">文档<a></a></h2><p>2013-03-20 document Assets:Checking "path/to/statement.pdf"</p></td><td><h2 id="transactions">交易<a></a></h2><p>2015-05-30 * "Some narration about this transaction"<br />
+Liabilities:CreditCard -101.23 USD<br />
+Expenses:Restaurant 101.23 USD</p><p>2015-05-30 ! "Cable Co" "Phone Bill" #tag ˆlink</p><p>id: "TW378743437" <em>；元数据</em><br />
+Expenses:Home:Phone 87.45 USD<br />
+Assets:Checking <em>；您可以省略一个金额</em></p><h3 id="postings">分录<a></a></h3><p>... 123.45 USD <em>简单</em><br />
+... 10 GOOG <strong>{502.12 USD}</strong> <em>带单位成本<br />
+</em> ... 10 GOOG <strong>{{5021.20 USD}}</strong> <em>带总成本</em></p><p>... 10 GOOG <strong>{502.12 # 9.95 USD}</strong> <em>带两种成本</em><br />
+... 1000.00 USD <strong>@ 1.10 CAD</strong> <em>带单位价格</em><br />
+... 10 GOOG {502.12 USD} @ 1.10 CAD <em>带成本与价格</em><br />
+... 10 GOOG {502.12 USD, <strong>2014-05-12</strong>} <em>带日期</em><br />
+<strong>!</strong> ... 123.45 USD ... <em>带标志</em></p><h2 id="balance-assertions-and-padding">余额断言与填充<a></a></h2><p><em>仅断言给定货币的金额：</em></p><p>2015-06-01 balance Liabilities:CreditCard -634.30 USD</p><p><em>自动插入 transaction 以满足以下断言：</em></p><p>YYYY-MM-DD pad Assets:Checking Equity:Opening-Balances</p><h2 id="events">事件<a></a></h2><p>YYYY-MM-DD event "location" "New York, USA"<br />
+YYYY-MM-DD event "address" "123 May Street"</p><h2 id="options">选项 <a></a></h2><p>option "title" "My Personal Ledger"</p><p><em>请参阅 <a href="beancount-options-reference.html">此文档</a> 获取支持的完整选项列表。</em></p><h2 id="other">其他<a></a></h2><p>pushtag #trip-to-peru</p><p>...</p><p>poptag #trip-to-peru</p><p>; 注释以分号开头</p></td></tr></tbody></table>
+
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

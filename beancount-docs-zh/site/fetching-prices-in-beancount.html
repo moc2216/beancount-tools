@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prices in Beancount · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais，2015 年 12 月">
+  <meta property="og:title" content="Prices in Beancount · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais，2015 年 12 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">fetching-prices-in-beancount</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 投资账本 <span class="count">5</span></div><ul>
+<li><a href="how-inventories-work.html">How Inventories Work</a></li>
+<li><a href="trading-with-beancount.html">Trading with Beancount</a></li>
+<li><a href="calculating-portfolio-returns.html">Calculating Portfolio Returns</a></li>
+<li class="active"><a href="fetching-prices-in-beancount.html">Prices in Beancount</a></li>
+<li><a href="stock-vesting-in-beancount.html">Stock Vesting in Beancount</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#_1">译者导读</a></li>
+<li><a href="#_2">引言</a></li>
+<li><a href="#_3">问题</a></li>
+<li><a href="#bean-price">“bean-price” 工具</a><ul>
+<li><a href="#source">source 字符串</a></li>
+<li><a href="#source_1">回退 source</a></li>
+<li><a href="#price">反向 price</a></li>
+<li><a href="#_4">日期</a></li>
+<li><a href="#_5">缓存</a></li>
+</ul>
+</li>
+<li><a href="#beancount-price_1">从 Beancount 输入文件获取 Price</a><ul>
+<li><a href="#asset">抓取哪些 Asset</a></li>
+</ul>
+</li>
+<li><a href="#_6">结论</a><ul>
+<li><a href="#_7">编写你自己的脚本</a></li>
+<li><a href="#_8">贡献</a></li>
+</ul>
+</li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-04" data-parent="index.html#group-04">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/fetching_prices_in_beancount/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/fetching_prices_in_beancount/</p>
+</blockquote>
+<h1 id="beancount-price">Beancount 中的 Price<a id="title"></a></h1>
+<p><a href="mailto:blais@furius.ca">Martin</a> <a href="mailto:blais@furius.ca">Blais</a>，2015 年 12 月</p>
+<p><a href="http://furius.ca/beancount/doc/prices">http://furius.ca/beancount/doc/prices</a></p>
+<h2 id="_1">译者导读</h2>
+<p>这篇讲的是 Beancount 如何获取并维护 price 数据。它对 advanced 用户的价值不在"怎么抓 price"本身，而在下面几点：</p>
+<ol>
+<li><strong>Beancount 是 hermetic 的</strong>：price 永远不会自动从网络抓取，任何一次报表运行都是确定性的、可离线的。理解这一点，才能理解为什么需要显式的 Price directive，以及为什么抓取工具是外置的、且默认只抓"当前持仓真正需要的" price。</li>
+<li><strong><code>bean-price</code> 的核心抽象是 source string</strong>：<code>&lt;报价货币&gt;:&lt;module&gt;/[^]&lt;symbol&gt;</code>。它真正的威力在于 <strong>extensibility</strong>——你可以写自己的 Python 抓取模块放到 PYTHONPATH 上，通过 module 名直接引用，完全不必修改 Beancount 本身。</li>
+<li><strong>几个容易踩的细节</strong>：fallback source 用逗号分隔依次尝试；inverted price 用 <code>^</code> 前缀，且 <code>--swap-inverted</code>（交换货币方向）与"取 price 的倒数"是两种不同的做法；inverted 之后的 precision 可能与抓取到的不一致。</li>
+<li><strong>"抓取哪些 asset"其实是三个列表的交集</strong>：<code>--inactive</code>、<code>--undeclared</code>、<code>--clobber</code>、<code>--all</code> 这几个 option 的语义，决定了默认只抓"当前持仓所需"的 price，其余都要显式放宽。</li>
+</ol>
+<blockquote>
+<p><strong>译者注 · 版本提示</strong>：本文写于 2015 年，当时 <code>bean-price</code> 随 Beancount 一起分发。后来它连同各 price source 一起独立为 <a href="https://github.com/beancount/beanprice/">beanprice</a> 包，Beancount v2 起不再内置该工具；文中提到的 Google Finance source 也已被废弃移除，目前内置抓取源以 Yahoo! Finance 为主。安装方式与命令行入口请以 beanprice 仓库为准。</p>
+</blockquote>
+<hr />
+<p><em>本文介绍 Beancount 中用于抓取并维护 price 数据的工具。</em></p>
+<h2 id="_2">引言<a id="introduction"></a></h2>
+<p>处理一个 Beancount 文件，从定义上说，仅限于文件自身的内容。特别是，commodity 的最新 price <strong>永远不会</strong>自动从互联网抓取。这是有意为之：目的是让任何一次报表运行都是确定性的，并且可以离线运行。没有任何意外。</p>
+<p>然而，为了计算资产的市场价值，我们确实需要访问 price 信息。为此，Beancount 提供了一个 Price directive，可以通过在输入文件中内联插入这些 price point，来填充它内存中的 price 数据库：</p>
+<p>2015-11-20 price ITOT 95.46 USD<br />
+2015-11-20 price LQD 115.63 USD<br />
+2015-11-21 price USD 1.33495 CAD<br />
+…</p>
+<p>当然，你可以手动完成这件事：在线查询 price，然后自己写出这些 directive。但对于公开交易的资产，你可以自动化这个过程——调用一些代码来下载 price 并为你写出 directive。</p>
+<p>Beancount 自带了一些工具来帮助你完成这件事。本文介绍这些工具。</p>
+<h2 id="_3">问题<a id="the-problem"></a></h2>
+<p>在维护 Beancount 文件的语境下，我们有几项特定的需求需要解决。</p>
+<p>第一，我们不能指望用户总是及时更新输入文件。这意味着我们不仅要能抓取最新 price，还要能抓取<strong>过去的历史 price</strong>。Beancount 提供了一个接口来提供这些 price，并提供了若干实现（从 Yahoo! Finance 和 Google Finance 抓取）。</p>
+<p>第二，我们不想为那些在某个时间点上与我们无关的持仓存储太多 price。文件中持有的资产列表随时间变化。理想情况下，我们希望只包含那些<strong>正在持有期间</strong>的资产的 price 列表。Beancount 的 price 维护工具能够判断出：在某个特定日期，它需要为哪些 commodity 抓取 price。</p>
+<p>第三，如果某个 price 已经出现在输入文件中，我们不想重复抓取。这些工具会检测到这种情况并跳过这些 price。此外还有一个 caching 机制，可以避免冗余的网络请求。</p>
+<p>最后，虽然我们提供了一些 price source 的基础实现，但我们无法为所有可能的在线数据源和网站都提供这样的代码。这个问题类似于从各种机构导入和提取数据。为了解决它，我们提供了一个 <strong>extensibility（可扩展性）</strong> 机制：你可以在 Python 模块中实现自己的 price source 抓取器，并在输入文件中通过把模块名指定为该 commodity 的 source 来指向它。</p>
+<h2 id="bean-price">“bean-price” 工具<a id="the-bean-price-tool"></a></h2>
+<p>Beancount 自带一个名为 “bean-price” 的命令行工具，整合了上述思路。默认情况下，这个脚本接受一个 Beancount 输入文件名列表，并抓取为计算当前 account 中持仓的最新市场价值所需的 price：</p>
+<pre><code>bean-price /home/joe/finances/joe.beancount
+</code></pre>
+<p>你也可以提供一个要运行的特定 price 抓取任务列表，例如：</p>
+<pre><code>bean-price -e USD:google/TSE:XUS CAD:mysources.morningstar/RBF1005
+</code></pre>
+<p>这些任务会并发运行，所以应该相当快。</p>
+<h3 id="source">source 字符串 <a id="source-strings"></a></h3>
+<p>每个这种 "job source string" 的通用格式是：</p>
+<pre><code>&lt;quote-currency&gt;:&lt;module&gt;/[^]&lt;symbol&gt;
+</code></pre>
+<p>例如：</p>
+<pre><code>USD:beancount.prices.sources.google/NASDAQ:AAPL
+</code></pre>
+<p>“quote-currency” 是 commodity 被报价所用的货币。例如，苹果的股票以美元报价。</p>
+<p>"module" 是一个 Python module 的名字，该 module 包含一个可以被实例化、并能连接到数据源提取 price 数据的 Source 类。这些 module 会被自动导入，其中的 Source 类会被实例化，以便从它们所支持的特定在线数据源拉取 price。这使得你可以编写自己的抓取代码而无需修改这个脚本。你的代码可以放在 Python PYTHONPATH 上的任何位置，而且你完全不必为了让它工作而修改 Beancount 本身。</p>
+<p>“symbol” 是传给 price 抓取器用于查询该货币的字符串。例如，苹果股票在 Nasdaq 交易，它在 Google Finance source 中对应的 symbol 是 “NASDAQ:AAPL”。其他 price source 可能使用不同的符号体系，例如有的可能要求资产的 CUSIP。</p>
+<p>我们提供了 price source 的默认实现；内置了 Yahoo! Finance 和 Google Finance 的抓取器，它们覆盖了一大类常见的公开投资类型（例如股票和一些共同基金）。为方便起见，module 名总是先在 "<code>beancount.prices.sources</code>" 这个 package 下搜索，这些实现就放在那里。这就是为什么，例如要使用内置的 Yahoo! Finance 数据抓取器时，你不需要写出完整的 "<code>beancount.prices.sources.yahoo/AAPL</code>"，而只需写 "<code>yahoo/AAPL</code>"。</p>
+<h3 id="source_1">回退 source <a id="fallback-sources"></a></h3>
+<p>在实践中，在线抓取 price 经常失败。数据源通常只支持数量有限的资产，而且即便是支持的资产，支持程度也可能各不相同。例如，Google Finance 支持股票的历史 price，但不返回货币类 instrument 的历史 price（这些限制可能更多与它们和上游数据提供商之间的合同约定有关，而非技术限制）。</p>
+<p>为此，一个 source string 可以提供多个数据 source，用逗号分隔。例如：</p>
+<pre><code>USD:google/CURRENCY:GBPUSD,yahoo/GBPUSD
+</code></pre>
+<p>每个 source 会依次尝试，如果其中一个无法返回有效的 price，就尝试下一个作为 fallback。希望是指定的 source 中至少有一个能成功。</p>
+<h3 id="price">反向 price <a id="inverted-prices"></a></h3>
+<p>有时候，只能获取某个 instrument 的逆方向的 price。货币尤其常见。例如，以美元报价的加元 price，由 USD/CAD 市场提供，而该市场给出的是 1 美元兑多少加元（即倒数）。为了使用它，你可以在 instrument 名前加 "<code>^</code>" 前缀，指示工具计算所抓取 price 的倒数：</p>
+<pre><code>USD:google/^CURRENCY:USDCAD
+</code></pre>
+<p>如果要像这样对 source price 取倒数，precision 可能与抓取到的不同。例如，如果 USD/CAD 的 price 是 1.32759，那么上面这条 directive 在为 “CAD” 这个 instrument 定价时会输出：</p>
+<pre><code>2015-10-28 price CAD  0.753244601119 USD
+</code></pre>
+<p>默认情况下，倒数汇率会按照其他 Price directive 对这些数字取整的同样方式进行取整。</p>
+<p>你可能已经知道，Beancount 的内存 price 数据库是双向工作的（所有汇率的倒数都会被自动存储）。所以，如果你更希望输出的 Price 条目是交换了货币、而不是对汇率数字本身取倒数，可以使用 <code>--swap-inverted</code> option。在前面那个为 CAD 定价的例子中，它会输出：</p>
+<pre><code>2015-10-28 price USD   1.32759 CAD
+</code></pre>
+<h3 id="_4">日期 <a id="date"></a></h3>
+<p>默认情况下，抓取的是资产的最新 price。你可以用一个 option 改为抓取过去某个指定日期的 price：</p>
+<pre><code>bean-price --date=2015-02-03 …
+</code></pre>
+<p>如果你用输入文件来指定要抓取的 price 列表，工具会判断出<strong>在那个时间点</strong>账面上持有的资产列表，并只为这些资产抓取历史 price。</p>
+<h3 id="_5">缓存 <a id="caching"></a></h3>
+<p>Price 会被自动缓存（如果是当前且最新的 price，只缓存很短的时间，大约半小时）。当你需要连续多次运行这个脚本进行排错时，这很方便。</p>
+<p>你可以用一个 option 禁用缓存：</p>
+<pre><code>bean-price --no-cache
+</code></pre>
+<p>你也可以让脚本在抓取 price 之前先清空缓存：</p>
+<pre><code>bean-price --clear-cache
+</code></pre>
+<h2 id="beancount-price_1">从 Beancount 输入文件获取 Price<a id="prices-from-a-beancount-input-file"></a></h2>
+<p>通常，人们用 Beancount 输入文件来指定要抓取的货币列表。为此，你应该在输入文件中为每一个想要抓取 price 的货币提供一个 Commodity directive，像这样：</p>
+<pre><code>2007-07-20 commodity VEA
+
+  price: "USD:google/NYSEARCA:VEA"
+</code></pre>
+<p>"price" metadata 应该包含一个 price source string 列表。例如，一个股票产品可能长这样：</p>
+<pre><code>2007-07-20 commodity CAD
+
+  price: "USD:google/CURRENCY:USDCAD,yahoo/USDCAD"
+</code></pre>
+<p>而一个货币可能需要换算到多个目标货币：</p>
+<pre><code>1990-01-01 commodity GBP
+
+  price: "USD:yahoo/GBPUSD CAD:yahoo/GBPCAD CHF:yahoo/GBPCHF"
+</code></pre>
+<h3 id="asset">抓取哪些 Asset<a id="which-assets-are-fetched"></a></h3>
+<p>从一个 Beancount 输入文件计算"需要 price 的 commodity 列表"有很多种方法：</p>
+<ol>
+<li>
+<p><strong>Commodity directives。</strong> 文件中所有带有 “price” metadata 的 Commodity directive 组成的列表。对于其中每个持仓，会查阅该 directive，并用它的 "<code>price</code>" metadata 字段来指定从哪里抓取 price。</p>
+</li>
+<li>
+<p><strong>按 cost 持有的资产的 commodity。</strong> 在某个特定日期所有按 cost 持有的持仓的 price。因为这些持仓是按 cost 持有的，我们可以假设它们的 commodity 有一个对应的、随时间变化的 price。</p>
+</li>
+<li>
+<p><strong>被换算的 commodity。</strong> 那些过去从其他 commodity 换算而来的持仓的 price（例如，把某种货币的现金从另一种货币换算过来）。</p>
+</li>
+</ol>
+<p>默认情况下，要抓取的 ticker 列表只包括这三个列表的<strong>交集</strong>。这是因为这个脚本最常见的用途是：为某个特定日期抓取缺失的 price，而且只抓需要的那些。</p>
+<p><strong>不活跃的 commodity。</strong> 你可以用 “<code>--inactive</code>” option 来抓取 (1) 的完整 price 集合，而不考虑 (2) 和 (3) 中确定的资产持仓。</p>
+<p><strong>未声明的 commodity。</strong> 没有对应 “Commodity” directive 的 commodity 默认会被忽略。要包含输入文件中出现过的完整 commodity 列表，使用 “<code>--undeclared</code>” option。</p>
+<p><strong>Clobber。</strong> 对于同一数据已经存在的 price directive 默认会被排除，因为该 price 已经在文件里了。你可以用 “<code>--clobber</code>” 来忽略已有的 price directive，从而不把抓取到的内容过滤掉。</p>
+<p>最后，你可以用 “--all” 来包含不活跃和未声明的 commodity，并允许覆盖已有的。除了测试之外，你可能不想用它。</p>
+<p>如果你想排错并打印出所见到的 commodity 列表，把 “<code>--verbose</code>” option 用两次，即 “<code>-vv</code>”。你也可以只用 “<code>--dry-run</code>” option 打印出将要抓取的 price 列表，它会在真正抓取缺失 price 之前停下来。</p>
+<h2 id="_6">结论<a id="conclusion"></a></h2>
+<h3 id="_7">编写你自己的脚本<a id="writing-your-own-script"></a></h3>
+<p>如果这个工具定义的工作流不适合你的需求，你想自己写一个脚本，你不必从零开始；你应该能够复用现有的 price 抓取代码。例如，给定一个已有文件，每周五抓取所有资产的 price 来补齐缺失 price 的历史记录会很方便。另一个例子是：抓取在有投入和分配的情况下正确计算投资收益所需的全部 price directive。</p>
+<p>你可以在 <a href="https://github.com/beancount/beanprice/">beanprice</a> 仓库里找到多个 price source 的代码，以及其他 price source，比如 pricehist 模块。</p>
+<h3 id="_8">贡献<a id="contributions"></a></h3>
+<p>如果这个工作流很适合你，你想向 Beancount 贡献某个 price source 抓取器，请联系邮件列表。我愿意纳入那些经过了非常仔细的单元测试、并且已经使用了一段时间的通用抓取器。</p>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

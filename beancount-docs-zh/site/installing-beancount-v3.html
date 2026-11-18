@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Installing Beancount (C++ version) · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais - 2020 年 7 月">
+  <meta property="og:title" content="Installing Beancount (C++ version) · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais - 2020 年 7 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">installing-beancount-v3</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 入门 / 安装 / 运行 <span class="count">5</span></div><ul>
+<li><a href="beancount-user-manual.html">Beancount User&#x27;s Manual</a></li>
+<li><a href="getting-started-with-beancount.html">Getting Started with Beancount</a></li>
+<li><a href="installing-beancount.html">Installing Beancount</a></li>
+<li class="active"><a href="installing-beancount-v3.html">Installing Beancount (C++ version)</a></li>
+<li><a href="running-beancount-and-generating-reports.html">Running Beancount &amp; Generating Reports</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#python">设置 Python</a></li>
+<li><a href="#bazel">使用 Bazel 构建</a><ul>
+<li><a href="#bazel_1">Bazel 依赖项</a></li>
+<li><a href="#_1">构建与测试</a></li>
+<li><a href="#_2">开发</a></li>
+<li><a href="#ingestion">数据摄取（Ingestion）</a></li>
+<li><a href="#tbd">待定（TBD）</a></li>
+</ul>
+</li>
+<li><a href="#meson">使用 meson 进行开发安装</a><ul>
+<li><a href="#linux">在 Linux 上</a></li>
+<li><a href="#windows">在 Windows 上</a></li>
+</ul>
+</li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-01" data-parent="index.html#group-01">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/installing_beancount_v3/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/installing_beancount_v3/</p>
+</blockquote>
+<h1 id="beancountc">安装 Beancount（C++ 版本）<a id="title"></a></h1>
+<p><a href="mailto:blais@furius.ca">Martin Blais</a> - 2020 年 7 月</p>
+<p><a href="http://furius.ca/beancount/doc/v3-install">http://furius.ca/beancount/doc/v3-install</a></p>
+<p><em>以下是在您的计算机上下载并运行 Beancount v3（开发中）的说明。对于 v2，请参阅此文档：<a href="installing-beancount.html">Beancount - 安装 (v2)</a></em></p>
+<table><tbody><tr class="odd"><td><em><strong>本文档介绍的是 Beancount v3，这是一个实验性的开发中版本（截至 2020 年 7 月）；构建稳定版本（Beancount v2）的说明可在<a href="installing-beancount.html">另一份文档</a>中找到。</strong></em></td></tr></tbody></table>
+
+<h2 id="python">设置 Python<a id="setup-python"></a></h2>
+<p>运行程序仍然需要 Python 依赖项。</p>
+<pre><code>pip install –r requirements/dev.txt
+</code></pre>
+<h2 id="bazel">使用 Bazel 构建<a id="building-with-bazel"></a></h2>
+<p><em>警告：这是一个实验性开发分支。不要期望一切都已完美打磨。</em></p>
+<h3 id="bazel_1">Bazel 依赖项<a id="bazel-dependencies"></a></h3>
+<p>Beancount v3 使用 Bazel 构建系统，这在很大程度上将您与计算机上的本地安装和依赖项隔离开来。</p>
+<p>需要安装的依赖项如下：</p>
+<ul>
+<li>
+<p><strong>Bazel 本身。</strong> 请遵循 <a href="https://bazel.build/">https://bazel.build/</a> 上的说明。</p>
+</li>
+<li>
+<p><strong>C++ 编译器。</strong> g++ 或 clang 均可。我使用的是 clang-11。</p>
+</li>
+<li>
+<p><strong>Python 运行时</strong>（版本 3.8 或更高）。请从您的发行版安装。</p>
+</li>
+</ul>
+<p>Bazel 会自行下载并编译其所需的所有库（甚至包括代码生成器，例如 Bison），并按照构建中指定的精确版本进行构建，因此您无需为此担心。</p>
+<h3 id="_1">构建与测试<a id="building-testing"></a></h3>
+<p>只需运行以下命令：</p>
+<pre><code>bazel build //bin:all
+</code></pre>
+<p>目前还没有安装脚本，您必须从源代码运行。您可以使用以下命令运行单个程序（例如 bean-check）：</p>
+<pre><code>bazel run //bin:bean_check -- /path/to/ledger.beancount
+</code></pre>
+<p>或者，如果您不介意自动重新构建修改后的代码，可以这样运行：</p>
+<pre><code> ./bazel-bin/bin/bean_check /path/to/ledger.beancount
+</code></pre>
+<h3 id="_2">开发<a id="development"></a></h3>
+<p>您可以像这样运行所有单元测试：</p>
+<pre><code>bazel test //...
+</code></pre>
+<p>由于 Bazel 对所有依赖项都有详细的记录，在修改代码后重新运行此命令只会重新测试受影响的 targets；这使得带有测试的迭代开发变得更加有趣。</p>
+<p>另一个优势是，由于构建所依赖的所有库都是下载并构建的，虽然这在首次构建时可能较慢，但它允许我们使用非常新发布的依赖代码版本。</p>
+<p>Targets 在其目录本地的 BUILD 文件中定义。所有构建规则都可以在 //third_party 下找到。</p>
+<h3 id="ingestion">数据摄取（Ingestion）<a></a></h3>
+<p>数据摄取代码涉及导入位于仓库外部的代码。Bazel 二进制文件是自包含的，如果未声明为依赖项，导入模块将会失败，因此运行 <code>//bin:bean_extract</code> target 可能无法正常工作。</p>
+<p>这目前还不起作用（除非将您的导入配置构建为一个显式链接到 Beancount 的 py_binary() target）。通过定义一个合适的 WORKSPACE 文件来从中获取规则，可以在不编写太多 Bazel 代码的情况下实现这一点。我还没有提供这方面的示例（待定）。</p>
+<p>作为变通方法，您可以设置 PYTHONPATH 以从源代码位置导入，并预先创建一个指向解析器 .so 文件的符号链接。您可以像这样操作：</p>
+<pre><code>make bazel-link
+</code></pre>
+<h3 id="tbd">待定（TBD）<a></a></h3>
+<p>还有一些构建集成任务需要完成：</p>
+<ul>
+<li>
+<p>尚不支持 pytype。</p>
+</li>
+<li>
+<p>pylint 也未集成到构建中。</p>
+</li>
+</ul>
+<h2 id="meson">使用 meson 进行开发安装 <a id="installation-for-development-with-meson"></a></h2>
+<p><em><strong>注意</strong>：本节基于以下讨论进行了更新：<a href="https://groups.google.com/g/beancount/c/7ppbyz_5B5w">https://groups.google.com/g/beancount/c/7ppbyz_5B5w</a></em></p>
+<p>Beancount v3 的 Bazel 构建会编译一些实验性的 C++ 代码，截至撰写本文时（2024 年 3 月 9 日），这些代码除了用于技术演示外，尚未用于其他任何用途。在“生产”环境中，v3 使用 meson-python 来构建扩展模块，并将其打包成 Python wheel。这就是 pip 在安装过程中所使用的机制。</p>
+<p>本节描述的是用于开发 beancount v3 python 代码的安装流程，而不是用于实验 C++ 代码。</p>
+<h3 id="linux">在 Linux 上<a id="on-linux"></a></h3>
+<p>已在 Ubuntu 上使用 python3.12 和 python3.12-dev 进行测试</p>
+<p>相关链接</p>
+<p><a href="https://mesonbuild.com/meson-python/how-to-guides/editable-installs.html#build-dependencies">https://mesonbuild.com/meson-python/how-to-guides/editable-installs.html</a></p>
+<pre><code>git clone https://github.com/beancount/beancount.git
+</code></pre>
+<p>创建并激活虚拟环境</p>
+<pre><code>python3.12 -m venv beancount/venv
+. beancount/venv/bin/activate
+cd beancount
+</code></pre>
+<p>安装所需的软件包。</p>
+<pre><code>python -m pip install meson-python meson ninja
+</code></pre>
+<p>以可编辑模式安装 beancount，且不进行构建隔离</p>
+<pre><code>python -m pip install --no-build-isolation --editable .
+</code></pre>
+<p><strong>注意：</strong> 有一种 <a href="https://groups.google.com/g/beancount/c/7ppbyz_5B5w/m/YlHiKhynFAAJ">观点</a> 认为不需要 --no-build-isolation 选项，但也有人提到，如果没有这个选项，<a href="https://groups.google.com/g/beancount/c/7ppbyz_5B5w/m/nSxCzuutFAAJ">安装将无法正常工作</a>。此外，<a href="https://mesonbuild.com/meson-python/how-to-guides/editable-installs.html#editable-installs">文档</a> 也建议需要此选项。这可能取决于 Linux 环境的类型</p>
+<p>安装 pytest</p>
+<pre><code>python -m pip install pytest
+</code></pre>
+<p>运行测试并确保一切正常：</p>
+<pre><code>pytest --import-mode=importlib beancount/
+</code></pre>
+<h3 id="windows">在 Windows 上<a id="on-windows"></a></h3>
+<p>已在 64 位 Windows 10 Pro 上测试</p>
+<p><strong>先决条件</strong></p>
+<p>安装 Microsoft Visual Studio（已在 v 2022 上测试）</p>
+<p><strong>步骤</strong></p>
+<pre><code>git clone https://github.com/beancount/beancount.git
+cd beancount
+</code></pre>
+<p>如果运行的是 x64 位 Windows，请启动 "x64 Native Tools Command Prompt for VS 20XX"。为此，请按下并释放 Windows 键，然后输入 x64</p>
+<p><img alt="Windows 开始菜单搜索 “x64 Native Tools Command Prompt for VS 2022”，红圈标出该条目" src="assets/images/installing-beancount-v3/9c5ea265a2ff61958e89a0965bd95bbd54854eb0.png" /></p>
+<p>打开此提示符</p>
+<p>转到 beancount 安装的目录</p>
+<pre><code>C:\Program Files\Microsoft Visual Studio\2022\Community&gt;cd C:\_code\t\beancount
+C:\_code\t\beancount&gt;
+</code></pre>
+<p>激活虚拟环境</p>
+<pre><code>C:\_code\t\beancount&gt;venv\Scripts\Activate
+(venv) C:\_code\t\beancount&gt;
+</code></pre>
+<p>安装所需的软件包</p>
+<pre><code>(venv) C:\_code\t\beancount&gt;py -m pip install meson-python meson ninja
+</code></pre>
+<p>以可编辑模式安装 beancount。与 Linux 不同，在 Windows 上 <strong><code>--no-build-isolation</code></strong> 一方面会抛出一些错误，另一方面似乎并不需要</p>
+<pre><code>(venv) C:\_code\t\beancount&gt; py -m pip install --editable .
+</code></pre>
+<p>安装 pytest</p>
+<pre><code>(venv) C:\_code\t\beancount&gt;py -m pip install pytest
+</code></pre>
+<p>运行测试</p>
+<pre><code>(venv) C:\_code\t\beancount&gt;pytest --import-mode=importlib beancount
+</code></pre>
+<p>注意：Windows 上的一些测试会失败，这是由于通用的 <a href="https://github.com/beancount/beancount/issues?q=is%3Aopen+is%3Aissue+label%3Aportability">可移植性问题</a></p>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

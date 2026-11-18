@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beancount User&#x27;s Manual · Beancount 中文文档</title>
+  <meta name="description" content="这是所有与 Beancount 相关的文档的顶级页面。">
+  <meta property="og:title" content="Beancount User&#x27;s Manual · Beancount 中文文档">
+  <meta property="og:description" content="这是所有与 Beancount 相关的文档的顶级页面。">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">beancount-user-manual</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 入门 / 安装 / 运行 <span class="count">5</span></div><ul>
+<li class="active"><a href="beancount-user-manual.html">Beancount User&#x27;s Manual</a></li>
+<li><a href="getting-started-with-beancount.html">Getting Started with Beancount</a></li>
+<li><a href="installing-beancount.html">Installing Beancount</a></li>
+<li><a href="installing-beancount-v3.html">Installing Beancount (C++ version)</a></li>
+<li><a href="running-beancount-and-generating-reports.html">Running Beancount &amp; Generating Reports</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#_1">用户文档</a></li>
+<li><a href="#_2">食谱与示例</a></li>
+<li><a href="#_3">开发者文档</a></li>
+<li><a href="#_4">增强提案与讨论</a></li>
+<li><a href="#v3">V3 文档</a></li>
+<li><a href="#_5">关于本文档</a></li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-01" data-parent="index.html#group-01">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/index/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/index/</p>
+</blockquote>
+<h1 id="beancount">Beancount 用户手册<a id="title"></a></h1>
+<p><em>这是所有与 Beancount 相关的文档的顶级页面。</em></p>
+<p><a href="http://furius.ca/beancount/doc/index">http://furius.ca/beancount/doc/index</a></p>
+<h2 id="_1">用户文档<a id="documentation-for-users"></a></h2>
+<p><a href="command-line-accounting-in-context.html">命令行记账的背景：一篇说明性文档</a>，解释了什么是命令行记账，我<em>为什么</em>这样做，并通过一个简单的例子说明我<em>如何</em>操作。请将其作为入门阅读。</p>
+<p><a href="the-double-entry-counting-method.html">复式记账法</a>：对复式记账法的温和介绍，其术语与命令行记账系统所做的假设和简化相兼容。</p>
+<p><a href="installing-beancount.html">安装 Beancount</a>：在您的计算机上下载和安装的说明，以及软件发布信息。</p>
+<p><a href="running-beancount-and-generating-reports.html">运行 Beancount 并生成报告</a>：如何运行 Beancount 可执行文件并生成 report。本文包含面向 Beancount 用户的技术信息。</p>
+<p><a href="getting-started-with-beancount.html">Beancount 入门</a>：解释如何创建、初始化和组织输入文件的基本知识，以及声明 account 和添加 pad 指令的过程。</p>
+<p><a href="beancount-language-syntax.html">Beancount 语言语法</a>：带有示例的语言语法完整描述。这是 Beancount 语言的主要参考。</p>
+<p><a href="beancount-options-reference.html">Beancount 选项参考</a>：对所有可能选项值的描述和解释。</p>
+<p><a href="precision-tolerances.html">精度与容差</a>：transaction 和 balance assertion 允许从上下文中推断出的少量不精确性（tolerance）。本文档解释了其工作原理。</p>
+<p><a href="beancount-query-language.html">Beancount 查询语言</a>：对 bean-query 命令行客户端工具的高级概述，该工具允许您从 Beancount 账本文件中提取各种数据表。</p>
+<p><a href="beancount-cheat-sheet.html">Beancount 速查表</a>：单页“速查表”，总结了 Beancount 语法。</p>
+<p><a href="how-inventories-work.html">库存如何工作</a>：解释库存、其表示方式，以及 lot 如何与库存中持有的头寸进行匹配的详细信息。这是阅读交易文档的预备知识。</p>
+<p><a href="exporting-your-portfolio.html">导出您的投资组合</a>：如何将您的投资组合导出到外部投资组合跟踪网站。</p>
+<p><a href="tutorial-example.html">教程与示例</a>：一个现实的示例账本文件，包含假设的 Beancount 用户几年的财务生活。这可用于测试 Beancount，查看其 report 或 Web 界面的样子。这可以快速让您了解使用 Beancount 能获得什么。</p>
+<p><a href="https://groups.google.com/forum/#!forum/beancount">Beancount 邮件列表</a>：特定于 Beancount 的问题和讨论发生在那里。相关的还有 <a href="https://groups.google.com/forum/#!forum/ledger-cli">Ledger-CLI 论坛</a>，其中包含更多通用讨论，并作为命令行记账主题的元列表。</p>
+<p><a href="beancount-history-and-credits.html">Beancount 历史与致谢：</a> 描述 Beancount 的开发历史，并向其贡献者致谢。</p>
+<p><a href="a-comparison-of-beancount-and-ledger-hledger.html">Beancount 与 Ledger 及 HLedger 的比较</a>：命令行记账系统之间的定性功能比较。</p>
+<p><a href="fetching-prices-in-beancount.html">在 Beancount 中获取价格</a>：如何使用 Beancount 的工具获取和维护您资产的 price 数据库。</p>
+<p><a href="importing-external-data.html">导入外部数据</a>：描述从金融机构可下载的外部文件导入数据的过程，以及 Beancount 提供的用于自动化部分工作的工具和库。</p>
+<h2 id="_2">食谱与示例<a id="cookbook-examples"></a></h2>
+<p><em>这些文档展示了如何使用复式记账法来完成特定任务。请利用这些文档来培养对如何构建你的 account 结构的直觉。</em></p>
+<p><a href="command-line-accounting-cookbook.html">命令行记账食谱</a>：关于如何记录各种不同类型 financial transaction 的示例。这无疑是建立对如何最佳使用复式记账法直觉的最好方式。</p>
+<p><a href="trading-with-beancount.html">使用 Beancount 进行交易</a>：对交易损益（P/L）的解释，以及如何使用 Beancount 处理各种 investment 和交易场景的实例。这是食谱的补充。</p>
+<p><a href="stock-vesting-in-beancount.html">Beancount 中的股票归属</a>：一个示例，展示了如何处理限制性股票单位（RSU）以及科技公司和初创公司常见的归属事件。</p>
+<p><a href="sharing-expenses-with-beancount.html">使用 Beancount 分摊费用</a>：一个现实且详细的示例，展示了如何使用复式记账法与他人分摊旅行或项目的费用。</p>
+<p><a href="how-we-share-expenses.html">我们如何分摊费用</a>：对一种持续系统的更详细描述，该系统用于 (a) 在双方都做出贡献的伴侣之间分摊费用，以及 (b) 向拥有自己账本的具体项目（我们的儿子）分摊费用。这描述了我们真实的系统。</p>
+<p><a href="health-care-expenses.html">医疗费用</a>（未完成）：一份尚未完全完成的文档，解释了如何处理美国网络内和网络外提供者的医疗费用序列。</p>
+<p><a href="tracking-medical-claims.html">追踪医疗索赔</a>：一个示例结构，用于追踪网络外心理治疗课程，包括自付费用、医疗索赔以及针对未覆盖部分的关联 HSA 报销。</p>
+<p><a href="calculating-portfolio-returns.html">计算投资组合回报</a>：如何从 Beancount 账本中计算投资组合回报。这描述了在实验脚本中完成的工作，以及提取正确数据所涉及的过程。</p>
+<h2 id="_3">开发者文档<a id="documentation-for-developers"></a></h2>
+<p><a href="beancount-scripting-plugins.html">Beancount 脚本与插件</a>：一份指南，介绍如何编写脚本以在内存中加载账本内容并处理 directive，以及如何编写插件来转换它们。</p>
+<p><a href="beancount-design-doc.html">Beancount 设计文档</a>：关于程序架构和设计选择、代码约定、不变量及方法论的信息。如果你想获得更深入的理解，请阅读此文档。</p>
+<p><a href="ledgerhub-design-doc.html">LedgerHub 设计文档</a>：在 <a href="http://github.com/beancount/beancount/tree/master/beancount/ingest/">beancount.ingest</a> 中实现的导入工具和库的设计与架构。这曾是一个名为 LedgerHub 的独立项目（现已停止维护），其有用部分最终被整合进了 Beancount。这是略显过时的原始设计文档。</p>
+<p><a href="https://github.com/beancount/beancount/">源代码</a>：Beancount 源代码的官方仓库自 2020 年 5 月起位于 <a href="http://github.com/beancount/beancount/">Github</a>。（2008 年至 2020 年 5 月期间托管在 Bitbucket 上）。</p>
+<p><a href="external-contributions.html">外部贡献</a>：一份列表，列出了其他人制作并分享的、基于 Beancount 库构建的插件、导入器及其他代码。</p>
+<h2 id="_4">增强提案与讨论<a id="enhancement-proposals-discussions"></a></h2>
+<p><em>我偶尔会撰写增强提案，以便在推进工作之前整理和总结我的想法，并向其他用户征求反馈。这是了解我计划添加哪些功能、了解详细工作原理，或与其他类似软件（如 Ledger 或 HLedger）进行比较差异的良好材料。</em></p>
+<p><a href="a-proposal-for-an-improvement-on-inventory-booking.html">关于库存记账改进的提案</a>：一份提案，概述了 Ledger 和 Beancount 在库存记账方面的现状，以及一种更好的方法，该方法将支持平均成本记账并在不计算佣金的情况下计算资本利得。</p>
+<p><a href="settlement-dates-in-beancount.html">Beancount 中的结算日期</a>：关于结算日期或辅助日期如何在 Beancount 中使用，以及它们在 Ledger 中如何使用的讨论。</p>
+<p><a href="balance-assertions-in-beancount.html">Beancount 中的余额断言</a>：对 Beancount 和 Ledger 中执行 balance assertion 的不同语义的总结，以及一项扩展 Beancount 语法以支持更复杂断言的提案。</p>
+<p><a href="fund-accounting-with-beancount.html">使用 Beancount 进行基金会计</a>：关于基金会计以及如何最好地使用 Beancount 在单个账本中跟踪多个基金的讨论。</p>
+<p><a href="rounding-precision-in-beancount.html">Beancount 中的舍入与精度</a>：关于余额检查中重要的舍入和精度问题的讨论，以及一项推断所需精度的更好方法的提案。（<a href="precision-tolerances.html">已实现</a>）</p>
+<h2 id="v3">V3 文档<a id="v3-documentation"></a></h2>
+<p><em>截至 2020 年夏季，向 C++ 的重写工作正在进行中。以下是与此相关的文档。</em></p>
+<p><a href="beancount-v3.html">Beancount V3</a>：目标与设计：版本 3 向 C++ 重写的动机、目标和设计。</p>
+<p><a href="https://docs.google.com/document/d/1Ia4zYmkB6I6IbWPRlcZYYuMS1ZI55T99dp9LiMJqXCE/">Beancount V3：与 V2 的差异</a>：当前在 v3（位于 "master" 分支）中已完成的变更列表，这些变更尚未纳入 v2 文档集。</p>
+<p><a href="installing-beancount-v3.html">安装 Beancount (v3)</a>：v3 的安装步骤。</p>
+<p><a href="beancount-v3-dependencies.html">Beancount V3：依赖项</a>：构建版本 3 所需的软件依赖项。</p>
+<p><a href="beangulp-design-doc-for-new-repo.html">Beangulp 新仓库设计文档</a>：v3 的更新数据摄取框架。</p>
+<h2 id="_5">关于本文档<a id="about-this-documentation"></a></h2>
+<p>你可能已经注意到，我正在使用 <a href="https://docs.google.com/">Google Docs</a>。我意识到这对一个开源项目来说并不寻常。如果你 <a href="https://groups.google.com/d/msg/ledger-cli/u648SA1o-Ek/yom_P38FCAAJ">对此感到不满</a>，那么请知悉，我也喜欢纯文本格式：在研究生期间，我大量使用 <a href="http://www.latex-project.org/">LaTeX</a>，而在过去十年里，我一直热爱 <a href="http://docutils.sourceforge.net">reStructuredText</a> 格式，甚至为 Emacs 编写了对其的支持。但大约在 2013 年发生了一些变化：<a href="https://docs.google.com/">Google Docs</a> 变得足够好，可以编写扎实的技术文档，并且我开始广泛享受其修订和评论功能：我沉迷于此，我热爱它。用户能够提出更正建议或在上下文中放置评论，这是一个极其有用的功能，比邮件列表上的补丁或评论更能极大地帮助提高我写作的质量。它还给了用户指出需要改进段落的机会。我已经收到了比我的其他任何项目多得多的文档反馈；它确实有效。</p>
+<p>它的<em>外观</em>也非常<em>好</em>，这有助于激励我写出更多、更好的内容。我想我可能再次爱上了所见即所得（WYSIWYG）……别误会我：LaTeX 和无标记格式很棒，但世界正在变化，对我来说，拥有社区协作和一份活生生的文档，比一个在我的仓库中缓慢老化的陈旧 TeX 文件更重要。我的目标是产出易于阅读、打印美观的高质量文本，尤其是在当今时代，能够在移动设备或平板电脑上良好渲染，以便你可以随时随地阅读。我还能在外出时编辑它，这对于记录想法或进行更正来说很有趣。最后，Google Docs 有一个 API 提供对文档的访问，因此如果需要，我最终可以下载元数据并将其全部转换为另一种格式。我并非喜欢它的一切，但它所提供的功能，我确实很喜欢。</p>
+<p>如果你想留下评论，如果你能在阅读时<strong>登录你的 Google 账户</strong>，以便你的名字显示在你的评论旁边，我将不胜感激。谢谢！</p>
+<p>—<a href="mailto:blais@furius.ca">Martin Blais</a></p>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

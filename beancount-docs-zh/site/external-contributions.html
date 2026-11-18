@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>External Contributions to Beancount · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais - 更新于：2024 年 6 月">
+  <meta property="og:title" content="External Contributions to Beancount · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais - 更新于：2024 年 6 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">external-contributions</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 对比 / 导出 / 社区 <span class="count">3</span></div><ul>
+<li><a href="a-comparison-of-beancount-and-ledger-hledger.html">A Comparison of Beancount and Ledger</a></li>
+<li><a href="exporting-your-portfolio.html">Exporting Your Portfolio</a></li>
+<li class="active"><a href="external-contributions.html">External Contributions to Beancount</a></li>
+</ul></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-09">历史</a> <span class="count">1</span></div></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#_1">索引</a></li>
+<li><a href="#_2">书籍与文章</a></li>
+<li><a href="#_3">插件</a></li>
+<li><a href="#_4">工具</a></li>
+<li><a href="#ai">AI 工具</a><ul>
+<li><a href="#mcp">MCP 服务器</a></li>
+</ul>
+</li>
+<li><a href="#_5">替代实现</a></li>
+<li><a href="#_6">替代解析器</a><ul>
+<li><a href="#bisonparser-generator">Bison（parser generator）</a></li>
+<li><a href="#antlr">使用 Antlr</a></li>
+<li><a href="#tree-sitter">使用 Tree-sitter</a></li>
+<li><a href="#rust">Rust 实现</a></li>
+<li><a href="#emacs-lisp">Emacs Lisp（编辑器脚本）</a></li>
+</ul>
+</li>
+<li><a href="#_7">导入器</a></li>
+<li><a href="#_8">转换器</a></li>
+<li><a href="#_9">下载器</a></li>
+<li><a href="#_10">价格来源</a></li>
+<li><a href="#_11">开发</a></li>
+<li><a href="#_12">文档</a></li>
+<li><a href="#web">接口 / Web</a></li>
+<li><a href="#_13">移动/手机数据录入</a></li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-07" data-parent="index.html#group-07">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/external_contributions/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/external_contributions/</p>
+</blockquote>
+<h1 id="beancount">Beancount 的外部贡献<a id="title"></a></h1>
+<p><a href="mailto:blais@furius.ca">Martin Blais</a> - 更新于：2024 年 6 月</p>
+<p><a href="http://furius.ca/beancount/doc/contrib">http://furius.ca/beancount/doc/contrib</a></p>
+<p>指向由其他人编写的、基于 Beancount 和/或 Ledgerhub 构建或与之相关的代码的链接。</p>
+<h2 id="_1">索引<a id="indexes"></a></h2>
+<p>本文档仅包含那些曾被讨论过或已向邮件列表发送过公告的包。你可以在公共索引上找到其他包：</p>
+<ul>
+<li>
+<p>PyPI：你可以在 <a href="https://pypi.org/search/?q=beancount&amp;o=">PyPI</a> 上找到许多其他与 Beancount 相关的项目。</p>
+</li>
+<li>
+<p>GitHub：截至 2020 年 9 月，<a href="https://github.com/search?p=5&amp;q=beancount&amp;ref=opensearch&amp;type=Repositories">搜索 "beancount"</a> 会显示 318 个项目。</p>
+</li>
+<li>
+<p><a href="https://awesome-beancount.com">awesome-beancount.com</a>：一个精选的 Beancount 资源列表，Beancount 是一个基于命令行、使用纯文本文件的双式记账系统。</p>
+</li>
+</ul>
+<h2 id="_2">书籍与文章<a id="books-and-articles"></a></h2>
+<p><a href="https://personalfinancespython.com/">使用 Python 管理个人财务</a>（Siddhant Goel）：一本关于纯文本会计和 Beancount 的 2020 年出版的书籍。</p>
+<p><a href="https://reds-rants.netlify.app/personal-finance/the-five-minute-ledger-update/">五分钟账本更新</a>（RedStreet）：一系列文章，展示了如何自动化从机构（银行、信用卡、经纪商等）下载数据，以便在五分钟以内完成账本更新。<a href="https://groups.google.com/g/beancount/c/_NclCTXaExs/m/EFjqkqElAQAJ">邮件列表讨论串</a>。</p>
+<p><a href="https://reds-rants.netlify.app/personal-finance/tax-loss-harvesting-with-beancount/">使用 Beancount 进行税务亏损收割</a>（RedStreet）：一篇从美国视角探讨 TLH 的文章，涵盖了相关要求、wash sale 的细微差别以及安全的卖出/买入日期，并与 robo-advisors 进行了比较。（相关：<a href="https://github.com/redstreet/fava_investor/tree/main/fava_investor/modules/tlh">fava_investor TLH 模块</a>，适用于 fava 和纯 Beancount 命令行版本）。</p>
+<p><a href="https://reds-rants.netlify.app/personal-finance/scaled-estimates-of-mutual-fund-navs/">共同基金 NAV 的缩放估算</a>（RedStreet）：问题在于：共同基金的 NAV（至少在美国）每天仅在收盘时更新一次。当需要在交易窗口仍开放时做出财务决策（例如：进行税务亏损收割时），而当日收盘 NAV 尚未可用时，有时对 NAV 进行粗略估算会很有用，尤其是在市场波动剧烈的日子。</p>
+<p><a href="https://noisysignal.com/trade_hist_shortcut/">从 Fidelity 抓取交易历史的快捷方式</a>（David Avraamides）：我撰写了一篇描述，说明如何使用 Shortcut 从 Fidelity 网站抓取交易历史，通过 Python 脚本将其转换为 Beancount 的账本格式，然后将其保存到剪贴板，以便粘贴到账本文件中。</p>
+<p><a href="https://lazy-beancount.xyz/">懒人的 Beancount</a>（Vasily M）/ <a href="https://github.com/Evernight/lazy-beancount">Evernight/lazy-beancount</a>：一份关于如何开始（并继续）使用开源 Beancount 会计系统追踪个人财务的观点鲜明的指南。它附带了一些代码。该指南的主要目标是为您提供一种方式，使用纯文本会计逐步且增量地开始管理自己的财务。同时也包含并配置了各种有用的工具。</p>
+<p><a href="https://academy.beanhub.io/">平衡之道 — https://academy.beanhub.io/</a>（Fang-Pen Lin）：使用可视化和图表解释复式记账法。</p>
+<p><a href="https://www.isabekov.pro/multiperiod-hledger-style-reports-in-beancount-pivoting-a-table/">Beancount 中的多周期 hledger 风格报告：透视表 | Altynbek Isabekov</a>：一篇展示如何生成账户余额透视表摘要的文章，例如按年份汇总，并附有<a href="https://github.com/isabekov/beancount-multiperiod-reports">相关代码 (github)</a>。</p>
+<p><a href="https://lalitm.com/post/one-number-i-trust/">我信任的一个数字：多币种家庭的纯文本会计 - Lalit Maganti</a> - 一篇记录 DEB 各种使用示例的文章。</p>
+<p><a href="https://github.com/Ev2geny/beanquery-interactive-manual">交互式 beanquery 手册</a>（Chary Ev2geny）：涵盖了 beanquery 的最新功能，包含许多使用实际账本的实例，具有自文档化特性：所有查询输出都是作为 notebook 执行的一部分通过运行 beanquery 计算得出的；具有交互性：当作为 marimo notebook 运行时，读者可以通过更改默认账本和/或查询进行实验，输出会自动更新。</p>
+<p><a href="https://cdeguet.net/blog/beancount-comptabilite-pour-hackers/">Beancount 或黑客的会计</a>（Cyril Deguet）</p>
+<h2 id="_3">插件<a id="plugins"></a></h2>
+<p><a href="https://www.google.com/url?q=https%3A%2F%2Fgist.github.com%2Fkljohann%2Faebac3f0146680fd9aa5&amp;sa=D&amp;sntz=1&amp;usg=AFQjCNGn2AkL35onTeXgOQzLzkjVpvLcpg">split_transactions</a>：Johann Klähn <a href="https://groups.google.com/d/msg/beancount/z9sPboW4U3c/1qIIzro4zFoJ">编写了一个插件</a>，可以将单个 transaction 拆分到多个针对 limbo account 的 posting 中，类似于折旧处理。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_plugins">zerosum</a>：Red S <a href="https://groups.google.com/d/msg/beancount/MU6KozsmqGQ/sehD3dqZslEJ">编写了一个插件</a>，用于匹配那些合在一起总和应为零的 transaction，并将它们移动到一个单独的 account 中。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_plugins">effective_dates</a>：Red S 编写了一个插件，用于将 transaction 的不同部分 booking 到不同的日期。</p>
+<p><a href="https://github.com/davidastephens/beancount-plugins">beancount-plugins</a>：Dave Stephens 创建了一个仓库，用于分享他编写的与折旧相关的各种插件。</p>
+<p><a href="https://github.com/zacchiro/beancount-plugins-zack">beancount-plugins-zack</a>：Stefano Zacchiroli 创建了这个仓库来分享他的插件。包含 directive 排序等功能。</p>
+<p>b<a href="https://github.com/Akuukis/beancount-oneliner">eancount-oneliner</a>：Akuukis 创建了一个插件，用于在一行中写入 entry（<a href="https://pypi.python.org/pypi/beancount-oneliner/1.0.0">PyPi</a>）。</p>
+<p><a href="https://github.com/Akuukis/beancount-interpolate">beancount-interpolate</a>：Akuukis 为 Beancount 创建了用于 transaction interpolation 的插件（recur, split, depr, spread）（<a href="https://pypi.python.org/pypi/beancount-interpolate">PyPi</a>）。</p>
+<p><a href="https://github.com/seltzered/beancount-plugins-metadata-spray">metadata-spray</a>：通过正则表达式跨 entries 添加元数据，而不是使用显式的 entries（由 Vivek Gani 编写）。</p>
+<p><a href="https://github.com/Akuukis/beancount_share">Akuukis/beancount_share</a>：一个 Beancount 插件，用于在一个 ledger 内将费用在多个合伙人之间分摊。这个插件功能非常强大，很可能可以满足你所有的分摊需求。</p>
+<p><a href="https://github.com/w1ndy/beancount_balexpr">w1ndy/beancount_balexpr</a>（Di Weng）：一个提供“balance expressions”的插件，可作为 Custom directive 针对 Beancount entries 运行。参见<a href="https://groups.google.com/d/msgid/beancount/cdcf2cc7-8061-4f69-ae6a-c82564463652n%40googlegroups.com?utm_medium=email&amp;utm_source=footer">此线程</a>。</p>
+<p><a href="https://git.io/autobean.narration">autobean.narration</a>（Archimedes Smith）：允许通过从行内注释填充 per-posting narration 元数据，以简洁的方式为每个 posting 添加注释。</p>
+<p><a href="https://github.com/SEIAROTg/autobean/">autobean.sorted</a>：检查每个文件中的 transaction 是否按非降序排列。通过警告那些未按日期非降序排列的 directive，帮助识别位置错误或日期错误的 directive。</p>
+<p><a href="https://github.com/hoostus/beancount-asset-transfer-plugin">hoostus/beancount-asset-transfer-plugin</a>：一个插件，用于在两个 Beancount account 之间自动生成实物转移，同时保留 cost basis 和获取日期。</p>
+<p><a href="https://github.com/PhracturedBlue/fava-portfolio-summary">PhracturedBlue/fava-portfolio-summary</a>（Phractured Blue）：一个 Fava 插件，用于显示带有收益率的投资组合摘要。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_plugins">rename_accounts</a>：Red S 编写的用于重命名 account 的插件。例如：将“Expenses:Taxes”重命名为“Income:Taxes”有助于费用分析。<a href="https://github.com/redstreet/beancount_reds_plugins/tree/main/beancount_reds_plugins/rename_accounts#readme">更多详情在此</a>。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_plugins/tree/master/beancount_reds_plugins/capital_gains_classifier">Long_short capital gains classifier</a>：Red S 编写的插件，根据资产持有期限将资本利得分类为长期和短期，并根据价值分类为收益和损失。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_plugins/tree/main/beancount_reds_plugins/autoclose_tree">Autoclose_tree</a>：当关闭一个 account 时，自动关闭该 account 的所有后代。</p>
+<p><a href="https://github.com/Evernight/beancount-valuation">Evernight/beancount-valuation</a>（Vasily M）：一个 Beancount 插件，用于跟踪不透明基金的总价值。你可以使用它代替 balance assertion 来断言 account 的总价值。如果 account 的当前价值不同，它将改为调整由插件用于技术目的创建的底层合成商品的 price。</p>
+<p><a href="https://github.com/Evernight/beancount-plugin-tax-uk/">Evernight/beancount-plugin-tax-uk</a>（Vasily M）：一个为 Beancount 生成英国资本利得、股息和其他 investment income 税务 report 的插件。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_plugins/tree/main/beancount_reds_plugins/box_accrual">beancount_reds_plugins/…/box_accrual</a>（Redstreet）：自动按比例将合成贷款（box spread）的资本损失分摊到各个日历年，创建用于报告的准确年度应计 entry。</p>
+<p><a href="https://github.com/scanta2/ESPPresso">scanta2/ESPPresso</a>（Stefano Mihai Canta）：一个用于计算 ESPP 处置普通收入的 Beancount 插件。</p>
+<h2 id="_4">工具<a id="tools"></a></h2>
+<p><a href="https://github.com/blaulan/alfred-beancount">alfred-beancount</a> (Yue Wu)：macOS 工具 “Alfred” 的插件，用于快速在 Beancount 文件中录入 transaction。支持完整的 account 名称和收款方匹配。</p>
+<p><a href="https://github.com/simon-v/bean-add">bean-add</a> (Simon Volpert)：Beancount transaction 录入助手。</p>
+<p><a href="https://github.com/hoostus/fincen_114">hoostus/fincen_114</a> (Justus Pendleton)：FBAR / FinCEN 114 report 生成器。</p>
+<p><a href="https://github.com/ghislainbourgeois/beancount_portfolio_allocation">ghislainbourgeois/beancount_portfolio_allocation</a> (<a href="https://groups.google.com/d/msgid/beancount/b36d9b67-8496-4021-98ea-0470e5f09e4b%40googlegroups.com?utm_medium=email&amp;utm_source=footer">Ghislain Bourgeois</a>)：一种快速计算不同投资组合中资产配置的方法。</p>
+<p><a href="https://github.com/hoostus/portfolio-returns">hoostus/portfolio-returns</a> (Justus Pendleton)：投资组合回报率计算器</p>
+<p><a href="https://github.com/costflow/syntax">costflow/syntax</a> (Leplay Li)：一款允许用户从常用即时通讯应用中保存纯文本记账的产品。一种将单行消息转换为 beancount/*ledger 格式的语法。</p>
+<p><a href="https://github.com/hoostus/beancount-control-chart">process control chart</a> (Justus Pendleton)：相对于投资组合规模的支出。<a href="https://groups.google.com/d/msgid/beancount/0cd47f9a-37d6-444e-8516-25e247a9e0cd%40googlegroups.com?utm_medium=email&amp;utm_source=footer">讨论帖。</a></p>
+<p><a href="https://pypi.org/project/pinto/">Pinto</a> (Sean Leavey)：Beancount 的增强型命令行界面。支持在 ledger 文件中自动插入 transaction。</p>
+<p><a href="https://github.com/PhracturedBlue/fava-encrypt">PhracturedBlue/fava-encrypt</a>：一种基于 docker 的解决方案，用于在保持 Fava 在线的同时，对静态存储的 beancount 数据进行加密。请参阅<a href="https://groups.google.com/d/msgid/beancount/ece6f424-a86b-4e6d-8ecc-4e05c8e74373n%40googlegroups.com?utm_medium=email&amp;utm_source=footer">此讨论帖</a>以了解背景。</p>
+<p><a href="https://github.com/kubauk/beancount-import-gmail">kubauk/beancount-import-gmail</a>：beancount-import-gmail 使用 gmail API 和 OAuth 登录您的邮箱并下载订单详情，然后用于增强您的 transaction 以便于分类。</p>
+<p><a href="https://github.com/sulemankm/budget_report">sulemankm/budget_report</a>：一个非常简单的命令行预算跟踪工具，用于 beancount ledger 文件。</p>
+<p><a href="https://github.com/fdavies93/minibudget">fdavies93/minibudget</a> (Frank Davies)：MiniBudget 是一个旨在使用纯文本格式实现个人和小型企业预算管理的工具。它受 beancount 和 plainbudget 的启发。</p>
+<p><a href="https://github.com/dyumnin/dyu_accounting">dyumnin/dyu_accounting</a>：一套会计配置，用于自动化生成各种财务报表，以符合印度政府的规定。</p>
+<p><a href="https://github.com/redstreet/fava_investor/tree/main/fava_investor/modules/minimizegains">Gains Minimizer</a> (RedStreet)：自动确定要出售的 lot 以最小化资本利得税。<a href="http://favainvestor.pythonanywhere.com/example-beancount-file/extension/Investor/?module=minimizegains">在线示例。</a></p>
+<p><a href="https://github.com/maread99/beanahead">beanahead</a> (Marcus Read)：增加了包含未来 transaction 的功能（自动生成定期 transaction，提供临时预期 transaction，预期 transaction 与导入的 transaction 进行对账；所有功能均可通过 cli 访问）。</p>
+<p><a href="https://github.com/SEIAROTg/autobean-format">autobean-format</a> (Archimedes Smith)：又一个 beancount 格式化程序，由早期项目 autobean-refactor 提供支持，autobean-refactor 是一个用于解析和以编程方式操作 beancount 文件的库。基于正确的解析器，使其能够格式化 ledger 的每个角落，包括算术表达式。</p>
+<p><a href="https://github.com/akirak/flymake-bean-check">akirak/flymake-bean-check</a> (Akira Komamura)：Emacs 的 flymake 支持。</p>
+<p><a href="https://reds-rants.netlify.app/personal-finance/direct-downloads/">bean-download</a> (Red Street)：随 beancount-reds-importers 一起提供的下载器，您可以配置它运行任意命令来下载您的 account 对账单。它现在有一个新功能：needs-update 子命令。</p>
+<p><a href="https://github.com/gerdemb/beanpost">gerdemb/beanpost</a> (Ben Gerdemann)：Beanpost 由一个 PostgreSQL 架构和导入/导出命令组成，允许您在 beancount 文件和 PostgreSQL 数据库之间传输数据。Beancount 的许多功能是使用自定义 PostgreSQL 函数实现的，允许进行复杂的查询和数据操作。此设置提供了一个灵活的后端，可以与 web 应用程序或 report 系统等其他工具集成</p>
+<p><a href="https://github.com/LaunchPlatform/beanhub-cli">LaunchPlatform/beanhub-cli</a> (Fang-Pen Lin)：BeanHub 或 Beancount 用户的命令行工具。</p>
+<p><a href="https://github.com/zacchiro/beangrep">zacchiro/beangrep</a>：Beangrep 是 Beancount 纯文本会计系统的类 grep 过滤器。</p>
+<p><a href="https://github.com/Ev2geny/evbeantools">Ev2geny/evbeantools</a>：该工具使得在汇率变动以及资金从一种商品转移到另一种商品（包括基于 cost 和非基于 cost 的跟踪）的多币种/多商品 ledger 情况下，能够解释任意两个日期之间净资产的变化。这是通过创建一个转换/等效 ledger 来实现的，可以使用 beanquery 在其上进行进一步分析。</p>
+<p><a href="https://github.com/d-k-c/bean-acb">d-k-c/bean-acb</a> (Damien Riegel)：一个帮助跟踪财产调整后成本基础（ACB）的脚本。该规则在加拿大用于计算处置财产时必须申报的资本利得。</p>
+<p><a href="https://github.com/tesujimath/bean-sort">tesujimath/bean-sort</a> (Simon Guest)：bean-sort 是一个用于 Beancount 文件的简单排序实用程序。它之所以简单，是因为它不尝试解析文件，只是按日期字段进行分割。</p>
+<p>Beanquick (<a href="https://twobitsware.com/beanquick">https://twobitsware.com/beanquick</a>)：一款 macOS 应用程序，提供三种录入 transaction 的方式，从引导式表单到快速语法。</p>
+<p><a href="https://github.com/paulsc/fava-edit-replay">paulsc/fava-edit-replay</a> (Paul S)：此扩展允许你一次性对多个 Beancount transaction 应用批量编辑，将编辑操作（搜索过滤器与 diff 的组合）保存为“replays”，以便稍后应用；可按 account、时间段或自定义过滤器筛选 transaction，并根据最近修改的 transaction 建议过滤器。</p>
+<p><a href="https://github.com/alensiljak/ledger2bql">alensiljak/ledger2bql</a> (Alen Šiljak)：为 Beancount 提供 ledger 风格的查询。</p>
+<p><a href="https://pypi.org/project/bean-inquiry/">bean-inquiry</a> (Oscar &amp; Ale)：运行带参数的查询。</p>
+<p><a href="https://github.com/slimslickner/beanschedule">slimslickner/beanschedule</a> (Tim Tichner)：beanschedule 提供两个主要功能：一个用于预测计划 transaction 的 plugin，以及一个用于增强导入 transaction 的 hook。每个 schedule 都定义为一个 yaml 文件，包含匹配逻辑、重复规则和预期的 posting。目前，唯一的“动态” posting 是贷款摊销，其中会包含 Interest 和 Principal 等 account；基本的匹配仅是一个 cost 范围。</p>
+<p><a href="https://github.com/romamo/beancount-cli">romamo/beancount-cli</a> (Roman Medvedev)：这是一个基于 Beancount v3 和 Pydantic 构建的现代 CLI。除了标准的 ledger 任务外，我一直致力于使其“agent-friendly”——即通过描述性的帮助字符串和内置的 JSON schema 发现机制，使其能与 AI 助手和自动化工作流良好配合。</p>
+<h2 id="ai">AI 工具<a id="ai-tools"></a></h2>
+<h3 id="mcp">MCP 服务器<a id="mcp-servers"></a></h3>
+<p><a href="https://github.com/vanto/beanquery-mcp">vanto/beanquery-mcp</a>（Tammo van Lessen）：一个实验性的 MCP 服务器，用于演示如何结合 Claude 处理 BQL 的 beanquery。<a href="https://github.com/vanto/beanquery-mcp/blob/main/docs/screenshot-expanded.png">截图</a>。（这是一个概念验证（PoC），您应谨慎选择希望与哪个 LLM 共享的数据。）</p>
+<p><a href="https://github.com/StdioA/beancount-mcp">StdioA/beancount-mcp</a>（David Dai）：一个 Beancount MCP 服务器，可以执行 beancount 查询，并向账本提交 (a) transaction。</p>
+<h2 id="_5">替代实现<a id="alternative-implementations"></a></h2>
+<p><a href="https://github.com/yagebu/uromyces">yagebu/uromyces</a> (Jakob Schnitzer)：uromyces 是 Beancount 部分功能的 Rust 玩具级重新实现。</p>
+<p><a href="https://github.com/themoritz/turbobean">themoritz/turbobean</a> (Moritz Drexl)：Beancount 的 Zig 语言替代实现。这是一个从零开始实现的 Beancount，速度快且不依赖 Python 生态系统。</p>
+<p><a href="https://github.com/tesujimath/limabean">tesujimath/limabean</a> (Simon Guest)：这是一个使用 Rust、Clojure 和 Lima 解析器实现的 Beancount 新版本。</p>
+<h2 id="_6">替代解析器<a id="alternative-parsers"></a></h2>
+<h3 id="bisonparser-generator">Bison（parser generator） <a id="bison"></a></h3>
+<p>Beancount v2 解析器使用 GNU flex + GNU bison（以实现最大可移植性）。</p>
+<p>Beancount v3 解析器使用 <a href="https://www.genivia.com/doc/reflex/html/">RE/flex</a> + GNU bison（以支持 Unicode 和 C++）。</p>
+<h3 id="antlr">使用 Antlr<a id="using-antlr"></a></h3>
+<p><a href="https://github.com/jord1e/jbeancount">jord1e/jbeancount</a>（Jordie Biemold）/ 使用 Antlr：一个用于 Beancount 输入语法的替代解析器，以 Java 实现（使用 Antlr4 解析器生成器）。这允许从 JVM 语言访问解析后的 Beancount 数据——而不受插件影响。详情请参阅<a href="https://groups.google.com/d/msgid/beancount/72ee8adb-a376-4e30-b6d4-ea8749f5f666n%40googlegroups.com?utm_medium=email&amp;utm_source=footer">此帖子</a>。</p>
+<h3 id="tree-sitter">使用 Tree-sitter<a id="using-tree-sitter"></a></h3>
+<p><a href="https://github.com/polarmutex/tree-sitter-beancount">polarmutex/tree-sitter-beancount</a>（Bryan Ryall）：一个用于 Beancount 语法的 tree-sitter 解析器。</p>
+<p><a href="https://github.com/dnicolodi/tree-sitter-beancount">https://github.com/dnicolodi/tree-sitter-beancount</a>（Daniele Nicolodi）：另一个基于 tree-sitter 的 Beancount 语法解析器。</p>
+<h3 id="rust">Rust 实现<a id="in-rust"></a></h3>
+<p><a href="https://github.com/jcornaz/beancount-parser">jcornaz/beancount-parser</a>（Jonathan Cornaz）：一个用于 Rust 的 beancount 文件解析库。使用 nom。</p>
+<p><a href="https://docs.rs/beancount-parser-lima/latest/beancount_parser_lima/">beancount_parser_lima</a>（Simon Guest）：一个 Rust 中的 Beancount 零拷贝解析器。它旨在完整实现 Beancount 文件格式，除了那些已弃用的部分以及此处记录的其他功能（该列表可能并不全面）。使用 <a href="https://docs.rs/logos/latest/logos/">Logos</a>、<a href="https://docs.rs/chumsky/latest/chumsky/">Chumsky</a> 和 <a href="https://docs.rs/ariadne/latest/ariadne/">Ariadne</a>。</p>
+<h3 id="emacs-lisp">Emacs Lisp（编辑器脚本） <a></a></h3>
+<p><a href="https://sr.ht/~trs-80/beancount-txn-elisp/">trs-80/beancount-txn-elisp/</a>：beancount-txn-elisp：一个用 Emacs Lisp 实现的库，用于读取/解析和写入/插入单个 Beancount transaction。</p>
+<h2 id="_7">导入器<a id="importers"></a></h2>
+<p><a href="https://github.com/redstreet/beancount_reds_importers">reds importers</a>：针对<a href="https://github.com/redstreet/beancount_reds_importers/tree/main/beancount_reds_importers">多家</a>美国机构及多种文件类型的简单导入器和工具。它通过提供维护良好的通用库（涵盖银行、信用卡、投资机构以及各种文件类型），强调编写自定义导入器的便捷性，从而最大限度地减少你需要编写的特定机构代码。这是 <strong><a href="https://reds-rants.netlify.app/personal-finance/the-five-minute-ledger-update/">五分钟账本更新</a></strong> 中所表达原则的参考实现。欢迎贡献。由 RedStreet 开发。</p>
+<p><a href="https://github.com/madhat2r/plaid2text">plaid2text</a>：一个从 <a href="http://www.plaid.com/">Plaid</a> 获取数据的导入器，它将 transaction 存储到 Mongo DB 中，并能够将其渲染为 Beancount 语法。由 Micah Duke 开发。</p>
+<p><a href="https://github.com/jbms/beancount-import">jbms/beancount-import</a>：一个用于从外部数据源半自动导入 transaction 的工具，支持将导入的 transaction 彼此之间以及与 beancount 日志中现有 transaction 进行合并和对账。其 UI 基于 Web。(<a href="https://github.com/jbms/beancount-import">公告</a>，<a href="https://groups.google.com/d/msg/beancount/YN3xL09QFsQ/qhL8U6JDCgAJ">旧版本链接</a>)。由 Jeremy Maitin-Shepard 开发。</p>
+<p><a href="https://github.com/wzyboy/awesome-beancount">awesome-beancount</a>：针对中国银行的导入器集合 + 技巧与窍门。由 <a href="https://github.com/wzyboy">Zhuoyun Wei</a> 开发。</p>
+<p><a href="https://github.com/fxtlabs/beansoup">beansoup</a>：Filippo Tampieri 在此项目中分享了他的一些 Beancount 导入器和自动补全器。</p>
+<p><a href="https://github.com/montaropdf/beancount-importers/">montaropdf/beancount-importers</a>：一个用于从工时表格式中提取加班费和休假以向客户开具发票的导入器。</p>
+<p><a href="https://github.com/siddhantgoel/beancount-dkb">siddhantgoel/beancount-dkb</a> (Siddhant Goel)：用于 DKB CSV 文件的导入器。</p>
+<p><a href="https://github.com/prabusw/beancount-importer-zerodha">prabusw/beancount-importer-zerodha</a>：用于印度券商 Zerodha 的导入器。</p>
+<p><a href="https://github.com/prabusw/beancount-importers-india">prabusw/beancount-importers-india</a>：用于部分印度银行和券商的导入器（已更新以使用 beangulp + v3）。</p>
+<p><a href="https://github.com/swapi/beancount-utils">swapi/beancount-utils</a>：另一个用于 Zerodha 的导入器。</p>
+<p><a href="https://github.com/Dr-Nuke/drnuke-bean">Dr-Nuke/drnuke-bean</a> (Dr Nuke)：一个基于 flex query（类似 API）的 IBKR 导入器，以及一个用于瑞士邮政银行（Swiss PostFinance）的导入器。</p>
+<p><a href="https://github.com/luciano-fiandesio/beanborg">Beanborg</a> (Luciano Fiandesio)：Beanborg 自动从外部 CSV 文件导入财务 transaction 到 Beancount 记账系统中。</p>
+<p><a href="https://gitlab.com/szabootibor/beancount-degiro">szabootibor/beancount-degiro</a> (<a href="https://pypi.org/project/beancount-degiro">PyPI</a>)：用于荷兰券商 Degiro 交易账户的导入器。</p>
+<p><a href="https://github.com/siddhantgoel/beancount-ing-diba">siddhantgoel/beancount-ing-diba</a> (<a href="https://pypi.org/project/beancount-ing-diba/">PyPI</a>)：ING 账户导入器（荷兰）。</p>
+<p><a href="https://github.com/PaulsTek/csv2bean">PaulsTek/csv2bean</a>：一个使用 Google Sheets 预处理 CSV 文件的简单 Go 应用程序。</p>
+<p><a href="https://github.com/ericaltendorf/magicbeans">ericaltendorf/magicbeans</a> (Eric Altendorf)：用于加密货币数据的 Beancount 导入器。提供详细的 lot 跟踪以及加密货币资产的资本利得/损失 report。"我编写它是因为我对现有商业加密货币税务 report 服务的准确性或透明度不满意。"</p>
+<p><a href="https://github.com/OSadovy/uabean/">OSadovy/uabean</a> (Oleksii Sadovyi)：一套针对乌克兰流行银行及其他机构的 Beancount 导入器和脚本。</p>
+<p><a href="https://github.com/fdavies93/seneca">fdavies93/seneca</a> (Frank Davies)：用于 Wise 的导入器。支持多币种转账。</p>
+<p><a href="https://github.com/LaunchPlatform/beanhub-import">LaunchPlatform/beanhub-import</a>：带有 UI 的新 Beancount 导入器。</p>
+<p><a href="https://github.com/rlan/beancount-multitool">rlan/beancount-multitool</a> (Rick Lan)：Beancount Multitool 是一个命令行界面 (CLI) 工具，用于将金融机构的财务数据转换为 Beancount 文件（支持：JA Bank ＪＡネットバンク, Rakuten Card 楽天カード, Rakuten Bank 楽天銀行, SBI Shinsei Bank 新生银行）。相关文章：<a href="https://www.linkedin.com/feed/update/urn:li:activity:7198125470662500352/">https://www.linkedin.com/feed/update/urn:li:activity:7198125470662500352/</a></p>
+<p><a href="https://github.com/LaunchPlatform/beanhub-import">LaunchPlatform/beanhub-import</a> (Fang-Pen Lin)：Beanhub-import 是一个简单、声明式、智能且易于使用的库，用于从 beanhub-extract 导入提取的 transaction。它基于预定义规则生成 Beancount transaction。</p>
+<p><a href="https://github.com/Sieboldianus/beancount-hibiscus-importer">Sieboldianus/beancount-hibiscus-importer</a>：Hibiscus 是德国广泛使用的开源软件。它支持使用 HBCI 或 FinTS 标准从银行获取 transaction，并（通过插件）通过网页抓取（信用卡）或 API（例如 Paypal）获取。此 Beancount Hibiscus Importer 提供导入功能，用于从 Hibiscus H2DB（直接或通过 XML-RPC）获取 transaction，并使用 v3 Beangulp 接口将其转换为 Beancount 格式。</p>
+<p><a href="https://github.com/flowerbug/bcgt">flowerbug/bcgt</a>：一个用于生成股票买入、卖出和拆股 Beancount Transaction 的工具。Bcgt 改编自 beangrow 中引用的 export.py 程序，该程序在早期 beancount 版本中可用。</p>
+<p><a href="https://github.com/AmmarShaqeel/maybank-importer">AmmarShaqeel/maybank-importer</a> (Ammar Shaqeel)：用于 Maybank（马来西亚）PDF 对账单的导入器。</p>
+<p><a href="https://github.com/AmmarShaqeel/rajhi-importer">AmmarShaqeel/rajhi-importer</a> (Ammar Shaqeel)：用于 Rajhi（沙特阿拉伯）PDF 对账单的导入器。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_importers/tree/main/beancount_reds_importers/importers/amazon">redstreet/beancount_reds_importers//amazon</a>（Redstreet）：用于处理 Amazon GDPR 数据导出的 Beancount Reds Importers。</p>
+<p><a href="https://github.com/tarioch/beancounttools/">tarioch/beancounttools</a>：针对 <a href="https://awardwallet.com/">AwardWallet</a> 的 importer，该服务提供（免费的）API，并集成了约 460 个航空公司、租车、购物及其他领域的忠诚度计划。</p>
+<p><a href="https://github.com/tesujimath/limabean-harvest">https://github.com/tesujimath/limabean-harvest</a>（Simon Guest）：limabean-harvest 是一个新的 Beancount importer，基于与 limabean 相似的原则构建，即混合使用 Rust 和 Clojure。其引人注目的特性包括：以数据而非代码进行配置，从 payee 和 narration 字段推断 secondary accounts，特别是这使得在同一组中导入的两个账户之间的 transaction 配对成为可能。</p>
+<h2 id="_8">转换器<a id="converters"></a></h2>
+<p><a href="https://github.com/madhat2r/plaid2text">plaid2text</a>：用于导出 Plaid transaction 并将其转换为 Ledger 或 Beancount 语法格式文件的 Python 脚本。</p>
+<p><a href="https://github.com/henriquebastos/gnucash-to-beancount/">gnucash-to-beancount</a>：Henrique Bastos 编写的脚本，用于将 GNUcash SQLite 数据库转换为等效的 Beancount 输入文件。</p>
+<p><a href="https://github.com/debanjum/gnucash-to-beancount">debanjum/gnucash-to-beancount</a>：上述项目的 fork。</p>
+<p><a href="https://github.com/AndrewStein/gnucash-to-beancount">andrewStein/gnucash-to-beancount</a>：基于上述两个项目的进一步 fork，修复了许多问题（参见<a href="https://groups.google.com/d/msg/beancount/MaaASKR1SSI/GX5I8lOkBgAJ">此讨论串</a>）。</p>
+<p><a href="https://github.com/hoostus/beancount-ynab">hoostus/beancount-ynab</a>：从 YNAB 到 Beancount 的转换器。</p>
+<p><a href="https://github.com/hoostus/beancount-ynab5">hoostus/beancount-ynab5</a>：同一作者针对 YNAB 的相同转换器，但适用于较新的版本 5。</p>
+<p><a href="https://github.com/zacchiro/ledger2beancount/">ledger2beancount</a>：用于将 ledger 文件转换为 beancount 的脚本。由 Stefano Zacchiroli 和 Martin Michlmayr 开发。</p>
+<p><a href="https://github.com/johannesjh/smart_importer">smart_importer</a>：beancount 和 fava 的智能导入器，提供 account 名称的智能建议。作者为 Johannes Harms。</p>
+<p><a href="https://gist.github.com/riking/0f0dab2b7761d2f6895c5d58c0b62a66">beancount-export-patreon.js</a>：用于导出您的 Patreon transaction 的 JavaScript，以便您可以查看确切向谁提供了资金的详细信息。作者为 kanepyork@gmail。</p>
+<p><a href="https://gitlab.com/alensiljak/pta-converters">alensiljak/pta-converters</a>（Alen Šiljak）：GnuCash -&gt; Beancount 转换器（2019 年）。</p>
+<p><a href="https://github.com/grostim/Beancount-myTools">grostim/Beancount-myTools</a>（Timothee Gros）：作者为法国银行开发的个人导入工具。</p>
+<h2 id="_9">下载器<a id="downloaders"></a></h2>
+<p><a href="https://github.com/redstreet/beancount_reds_importers">bean-download</a> (RedStreet)：bean-download 是一个用于从支持的机构便捷下载 transaction 的工具。你通过配置机构列表和任意下载命令（通常通过 <a href="https://ofxtools.readthedocs.io/en/latest/">ofxget</a>）来使用它。它会并行下载所有文件，正确命名它们，并将其放入你选择的目录中，之后你可以从中导入。该工具作为 <a href="https://github.com/redstreet/beancount_reds_importers">beancount-reds-importers</a> 的一部分进行安装。请参阅 <a href="https://reds-rants.netlify.app/personal-finance/direct-downloads/">配套文章</a>。</p>
+<p><a href="https://github.com/redstreet/beancount_reds_importers">ofx-summarize</a> (RedStreet)：在构建 importer 时，能够查看你试图导入的 .ofx 或 .qfx 文件的内容会很有帮助。ofx-summarize 命令正是为此而设计的。它随 <a href="https://github.com/redstreet/beancount_reds_importers">beancount-reds-importers</a> 一起提供，通常只需调用该命令即可使用。在文件上运行该命令会显示文件中的几笔 transaction。非常有用的是，你可以通过 python 调试器或解释器来探索你的 .ofx 文件。</p>
+<h2 id="_10">价格来源<a id="price-sources"></a></h2>
+<p><a href="https://github.com/hoostus/beancount-price-sources">hoostus/beancount-price-sources</a> : 一个 Morningstar 价格获取器，可聚合多个交易所的数据，包括非美国交易所。</p>
+<p><a href="https://github.com/andyjscott/beancount-financequote">andyjscott/beancount-financequote</a> : 为 bean-price 提供 Finance::Quote 支持。</p>
+<p><a href="https://github.com/aamerabbas/beancount-coinmarketcap">aamerabbas/beancount-coinmarketcap</a>: coinmarketcap 的价格获取器（<a href="https://medium.com/@danielcimring/downloading-historical-data-from-coinmarketcap-41a2b0111baf">参见帖子</a>）。</p>
+<p><a href="https://github.com/grostim/Beancount-myTools/blob/master/price/iexcloud.py">grostim/Beancount-myTools/.../iexcloud.py</a> : 由 Timothee Gros 编写的 iexcloud 价格获取器。</p>
+<p><a href="https://github.com/xuhcc/beancount-cryptoassets">xuhcc/beancount-cryptoassets</a> (Kirill Goncharov): 加密货币的价格来源。</p>
+<p><a href="https://github.com/xuhcc/beancount-ethereum-importer">xuhcc/beancount-ethereum-importer</a> (Kirill Goncharov): 用于 Beancount 的以太坊 transaction 导入器。包含一个从 Etherscan 下载 transaction 的脚本，以及一个用于导入已下载 transaction 的导入器。</p>
+<p><a href="https://github.com/xuhcc/beancount-exchangerates">xuhcc/beancount-exchangerates</a> (Kirill Goncharov): <a href="http://exchangeratesapi.io">http://exchangeratesapi.io</a> 的价格来源。</p>
+<p><a href="https://github.com/tarioch/beancounttools">tarioch/beancounttools</a> (Patrick Ruckstuhl): 价格来源和导入器。</p>
+<p><a href="https://gitlab.com/chrisberkhout/pricehist">https://gitlab.com/chrisberkhout/pricehist</a> (Chris Berkhout): 一个命令行工具，可从多个来源获取每日历史价格，并以多种格式输出。支持 CoinDesk、欧洲中央银行、Alpha Vantage、CoinMarketCap 的部分来源。用户可以请求特定的价格类型，如最高价、最低价、开盘价、收盘价或调整后收盘价。它也可以通过 bean-price 使用。</p>
+<h2 id="_11">开发<a id="development"></a></h2>
+<p><a href="https://github.com/yegle/beancount-type-stubs">Py3k 类型注解</a>：Yuchen Ying 正在为 Beancount 实现 python3 类型注解。</p>
+<p><a href="https://github.com/bryall/tree-sitter-beancount">bryall/tree-sitter-beancount</a>（Bryan Ryall）：一个用于 beancount 语法的 tree-sitter 解析器。</p>
+<p><a href="https://github.com/jmgilman/beancount-stubs">jmgilman/beancount-stubs</a>：部分 Beancount 源代码的 Typing .pyi 存根文件。</p>
+<h2 id="_12">文档<a id="documentation"></a></h2>
+<p><a href="https://beancount.github.io/docs/">Beancount 文档</a>（<a href="http://github.com/xuhcc">Kirill Goncharov</a>）：将 Beancount 文档从 Google Docs 源文件正式转换为 Markdown 和 HTML 格式。这包括大部分 Google Docs 文档，并由 Kirill Goncharov 在 Beancount 组织仓库中<a href="http://github.com/beancount/docs">维护于此</a>。</p>
+<p><a href="http://aumayr.github.io/beancount-docs-static/">Beancount 源代码文档</a>（<a href="http://github.com/aumayr">Dominik Aumayr</a>）：由 Sphinx 生成的 Beancount 代码库源代码文档。生成此文档的代码<a href="https://github.com/aumayr/beancount-docs">位于此处</a>。</p>
+<p><a href="http://aumayr.github.io/beancount-sql-queries/">Beancount 的 SQL 查询</a>（Dominik Aumayr）：示例 SQL 查询。</p>
+<p><a href="https://wzyboy.im/post/1063.html">Beancount —— 命令行复式簿记</a>（Zhuoyun Wei）：一篇关于如何使用 Beancount 的中文教程（博客文章）。</p>
+<p><a href="https://alexjj.com/blog/2016/2/managing-my-personal-finances-with-beancount/">使用 Beancount 管理我的个人财务</a>（Alex Johnstone）</p>
+<p><a href="https://lwn.net/SubscriberLink/751874/a38128abb72e45c5/">使用 Beancount 数豆子——以及更多</a>（LWN）</p>
+<h2 id="web">接口 / Web<a id="interfaces-web"></a></h2>
+<p><a href="https://github.com/aumayr/fava">fava: Beancount 的 Web 界面</a>（Dominik Aumayr, Jakob Schnitzer）：Beancount 自带一个简单的 Web 前端（“bean-web”），其目的仅作为一个薄壳，用于调用并显示其 report 的 HTML 版本。“Fava” 是一个具有更多且不同功能的替代 Web 应用前端，最初旨在作为一个试验场和概念验证，以探索一种更新、更好的设计来呈现 Beancount 文件的内容。</p>
+<p><a href="https://github.com/seltzered/fava-classy-portfolio">Fava Classy Portfolio</a>（Vivek Gani）：Classy Portfolio 是 Fava 的一个扩展，Fava 是 Beancount 纯文本会计软件的 Web 界面。该扩展显示不同投资组合（例如 'taxable' 与 'retirement'）的列表，并使用商品上的 'asset-class' 和 'asset-subclass' 元数据标签进行细分。</p>
+<p><a href="https://github.com/redstreet/fava_investor">Fava Investor</a> 项目（RedStreet）：Fava_investor 旨在成为一套针对 Beancount 和 Fava 的综合性 investment 报告、分析工具和工具集。它是一组模块的集合，每个模块提供一个 Fava 插件、一个 Beancount 库以及一个基于 Beancount 的 CLI（命令行界面）。当前模块包括：Visual、按类别划分的树状资产分配、按 account 划分的资产分配、税务亏损收割器、cash drag 分析。</p>
+<p><a href="https://github.com/redstreet/fava_miler">Fava Miler</a>（RedStreet）：航空里程和奖励积分：到期日和价值报告。</p>
+<p><a href="https://github.com/bryall/fava-envelope">Fava Envelope</a>（Brian Ryall）：一个 beancount fava 扩展，为 fava 和 beancount 添加信封预算功能。它作为 Fava 插件和 CLI 开发。</p>
+<p><a href="https://github.com/scauligi/refried">scauligi/refried</a>（Sunjay Cauligi）：一个受 YNAB 启发的 Fava 信封预算插件：所有支出 account 都成为独立的预算类别，预算通过向这些 account 的 transaction 执行，并且该插件自动为所有重新预算的 transaction 应用标签，以便轻松过滤。提供类似 YNAB 的预算和 account 视图。</p>
+<p><a href="https://beanhub.io/">BeanHub.io</a>：Beancount 内容的 Web 前端。“<em>自从我开始使用 Beancount 以来，我一直梦想让它完全自动化。过去几年，我一直在为此目标构建工具。连接银行并直接从那里获取数据是我想要实现的目标之一。我构建了此功能，并一直在我的账本中测试了一段时间。现在我的 Beancount 账本有 80% 是完全自动化的。我可以打开我的仓库，银行的 transaction 会自动像这样作为新的 commit 出现，而我无需动手。</em></p>
+<p><em>整个导入系统基于我们的开源 beanhub-import 和 beanhub-extract。导入流程中唯一的专有部分是 Plaid 集成。因此，假设你不信任我，但仍希望自动导入 transaction。只要你连接到 Plaid 并根据从 Plaid 获取的 transaction 编写 CSV 文件，你就应该能够在不使用 BeanHub 服务的情况下拥有相同的自动 transaction 导入系统。</em>”</p>
+<p>博客文章：</p>
+<blockquote>
+<p><a href="https://beanhub.io/blog/2024/06/24/introduction-of-beanhub-connect/">https://beanhub.io/blog/2024/06/24/introduction-of-beanhub-connect/</a></p>
+<p><a href="https://beanhub.io/blog/2024/04/23/how-beanhub-works-part1-sandboxing/">https://beanhub.io/blog/2024/04/23/how-beanhub-works-part1-sandboxing/</a></p>
+<p><a href="https://beanhub.io/blog/2024/06/26/how-beanhub-works-part2-layer-based-git-repos/">https://beanhub.io/blog/2024/06/26/how-beanhub-works-part2-layer-based-git-repos/</a></p>
+</blockquote>
+<p><a href="https://github.com/jmgilman/bdantic">jmgilman/bdantic</a>：一个用于使用 <a href="https://pydantic-docs.helpmanual.io/">pydantic</a> 扩展 beancount 的包。使用此包，你可以将你的账本转换为 JSON，等等。</p>
+<p><a href="https://github.com/SEIAROTg/autobean/tree/master/autobean/refactor">autobean/refactor</a>（Archimedes Smith）：用于以编程方式编辑账本的工具，包括格式化、排序、重构、重新排列 account、通过插件优化、从 v2 迁移、在导入时在账本中插入 transaction 等。</p>
+<p><a href="https://github.com/seltzered/beancolage">seltzered/beancolage</a>（Vivek Gani）：一个 Eclipse Theia（供应商中立的 vscode）应用，试图打包现有的基于 beancount 的包，例如 vscode-beancount 和 Fava。</p>
+<p><a href="https://github.com/fengkx/beancount-lsp-client">fengkx/beancount-lsp-client</a> / <a href="https://marketplace.visualstudio.com/items?itemName=fengkx.beancount-lsp-client">Beancount language service - Visual Studio Marketplace</a>（Vito Leung）：一个 Beancount VSCode 扩展（Language Server），提供语义高亮、补全、诊断、重命名等功能。</p>
+<p><a href="http://aaronstacy.com/personal-finances-dashboard/">aaronstacy.com/personal-finances-dashboard</a>：用于 Beancount 数据的 HTML + D3.js 可视化 dashboard。</p>
+<p><a href="https://github.com/aleyoscar/beancount-pulsar">https://github.com/aleyoscar/beancount-pulsar</a>：一个用于 Beancount - Plain Text Accounting 的 Pulsar 包，具有语法高亮、切换注释、某些 directive 的代码片段和自动缩进。Pulsar 包：<a href="https://web.pulsar-edit.dev/packages/beancount-pulsar">https://web.pulsar-edit.dev/packages/beancount-pulsar</a></p>
+<h2 id="_13">移动/手机数据录入<a id="mobilephone-data-entry"></a></h2>
+<p><a href="https://play.google.com/store/apps/details?id=link.beancount.mobile">Beancount Mobile</a> App（Kirill Goncharov）：一款用于 Beancount 的移动数据录入应用。（目前仅支持 Android。）仓库：<a href="https://github.com/xuhcc/beancount-mobile">https://github.com/xuhcc/beancount-mobile</a>（<a href="https://groups.google.com/d/msgid/beancount/014e0879-70e0-4cac-b884-82d8004e1b43%40googlegroups.com?utm_medium=email&amp;utm_source=footer">公告</a>）。</p>
+<p><a href="http://costflow.io/">http://costflow.io</a>：微信中的纯文本记账。“<em>向我们在 Telegram、Facebook Messenger、Whatsapp、LINE、微信等平台的机器人发送消息。Costflow 会神奇地将你的消息转换为 Beancount / Ledger / hledger 格式的 transaction。将该 transaction 追加到你 Dropbox / Google Drive 中的文件。借助它们的应用程序，该文件将同步到你的计算机。</em>”</p>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>

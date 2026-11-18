@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beancount History and Credits · Beancount 中文文档</title>
+  <meta name="description" content="Martin Blais，2014 年 7 月">
+  <meta property="og:title" content="Beancount History and Credits · Beancount 中文文档">
+  <meta property="og:description" content="Martin Blais，2014 年 7 月">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d5c4f'/%3E%3Ctext x='16' y='23' font-size='17' text-anchor='middle' fill='%23ffffff' font-family='serif'%3E%E8%B4%9D%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html">Beancount 中文文档 <span>译文</span></a>
+      <div class="tagline">beancount-history-and-credits</div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar"><p class="sidebar-label">目录</p>
+<nav class="tree">
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-01">入门 / 安装 / 运行</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-02">语言 / 查询</a> <span class="count">4</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-03">会计方法 / 校验</a> <span class="count">8</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-04">投资账本</a> <span class="count">5</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-05">导入 / 插件</a> <span class="count">2</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-06">架构 / 版本</a> <span class="count">6</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-07">对比 / 导出 / 社区</a> <span class="count">3</span></div></div>
+<div class="group collapsed"><div class="group-title"><span class="chev">▸</span> <a href="index.html#group-08">专题建模</a> <span class="count">5</span></div></div>
+<div class="group current"><div class="group-title"><span class="chev">▾</span> 历史 <span class="count">1</span></div><ul>
+<li class="active"><a href="beancount-history-and-credits.html">Beancount History and Credits</a></li>
+</ul></div>
+</nav>
+<div class="local-toc"><p class="sidebar-label">On this page</p>
+<ul>
+<li><a href="#beancount_1">Beancount 的历史</a></li>
+<li><a href="#_1">时间线</a></li>
+<li><a href="#_2">致谢</a></li>
+</ul>
+</div></aside>
+    <main>
+      <article>
+        <div class="backlink"><a id="backlink" href="index.html#group-09" data-parent="index.html#group-09">← 返回分类</a></div>
+        <div class="article-meta">
+          <span class="badge">译文</span>
+          <span>原文作者：Martin Blais</span>
+          <a href="https://beancount.github.io/docs/beancount_history_and_credits/" target="_blank" rel="noreferrer">查看原文 ↗</a>
+        </div>
+        
+        <blockquote>
+<p>非官方中文译文 · 术语保留英文；代码、account、option、币种原样。
+原文：https://beancount.github.io/docs/beancount_history_and_credits/</p>
+</blockquote>
+<h1 id="beancount">Beancount 历史与致谢<a id="title"></a></h1>
+<p><a href="http://plus.google.com/+MartinBlais">Martin Blais</a>，2014 年 7 月</p>
+<p><a href="http://furius.ca/beancount/doc/history">http://furius.ca/beancount/doc/history</a></p>
+<p><em>Beancount 的开发历史及贡献者致谢。</em></p>
+<h2 id="beancount_1">Beancount 的历史<a id="history-of-beancount"></a></h2>
+<p>John Wiegley 的 Ledger 是 Beancount 第一版的灵感来源。本系统的许多原始理念都源自他的系统。当我最初了解到复式记账法，并意识到它可以成为解决我在统计公司各种分期付款时遇到的诸多跟踪问题的完美方法时，我对当时可用的解决方案（包括 GnuCash，我很容易就能把它搞坏）感到迅速失望，很快就被引向了 Ledger 的网站。在那里，John 阐述了他对基于文本的系统的愿景，特别是摒弃借方和贷方、仅使用符号的想法，以及一种便捷的输入语法的基础，该语法允许你省略其中一个 posting 的金额。我对此感到非常兴奋，并与他就 Ledger 以及我如何使用它进行了多次热情的讨论。双方有一些思想的交叉授粉，John 对添加新功能的提议也非常开放。</p>
+<p>我对记账有着极其强烈的好奇心，因此我开始为 Ledger 编写一个 Python 接口。但最终，我发现自己用 Python 重写了整个系统——并非因为不喜欢 Ledger，而是因为它足够简单，我可以在很短的时间内完成大部分工作，并立即添加一些我认为有用的功能。这样做的原因之一是，我不再需要每次解析输入文件并生成一个控制台 report，而是只需解析一次，然后从内存中的 transaction 数据库中提供各种 report，这些 report 通过网页请求获取。因此，我不需要处理速度，所以出于性能原因必须使用 C++ 已不再必要，我选择坚持使用一种动态语言，这让我能够快速添加许多功能。这成为了 Beancount 版本 1，它独立存在并发展了自己的一套实验性功能。</p>
+<p>我的梦想是能够快速轻松地操作这些 transaction 对象，以获取数据的各种视图和细分。然而，我认为第一个实现并没有将极限推得足够远；老实说，代码质量不高——我写得非常快——而且对系统进行修改很笨拙。特别是，我最初实现资本利得跟踪的方式不够优雅，涉及一些手动计数。我对这一点不满意，但它能工作。它还使用了丑陋的临时解析器代码，以保持与 Ledger 语法的合理兼容性——我认为能够共享一些通用的输入语法并使用任一系统进行验证，甚至可能进行相互转换，会很有趣——这让我对修改语法以发展新功能感到谨慎，因此它在几年内保持稳定，我也失去了添加新功能的兴趣。</p>
+<p>但它是正确的，而且大部分时候都能工作，所以从 2008 年到 2012 年，我持续使用该系统来管理我个人的财务、公司的财务以及与我妻子的共同财产，并记录详细的 transaction；这很棒。在那段时间里，我学到了很多关于如何记账的知识（cookbook 文档旨在帮助你做到同样的事情）。2013 年夏天，我顿悟了，意识到了一种正确且可推广的实现资本利得的方法，如何合并以 cost 持有的头寸和常规头寸的跟踪，以及一套简单的规则来合理地执行对这些头寸的操作（即库存机制的设计）。我还看到了更好地分解内部数据结构的方法，并决定摆脱与 Ledger 兼容性的约束，重新设计输入语法，以便使用 lex/yacc 生成器来解析输入语言，这将使我能够轻松地发展输入语法而无需处理解析问题，并更容易创建其他语言的移植版本。在这个过程中，出现了一种更简单、更一致的语法，在一次大汗淋漓和几个紧张的周末之后，我从头重新实现了整个系统，甚至没有看以前的版本，采用了洁净室方式。Beancount 版本 2 诞生了，它比上一版好得多，模块化，并且易于通过插件进行扩展。</p>
+<p>其结果是我认为的一种优雅设计，涉及一组小型对象，这种设计很容易成为在其他计算机语言中重新实现的基础。这已在随附的设计文档中进行了描述，供有兴趣尝试实现的人参考（这将受到欢迎，我也预计这将会发生）。尽管 Ledger 仍然是一个充满表达簿记问题创意的项目，但 Beancount 的第二版提出了一种更简单的设计，省略了并非严格必要的功能，并旨在通过简单的 Web 界面和极少量的命令行选项来实现最大的可用性。由于我在第一版上拥有超过 5 年的实际使用经验，我给自己设定了一个目标：移除所有我认为实际上并不有用且引入了不必要复杂性的功能（例如虚拟 transaction、允许不属于五种类型的 account 等），并在不损害其可用性的前提下尽可能简化系统。由此产生的语言和软件在使用和理解上都要简单得多，由此产生的数据结构在使用上也要简单得多，处理过程更具“函数式”性质，且 Beancount 的内部结构非常模块化。我转换了所有 6 年的输入数据——得益于一些用于操作文件的非常简单的 Python 脚本——并开始专门使用新版本。它现在处于完全可用的状态。</p>
+<p>Ledger 的语法实现了许多触发大量隐式定义行为的功能；我觉得这令人困惑，其中一些原因记录在许多改进提案中。我不喜欢命令行选项。相比之下，Beancount 的设计提供了一种表达力较低、更底层的语法，但它与生成的内存数据结构紧密匹配，并且希望在这方面更加明确。我认为这两个项目各有优缺点。尽管 Ledger 很受欢迎，但在我看来，Ledger 的最新版本仍然存在一些不足之处。特别是，头寸的减少（reductions）并非在发生时立即进行 booking，而是似乎只是累积，并在显示时根据命令行选项的不同，使用不同的方法进行匹配。因此，在 Ledger 中，可以在一个 account 中同时持有同一商品的正数和负数 lot。我认为这可能导致交易 lot 的令人困惑甚至 <a href="https://groups.google.com/d/msg/ledger-cli/aQvbjTZa7HE/iMisMBkaI6UJ">错误的会计处理</a>。我认为 Ledger 类似项目社区仍在研究这个问题，最终他们可能会收敛到与我相同的解决方案，或者甚至找出更好的解决方案。</p>
+<p>在重新设计中，我将用于导入的配置 directive 分离出来，经过多次迭代，最终想出了一种优雅的方法来主要自动化导入过程，并自动检测各种输入文件并将其转换为我使用的输入语法。其结果是 <a href="ledgerhub-design-doc.html">LedgerHub 设计文档</a>。LedgerHub 目前已实现，我正在专门使用它，但由于测试不足，我尚未为其发布公开版本 [2014 年 7 月]。欢迎你自己尝试一下。</p>
+<p>2014 年 6 月和 7 月，我决定将七年关于命令行会计的思考整理成一组 Google 文档，这现在构成了 Beancount 当前文档的基础。我希望从这里开始逐步对其进行完善。</p>
+<h2 id="_1">时间线<a id="chronology"></a></h2>
+<ul>
+<li>Ledger 于 2003 年 8 月启动<br />
+<a href="http://web.archive.org/web/*/http://www.newartisans.com/ledger/">http://web.archive.org/web/*/http://www.newartisans.com/ledger/</a></li>
+</ul>
+<!-- -->
+
+<ul>
+<li>Beancount 于 2008 年启动<br />
+<a href="http://web.archive.org/web/*/furius.ca/beancount">http://web.archive.org/web/*/furius.ca/beancount</a></li>
+</ul>
+<!-- -->
+
+<ul>
+<li>HLedger 也于 2008 年启动<br />
+<a href="https://github.com/simonmichael/hledger/graphs/contributors?from=2007-01-21&amp;to=2014-09-08&amp;type=c">https://github.com/simonmichael/hledger/graphs/contributors?from=2007-01-21&amp;to=2014-09-08&amp;type=c</a></li>
+</ul>
+<h2 id="_2">致谢<a id="credits"></a></h2>
+<p>迄今为止，所有代码均由我贡献给 Beancount。一些用户以其他方式做出了重要贡献：</p>
+<ul>
+<li>
+<p>Daniel Clemente 一直在报告他在使用 Beancount 管理公司和个人财务时遇到的所有问题。他不懈的坚持和对细节的关注，帮助我将重点放在修复 Beancount 中那些我自己知道需要避免的粗糙角落上。</p>
+</li>
+<li>
+<p>经过多年的催促，我的老朋友 <a href="http://plus.google.com/+FilippoTampieri">Filippo Tampieri</a> 终于决定将其交易历史转换为 Beancount 格式。他贡献了对我的文档的多项深入审阅，并正在致力于添加各种评估资产回报的方法。</p>
+</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>版权与许可</strong>：原文 © Martin Blais / beancount/docs contributors，MIT License。中文翻译为非官方 derivative work，仅供个人学习；详见 <a href="notice.html">NOTICE.md</a>。</p>
+</blockquote>
+      </article>
+    </main>
+  </div>
+  <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
+  <script src="assets/nav.js"></script>
+</body>
+</html>
