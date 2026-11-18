@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import html
 import json
 import os
@@ -21,6 +22,7 @@ MANIFEST = ROOT / "translation-manifest.json"
 STATE = ROOT / "translation-state.json"
 
 # 发布地址；本地构建与 CI 必须一致，否则 sitemap 和 canonical 会漂移。
+ASSET_V = ""
 BASE_URL = os.environ.get(
     "DOCS_BASE_URL", "https://moc2216.github.io/beancount-tools"
 ).rstrip("/")
@@ -77,7 +79,7 @@ PAGE = """<!doctype html>
   <meta property="og:type" content="article">
   <link rel="canonical" href="{base}/{slug}.html">
   <link rel="icon" href="{icon}">
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css?v={v}">
 </head>
 <body>
   <header class="site-header">
@@ -103,7 +105,7 @@ PAGE = """<!doctype html>
     </main>
   </div>
   <footer class="page-footer">Beancount 中文文档 · 非官方译文 · 原文 © Martin Blais / beancount/docs contributors · MIT License</footer>
-  <script src="assets/nav.js"></script>
+  <script src="assets/nav.js?v={v}"></script>
 </body>
 </html>
 """
@@ -120,7 +122,7 @@ INDEX = """<!doctype html>
   <meta property="og:type" content="website">
   <link rel="canonical" href="{base}/">
   <link rel="icon" href="{icon}">
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css?v={v}">
 </head>
 <body>
   <header class="site-header">
@@ -208,6 +210,16 @@ def rewrite_media(body: str, row: dict) -> str:
     body = body.replace(f'src="../{stem}/media/', f'src="assets/images/{row["slug"]}/')
     body = body.replace(f'src="{row["slug"]}/media/', f'src="assets/images/{row["slug"]}/')
     return body
+
+
+def asset_version() -> str:
+    """用资源内容算版本号，避免浏览器拿到旧 CSS 配新 HTML。"""
+    h = hashlib.sha256()
+    for name in ("style.css", "nav.js"):
+        path = SITE / "assets" / name
+        if path.exists():
+            h.update(path.read_bytes())
+    return h.hexdigest()[:8]
 
 
 def render(text: str) -> tuple[str, str]:
@@ -306,7 +318,7 @@ NOT_FOUND = """<!doctype html>
   <meta name="description" content="这个地址没有对应的页面。返回目录继续阅读 Beancount 中文文档。">
   <meta name="robots" content="noindex">
   <link rel="icon" href="{icon}">
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css?v={v}">
 </head>
 <body>
   <header class="site-header">
@@ -363,7 +375,7 @@ def write_publish_files(rows: list[dict]) -> None:
     )
     (SITE / "robots.txt").write_text(robots, encoding="utf-8")
 
-    not_found = NOT_FOUND.format(icon=ICON, repo_single=repo_single)
+    not_found = NOT_FOUND.format(icon=ICON, repo_single=repo_single, v=ASSET_V)
     (SITE / "404.html").write_text(not_found, encoding="utf-8")
     print(f"wrote sitemap.xml ({len(urls)} urls), robots.txt, 404.html")
 
@@ -403,12 +415,13 @@ def build_sidebar(row: dict, by_slug: dict[str, dict], toc: str) -> str:
 
 
 def main() -> None:
-    global BASE_URL
+    global BASE_URL, ASSET_V
     argv = sys.argv[1:]
     if "--base-url" in argv:
         BASE_URL = argv[argv.index("--base-url") + 1].rstrip("/")
 
     SITE.mkdir(parents=True, exist_ok=True)
+    ASSET_V = asset_version()
     rows = load_manifest()
     state = load_state()
     by_slug = {r["slug"]: r for r in rows}
@@ -448,6 +461,7 @@ def main() -> None:
             pager=build_pager(row, order),
             desc=describe(body),
             icon=ICON,
+            v=ASSET_V,
         )
         (SITE / (row["slug"] + ".html")).write_text(page, encoding="utf-8")
         print("built", row["slug"])
@@ -475,6 +489,7 @@ def main() -> None:
         count=len(rows),
         desc="Beancount 官方文档正文的非官方中文译文，共 %d 篇，含语言语法、查询、精度与 tolerance、投资账本、导入插件等主题。" % len(rows),
         icon=ICON,
+        v=ASSET_V,
     )
     (SITE / "index.html").write_text(index, encoding="utf-8")
     print("built site/index.html")

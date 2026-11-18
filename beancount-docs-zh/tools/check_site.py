@@ -58,13 +58,15 @@ def main() -> int:
         for href in re.findall(r'href="([^"]+)"', html):
             if href.startswith(("http://", "https://", "#", "mailto:", "data:")):
                 continue
-            target = href.split("#")[0]
+            target = href.split("#")[0].split("?")[0]
             if target and not (SITE / target).exists():
                 problems.append(f"{page.name}: 链接目标不存在 {href}")
         if not re.search(r'<meta name="description" content="[^"]+"', html):
             problems.append(f"{page.name}: 缺少 meta description")
         if 'rel="icon"' not in html:
             problems.append(f"{page.name}: 缺少 favicon")
+        if "style.css?v=" not in html:
+            problems.append(f"{page.name}: CSS 未带版本号，可能读到旧样式")
         if not re.search(r'<link rel="canonical" href="https://[^"]+"', html):
             problems.append(f"{page.name}: 缺少 canonical 链接")
         for src in re.findall(r'<img[^>]+src="([^"]+)"', html):

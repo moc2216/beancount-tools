@@ -9,7 +9,7 @@ from pathlib import Path
 
 import markdown
 
-from build_all_site import BASE_URL, ICON
+from build_all_site import BASE_URL, ICON, asset_version
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
@@ -45,6 +45,7 @@ def dedupe_ids(text: str) -> str:
 
 
 def build_notice() -> None:
+    v = asset_version()
     md = markdown.Markdown(extensions=["extra", "toc", "sane_lists", "fenced_code", "tables"])
     body = md.convert(NOTICE.read_text(encoding="utf-8"))
     page = f"""<!doctype html>
@@ -56,7 +57,7 @@ def build_notice() -> None:
   <meta name="description" content="Beancount 中文文档的版权、许可与免责说明：原文 MIT License，中文为非官方翻译。">
   <link rel="canonical" href="{BASE_URL}/notice.html">
   <link rel="icon" href="{ICON}">
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css?v={v}">
 </head>
 <body>
   <header class="site-header">
