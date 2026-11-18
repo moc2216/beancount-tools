@@ -5,6 +5,7 @@
 官方 `beancount/docs` 正文的全量非官方译文，共 **39 篇**。除 API reference 外，正文页面已全部覆盖。
 
 - 单文件版：`Beancount中文文档-单文件.html`（可直接下载/打开）
+- 在线版本：<https://moc2216.github.io/beancount-tools/>
 - 全站索引：`site/index.html`
 - 中文 Markdown：`zh/`
 - Agent 使用指南：`AGENT-GUIDE.md`
